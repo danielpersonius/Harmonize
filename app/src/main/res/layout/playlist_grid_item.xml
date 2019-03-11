@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+        android:id="@+id/playlist_grid_linearlayout"
+        xmlns:tools="http://schemas.android.com/tools"
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:gravity="center"
+        android:orientation="vertical">
+
+    <ImageView
+            android:id="@+id/playlist_grid_playlist_image"
+            android:layout_width="90dp"
+            android:layout_height="90dp"
+            android:src="@mipmap/ic_default_playlist_image"
+            android:contentDescription="@string/playlist_image_alt_text"/>
+
+    <TextView
+            tools:hint="playlist name"
+            android:id="@+id/playlist_grid_playlist_name"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAlignment="center"/>
+</LinearLayout>

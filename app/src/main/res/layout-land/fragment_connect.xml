@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+    <TextView
+            android:id="@+id/connect_banner"
+            android:text="@string/connect_banner_label"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+
+            android:textAlignment="center"
+            android:textSize="34sp"
+            android:layout_alignParentEnd="true"
+            android:layout_marginEnd="20dp"
+            android:layout_marginTop="30dp"
+            android:layout_alignParentTop="true"
+            android:layout_alignParentStart="true"
+            android:layout_marginStart="20dp"
+            android:layout_alignParentBottom="true"
+            android:layout_marginBottom="300dp"/>
+
+    <android.support.constraint.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+        <ImageButton
+                android:id="@+id/connect_spotify_button"
+                android:layout_width="50dp"
+                android:layout_height="50dp"
+                android:background="@drawable/round_button"
+                android:src="@drawable/ic_spotify"
+                android:scaleType="fitXY"
+                android:contentDescription="@string/spotify_platform_banner"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"/>
+        <ImageButton
+                android:id="@+id/connect_soundcloud_button"
+                android:layout_width="50dp"
+                android:layout_height="50dp"
+                android:background="@drawable/round_button"
+                android:src="@drawable/ic_soundcloud"
+                android:scaleType="fitXY"
+                android:contentDescription="@string/soundcloud_platform_banner"
+                app:layout_constraintCircle="@+id/connect_spotify_button"
+                app:layout_constraintCircleAngle="135"
+                app:layout_constraintCircleRadius="90dp"/>
+        <ImageButton
+                android:id="@+id/connect_apple_button"
+                android:layout_width="50dp"
+                android:layout_height="50dp"
+                android:background="@drawable/round_button"
+                android:src="@drawable/ic_itunes"
+                android:scaleType="fitXY"
+                android:contentDescription="@string/apple_platform_banner"
+                app:layout_constraintCircle="@+id/connect_spotify_button"
+                app:layout_constraintCircleAngle="225"
+                app:layout_constraintCircleRadius="90dp"/>
+        <ImageButton
+                android:id="@+id/connect_pandora_button"
+                android:layout_width="50dp"
+                android:layout_height="50dp"
+                android:background="@drawable/round_button"
+                android:src="@drawable/ic_pandora"
+                android:scaleType="fitXY"
+                android:contentDescription="@string/pandora_platform_banner"
+                app:layout_constraintCircle="@+id/connect_spotify_button"
+                app:layout_constraintCircleAngle="180"
+                app:layout_constraintCircleRadius="125dp"/>
+    </android.support.constraint.ConstraintLayout>
+
+</RelativeLayout>
