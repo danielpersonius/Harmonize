@@ -2,4 +2,12 @@
     <string name="app_name">Harmonize</string>
     <string name="login_text">Login</string>
     <string name="acc_create_text">Create Account</string>
+    <string name="connect_banner_label">Connect</string>
+    <string name="spotify_platform_banner">Spotify</string>
+    <string name="apple_platform_banner">Apple Music</string>
+    <string name="soundcloud_platform_banner">Soundcloud</string>
+    <string name="pandora_platform_banner">Pandora</string>
+    <string name="circle_bullet">•</string>
+    <string name="playlist_options_label">Options</string>
+    <string name="export_label">Export</string>
 </resources>
