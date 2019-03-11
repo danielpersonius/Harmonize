@@ -9,8 +9,7 @@
             android:roundIcon="@mipmap/harmonize_launcher_round"
             android:supportsRtl="true"
             android:theme="@style/AppTheme">
-        <activity android:name=".ViewPlaylistActivity"
-                  android:parentActivityName=".MainActivity">
+        <activity android:name=".HomeActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
 
@@ -20,6 +19,7 @@
         <activity android:name=".PlatformConnectActivity"/>
         <activity android:name=".TuneParametersActivity"
                   android:parentActivityName=".MainActivity"/>
+        <activity android:name=".ViewPlaylistActivity"/>
     </application>
 
 </manifest>

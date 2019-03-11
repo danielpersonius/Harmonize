@@ -18,13 +18,7 @@ class ViewPlaylistFragment : Fragment() {
         private const val LOG_TAG = "ViewPlaylistFragment"
     }
 
-    // items to fill menu bar spinner with
-//    var menuOptions = mutableListOf(
-//        "Export"
-//    )
-
-    // example title
-    var playlistTitle = "Playlist #1"
+    var playlistTitle : String? = null
     // example list of songs
     var playlist = mutableListOf(
         Track("Divinity", "Porter Robinson", "Worlds", mapOf("BPM" to "90")),
@@ -60,7 +54,22 @@ class ViewPlaylistFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         Toast.makeText(context, "press row to play, long press to view metadata", Toast.LENGTH_LONG).show()
 
+        // rotation
+        if (savedInstanceState != null) {
+            playlistTitle = savedInstanceState.getString("PLAYLIST_NAME")
+        }
+
+        // extras would overwrite values from saved instance state
+        else {
+            val intent = activity?.intent
+            val extras = intent?.extras
+            if (extras != null) {
+                playlistTitle = extras.getString("PLAYLIST_NAME")
+            }
+        }
+
         playlist_name_banner.text = playlistTitle
+
         // change name on long press
         playlist_name_banner.setOnLongClickListener {
             Toast.makeText(context, "Change name", Toast.LENGTH_SHORT).show()
@@ -114,25 +123,6 @@ class ViewPlaylistFragment : Fragment() {
     override fun onCreateOptionsMenu(menu: Menu?, inflater: MenuInflater?) {
         super.onCreateOptionsMenu(menu, inflater)
         inflater?.inflate(R.menu.playlist_options, menu)
-//        val item = menu?.findItem(R.menu.playlist_options)
-////        item?.setOnMenuItemClickListener {
-////            Toast.makeText(context, "clicked", Toast.LENGTH_SHORT).show()
-////            true
-////        }
-//        val spinner = item?.actionView
-////        val spinner: Spinner? = activity?.findViewById(R.id.playlist_options_spinner)
-//        ArrayAdapter.createFromResource(
-//            context,
-//            R.array.playlist_menu_options,
-//            android.R.layout.simple_spinner_item
-//        ).also { adapter ->
-//            spinner?.setOnClickListener  {
-//                Toast.makeText(context, "asdf", Toast.LENGTH_SHORT).show()
-//            }
-//            // choice layout
-//            adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-////            spinner?.adapter = adapter
-//        }
     }
 
     override fun onOptionsItemSelected(item: MenuItem?): Boolean =
@@ -140,6 +130,8 @@ class ViewPlaylistFragment : Fragment() {
         when (item?.itemId) {
             R.id.playlist_menu_export_option -> {
                 Toast.makeText(context, "go to Export page", Toast.LENGTH_SHORT).show()
+//                val exportIntent = ExportActivity.createIntent(context, playlist)
+//                startActivity(exportIntent)
                 true
             }
             else -> super.onOptionsItemSelected(item)
