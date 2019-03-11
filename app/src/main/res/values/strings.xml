@@ -1,6 +1,9 @@
 <resources>
     <string name="app_name">Harmonize</string>
     <string name="login_text">Login</string>
+    <string name="user_email_text">username/email address</string>
+    <string name="password_text">password</string>
+    <string name="forgot_password_text">Forgot Password?</string>
     <string name="acc_create_text">Create Account</string>
     <string name="connect_banner_label">Connect</string>
     <string name="spotify_platform_banner">Spotify</string>
