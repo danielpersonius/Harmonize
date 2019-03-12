@@ -12,6 +12,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.SeekBar
 import android.widget.TextView
+import android.widget.Toast
 import kotlinx.android.synthetic.main.fragment_tune_parameters.*
 
 class TuneParametersFragment : Fragment() {
@@ -22,7 +23,7 @@ class TuneParametersFragment : Fragment() {
     private fun showDescription(parameterName : String, description : String) {
         val descriptionTextView = TextView(context)
         descriptionTextView.text = description
-        descriptionTextView.setPadding(60, 10, 10, 60)
+        descriptionTextView.setPadding(80, 10, 80, 10)
         // dialog box for input
         val builder = AlertDialog.Builder(context)
 
@@ -64,29 +65,23 @@ class TuneParametersFragment : Fragment() {
             startActivity(intent)
         }
 
-        artist_similarity_linearlayout.setOnLongClickListener {
+        artist_similarity_info_button.setOnClickListener {
             showDescription(getString(R.string.artist_similarity_label), getString(R.string.artist_similarity_parameter_description))
-            true
         }
-        energy_parameter_linearlayout.setOnLongClickListener {
+        energy_parameter_info_button.setOnClickListener {
             showDescription(getString(R.string.energy_parameter_label), getString(R.string.energy_parameter_description))
-            true
         }
-        danceability_parameter_linearlayout.setOnLongClickListener {
+        danceability_parameter_info_button.setOnClickListener {
             showDescription(getString(R.string.danceability_parameter_label), getString(R.string.danceability_parameter_description))
-            true
         }
-        speechiness_parameter_linearlayout.setOnLongClickListener {
+        speechiness_parameter_info_button.setOnClickListener {
             showDescription(getString(R.string.speechiness_parameter_label), getString(R.string.speechiness_parameter_description))
-            true
         }
-        loudness_parameter_linearlayout.setOnLongClickListener {
+        loudness_parameter_info_button.setOnClickListener {
             showDescription(getString(R.string.loudness_parameter_label), getString(R.string.loudness_parameter_description))
-            true
         }
-        valence_parameter_linearlayout.setOnLongClickListener {
+        valence_parameter_info_button.setOnClickListener {
             showDescription(getString(R.string.valence_parameter_label), getString(R.string.valence_parameter_description))
-            true
         }
         artist_similarity_spinner.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
 
