@@ -52,7 +52,7 @@ class ViewPlaylistFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         Log.d(LOG_TAG, "onViewCreated() called")
         super.onViewCreated(view, savedInstanceState)
-        Toast.makeText(context, "press row to play, long press to view metadata", Toast.LENGTH_LONG).show()
+        Toast.makeText(context, "press to play, long press to view metadata", Toast.LENGTH_LONG).show()
 
         // rotation
         if (savedInstanceState != null) {
@@ -110,7 +110,7 @@ class ViewPlaylistFragment : Fragment() {
             }
             // metadata(e.g. song characteristics) on long press
             trackView.setOnLongClickListener {
-                Toast.makeText(context, "View metadata", Toast.LENGTH_SHORT).show()
+                Toast.makeText(context, "View song characteristics", Toast.LENGTH_SHORT).show()
                 true
             }
 
@@ -129,9 +129,8 @@ class ViewPlaylistFragment : Fragment() {
         // Handle presses on the action bar menu items
         when (item?.itemId) {
             R.id.playlist_menu_export_option -> {
-                Toast.makeText(context, "go to Export page", Toast.LENGTH_SHORT).show()
-//                val exportIntent = ExportActivity.createIntent(context, playlist)
-//                startActivity(exportIntent)
+                val exportIntent = ExportActivity.createIntent(context)
+                startActivity(exportIntent)
                 true
             }
             else -> super.onOptionsItemSelected(item)

@@ -1,6 +1,7 @@
 package com.csci448.slittle.harmonize
 
 import android.app.Activity
+import android.app.AlertDialog
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
@@ -9,14 +10,28 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.SeekBar
+import android.widget.TextView
 import android.widget.Toast
-//import kotlinx.android.synthetic.main.fragment_tune_parameters.*
-
+import kotlinx.android.synthetic.main.fragment_tune_parameters.*
 
 class TuneParametersFragment : Fragment() {
-
     companion object {
         private const val LOG_TAG = "PlatformConnectFragment"
+    }
+
+    private fun showDescription(parameterName : String, description : String) {
+        val descriptionTextView = TextView(context)
+        descriptionTextView.text = description
+        descriptionTextView.setPadding(80, 10, 80, 10)
+        // dialog box for input
+        val builder = AlertDialog.Builder(context)
+
+        builder.setTitle("$parameterName Description")
+        builder.setView(descriptionTextView)
+        builder.setPositiveButton("Okay") {_, _ -> }
+        val dialog: AlertDialog = builder.create()
+        dialog.show()
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
@@ -38,12 +53,109 @@ class TuneParametersFragment : Fragment() {
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         Log.d(LOG_TAG, "onCreateView() called")
-        return inflater.inflate(R.layout.fragment_connect, container, false)
+        return inflater.inflate(R.layout.fragment_tune_parameters, container, false)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         Log.d(LOG_TAG, "onViewCreated() called")
         super.onViewCreated(view, savedInstanceState)
+
+        generate_playlist_button.setOnClickListener {
+            val intent = ViewPlaylistActivity.createIntent(context, "New playlist name")
+            startActivity(intent)
+        }
+
+        artist_similarity_info_button.setOnClickListener {
+            showDescription(getString(R.string.artist_similarity_label), getString(R.string.artist_similarity_parameter_description))
+        }
+        energy_parameter_info_button.setOnClickListener {
+            showDescription(getString(R.string.energy_parameter_label), getString(R.string.energy_parameter_description))
+        }
+        danceability_parameter_info_button.setOnClickListener {
+            showDescription(getString(R.string.danceability_parameter_label), getString(R.string.danceability_parameter_description))
+        }
+        speechiness_parameter_info_button.setOnClickListener {
+            showDescription(getString(R.string.speechiness_parameter_label), getString(R.string.speechiness_parameter_description))
+        }
+        loudness_parameter_info_button.setOnClickListener {
+            showDescription(getString(R.string.loudness_parameter_label), getString(R.string.loudness_parameter_description))
+        }
+        valence_parameter_info_button.setOnClickListener {
+            showDescription(getString(R.string.valence_parameter_label), getString(R.string.valence_parameter_description))
+        }
+        artist_similarity_spinner.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
+
+            override fun onProgressChanged(seekBar: SeekBar, i: Int, b: Boolean) {
+                artist_similarity_spinner_value.text = "$i%"
+            }
+
+            override fun onStartTrackingTouch(seekBar: SeekBar) {
+                artist_similarity_spinner_value.visibility = View.VISIBLE
+            }
+
+            override fun onStopTrackingTouch(seekBar: SeekBar) {}
+        })
+        energy_parameter_spinner.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
+
+            override fun onProgressChanged(seekBar: SeekBar, i: Int, b: Boolean) {
+                // current progress of SeekBar
+                energy_parameter_spinner_value.text = "$i%"
+            }
+
+            override fun onStartTrackingTouch(seekBar: SeekBar) {
+                energy_parameter_spinner_value.visibility = View.VISIBLE
+            }
+
+            override fun onStopTrackingTouch(seekBar: SeekBar) {}
+        })
+        danceability_parameter_spinner.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
+
+            override fun onProgressChanged(seekBar: SeekBar, i: Int, b: Boolean) {
+                danceability_parameter_spinner_value.text = "$i%"
+            }
+
+            override fun onStartTrackingTouch(seekBar: SeekBar) {
+                danceability_parameter_spinner_value.visibility = View.VISIBLE
+            }
+
+            override fun onStopTrackingTouch(seekBar: SeekBar) {}
+        })
+        speechiness_parameter_spinner.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
+
+            override fun onProgressChanged(seekBar: SeekBar, i: Int, b: Boolean) {
+                speechiness_parameter_spinner_value.text = "$i%"
+            }
+
+            override fun onStartTrackingTouch(seekBar: SeekBar) {
+                speechiness_parameter_spinner_value.visibility = View.VISIBLE
+            }
+
+            override fun onStopTrackingTouch(seekBar: SeekBar) {}
+        })
+        loudness_parameter_spinner.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
+
+            override fun onProgressChanged(seekBar: SeekBar, i: Int, b: Boolean) {
+                loudness_parameter_spinner_value.text = "$i%"
+            }
+
+            override fun onStartTrackingTouch(seekBar: SeekBar) {
+                loudness_parameter_spinner_value.visibility = View.VISIBLE
+            }
+
+            override fun onStopTrackingTouch(seekBar: SeekBar) {}
+        })
+        valence_parameter_spinner.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
+
+            override fun onProgressChanged(seekBar: SeekBar, i: Int, b: Boolean) {
+                valence_parameter_spinner_value.text = "$i%"
+            }
+
+            override fun onStartTrackingTouch(seekBar: SeekBar) {
+                valence_parameter_spinner_value.visibility = View.VISIBLE
+            }
+
+            override fun onStopTrackingTouch(seekBar: SeekBar) {}
+        })
     }
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {

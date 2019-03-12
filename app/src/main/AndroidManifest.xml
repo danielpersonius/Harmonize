@@ -16,6 +16,7 @@
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
+<<<<<<< HEAD
         <activity android:name=".PlatformConnectActivity"
                   android:parentActivityName=".HomeActivity"/>
         <activity android:name=".PassResetActivity"
@@ -29,6 +30,17 @@
                   android:parentActivityName=".HomeActivity"/>
         <activity android:name=".ViewPlaylistActivity"
                   android:parentActivityName=".HomeActivity"/>
+=======
+        <activity android:name=".PlatformConnectActivity"/>
+        <activity android:name=".PassResetActivity"/>
+        <activity android:name=".AccCreateActivity"/>
+        <activity android:name=".LoginActivity"/>
+        <activity android:name=".GeneratePlaylistActivity"/>
+        <activity android:name="TuneParametersActivity"/>
+        <activity android:name=".HomeActivity"/>
+        <activity android:name=".ExportActivity"/>
+        <activity android:name=".ViewPlaylistActivity"/>
+>>>>>>> 4fee0149801eaff85af1e6c1f025627c89119f71
     </application>
 
 </manifest>

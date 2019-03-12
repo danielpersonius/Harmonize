@@ -7,6 +7,7 @@ import android.util.Log
 import android.support.v4.app.Fragment
 import android.view.*
 import android.widget.Toast
+import kotlinx.android.synthetic.main.export.*
 
 class ExportFragment : Fragment() {
 
@@ -40,7 +41,18 @@ class ExportFragment : Fragment() {
         Log.d(LOG_TAG, "onViewCreated() called")
         super.onViewCreated(view, savedInstanceState)
 
-
+        spotify_export.setOnClickListener {
+            Toast.makeText(context, "Exported!", Toast.LENGTH_SHORT).show()
+        }
+        apple_music_export.setOnClickListener {
+            Toast.makeText(context, "Exported!", Toast.LENGTH_SHORT).show()
+        }
+        soundcloud_export.setOnClickListener {
+            Toast.makeText(context, "Exported!", Toast.LENGTH_SHORT).show()
+        }
+        pandora_export.setOnClickListener {
+            Toast.makeText(context, "Exported!", Toast.LENGTH_SHORT).show()
+        }
     }
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {

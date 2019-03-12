@@ -12,6 +12,8 @@
     <string name="edit_source_label">Edit</string>
     <string name="connect_banner_label">Connect</string>
     <string name="playlist_label">Playlists</string>
+    <string name="generate_playlist_label">Generate New Playlist</string>
+    <string name="choose_source_label">Source</string>
     <string name="spotify_platform_banner">Spotify</string>
     <string name="apple_platform_banner">Apple Music</string>
     <string name="soundcloud_platform_banner">Soundcloud</string>
@@ -21,6 +23,7 @@
     <string name="export_label">Export</string>
     <string name="playlist_image_alt_text">Playlist Image</string>
     <string name="tune_parameters_banner">Tune Search Parameters</string>
+    <string name="generate_button_label">Generate</string>
     <string name="artist_similarity_label">Artist Similarity</string>
     <string name="energy_parameter_label">Energy</string>
     <string name="danceability_parameter_label">Danceability</string>
