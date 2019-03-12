@@ -8,8 +8,8 @@
             android:label="@string/app_name"
             android:roundIcon="@mipmap/harmonize_launcher_round"
             android:supportsRtl="true"
-            android:theme="@style/AppTheme">
-        <activity android:name=".LaunchActivity">
+            android:theme="@style/Theme.AppCompat.Light.NoActionBar">
+        <activity android:name=".MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
 
@@ -24,7 +24,6 @@
                   android:parentActivityName=".LaunchActivity"/>
         <activity android:name=".LoginActivity"
                   android:parentActivityName=".LaunchActivity"/>
-        <activity android:name=".HomeActivity"/>
         <activity android:name=".TuneParametersActivity"
                   android:parentActivityName=".HomeActivity"/>
         <activity android:name=".ViewPlaylistActivity"
