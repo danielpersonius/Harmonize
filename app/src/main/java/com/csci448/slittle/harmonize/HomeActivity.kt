@@ -10,6 +10,7 @@ class HomeActivity : SingleFragmentActivity() {
             val intent = Intent(baseContext, HomeActivity::class.java)
             return intent
         }
+
     }
 
     override fun getLogTag() = LOG_TAG
