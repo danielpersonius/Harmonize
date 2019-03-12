@@ -33,7 +33,8 @@
 
         <activity android:name=".GeneratePlaylistActivity"/>
 
-        <activity android:name=".ExportActivity"/>
+        <activity android:name=".ExportActivity"
+                  android:parentActivityName=".ViewPlaylistActivity"/>
 
         <activity android:name=".CharActivity"/>
     </application>
