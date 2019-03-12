@@ -6,23 +6,24 @@ import android.os.Bundle
 import android.util.Log
 import android.support.v4.app.Fragment
 import android.view.*
-import android.widget.Toast
-import kotlinx.android.synthetic.main.fragment_connect.*
+import kotlinx.android.synthetic.main.fragment_generate_playlist.*
 
-class PlatformConnectFragment : Fragment() {
+class GeneratePlaylistFragment : Fragment() {
 
     companion object {
-        private const val LOG_TAG = "PlatformConnectFragment"
+        private const val LOG_TAG = "GenerateFragment"
+    }
+
+    // temporary intent creator since each button on this page launches TuneParametersActivity
+    private fun launchIntent(){
+        val intent = TuneParametersActivity.createIntent(context)
+        startActivity(intent)
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
         if (resultCode != RESULT_OK) { return }
         if (data == null) { return }
-//        if (requestCode == REQUEST_CODE_DETAILS_FRAGMENT) {
-//            val position = CrimeDetailsFragment.getChangedListPosition(data)
-//            adapter.notifyItemChanged(position)
-//        }
     }
 
     override fun onAttach(context: Context?) {
@@ -38,24 +39,24 @@ class PlatformConnectFragment : Fragment() {
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         Log.d(LOG_TAG, "onCreateView() called")
-        return inflater.inflate(R.layout.fragment_connect, container, false)
+        return inflater.inflate(R.layout.fragment_generate_playlist, container, false)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         Log.d(LOG_TAG, "onViewCreated() called")
         super.onViewCreated(view, savedInstanceState)
 
-        connect_spotify_button.setOnClickListener {
-            Toast.makeText(context, "Connecting Spotify!", Toast.LENGTH_SHORT).show()
+        generate_from_spotify_button.setOnClickListener {
+            launchIntent()
         }
-        connect_apple_button.setOnClickListener {
-            Toast.makeText(context, "Connecting Apple Music!", Toast.LENGTH_SHORT).show()
+        generate_from_soundcloud_button.setOnClickListener {
+            launchIntent()
         }
-        connect_soundcloud_button.setOnClickListener {
-            Toast.makeText(context, "Connecting Soundcloud!", Toast.LENGTH_SHORT).show()
+        generate_from_apple_button.setOnClickListener {
+            launchIntent()
         }
-        connect_pandora_button.setOnClickListener {
-            Toast.makeText(context, "Connecting Pandora!", Toast.LENGTH_SHORT).show()
+        generate_from_pandora_button.setOnClickListener {
+            launchIntent()
         }
     }
 

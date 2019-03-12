@@ -6,7 +6,7 @@ import android.content.Intent
 class ExportActivity : SingleFragmentActivity() {
     companion object {
         private const val LOG_TAG = "ExportActivity"
-        fun createIntent(baseContext: Context): Intent {
+        fun createIntent(baseContext: Context?): Intent {
             val intent = Intent(baseContext, ExportActivity::class.java)
             return intent
         }

@@ -129,9 +129,8 @@ class ViewPlaylistFragment : Fragment() {
         // Handle presses on the action bar menu items
         when (item?.itemId) {
             R.id.playlist_menu_export_option -> {
-                Toast.makeText(context, "go to Export page", Toast.LENGTH_SHORT).show()
-//                val exportIntent = ExportActivity.createIntent(context, playlist)
-//                startActivity(exportIntent)
+                val exportIntent = ExportActivity.createIntent(context)
+                startActivity(exportIntent)
                 true
             }
             else -> super.onOptionsItemSelected(item)

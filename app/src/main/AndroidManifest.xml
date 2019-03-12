@@ -20,9 +20,10 @@
         <activity android:name=".PassResetActivity"/>
         <activity android:name=".AccCreateActivity"/>
         <activity android:name=".LoginActivity"/>
+        <activity android:name=".GeneratePlaylistActivity"/>
         <activity android:name=".HomeActivity"/>
-        <activity android:name=".TuneParametersActivity"
-                  android:parentActivityName=".LaunchActivity"/>
+        <activity android:name=".TuneParametersActivity"/>
+        <activity android:name=".ExportActivity"/>
         <activity android:name=".ViewPlaylistActivity"/>
     </application>
 
