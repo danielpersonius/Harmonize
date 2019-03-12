@@ -4,10 +4,14 @@
     <string name="user_email_text">username/email address</string>
     <string name="password_text">password</string>
     <string name="password_reset_prompt">Reset Your Password</string>
+    <string name="nav_header_desc">Navigation header</string>
     <string name="forgot_password_text">Forgot Password?</string>
     <string name="pass_reset_text">Send Reset Link</string>
     <string name="acc_create_text">Create Account</string>
+    <string name="drawer_source_title">Sources</string>
+    <string name="edit_source_label">Edit</string>
     <string name="connect_banner_label">Connect</string>
+    <string name="playlist_label">Playlists</string>
     <string name="generate_playlist_label">Generate New Playlist</string>
     <string name="choose_source_label">Source</string>
     <string name="spotify_platform_banner">Spotify</string>
