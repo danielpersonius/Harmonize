@@ -18,7 +18,7 @@ class ViewPlaylistFragment : Fragment() {
         private const val LOG_TAG = "ViewPlaylistFragment"
     }
 
-    var playlistTitle : String? = null
+    var playlistTitle : String? = "Playlist name"
     // example list of songs
     var playlist = mutableListOf(
         Track("Divinity", "Porter Robinson", "Worlds", mapOf("BPM" to "90")),
