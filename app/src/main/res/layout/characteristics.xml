@@ -11,7 +11,7 @@
 
     <Space
             android:layout_width="match_parent"
-            android:layout_height="100dp"/>
+            android:layout_height="40dp"/>
 
     <TextView
             android:layout_width="match_parent"
@@ -24,134 +24,107 @@
 
     <Space
             android:layout_width="match_parent"
-            android:layout_height="100dp"/>
+            android:layout_height="10dp"/>
 
-    <LinearLayout
+
+    <ScrollView
+            android:id="@+id/characteristics_scrollview"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:padding="10dp"
-    >
+            android:layout_height="wrap_content">
+        <LinearLayout
+                android:id="@+id/characteristics_scrollview_linearlayout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
 
-        <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="match_parent"
-                android:text="Energy: "
-                android:textSize="30dp"
-
-        />
-        <Space
-                android:layout_width="80dp"
-                android:layout_height="match_parent"/>
-
-        <TextView
-                android:id="@+id/energy_char"
-                android:layout_width="wrap_content"
-                android:layout_height="match_parent"
-                android:textSize="30dp"
-                android:layout_gravity="right"
-                android:text="85"
-                android:background="#fff"
-        />
-
-
-
-    </LinearLayout>
-
-    <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:padding="10dp"
-    >
-
-        <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="match_parent"
-                android:text="Lyrics: "
-                android:textSize="30dp"
-
-        />
-        <Space
-                android:layout_width="91dp"
-                android:layout_height="match_parent"/>
-
-        <TextView
-                android:id="@+id/lyrics_char"
-                android:layout_width="wrap_content"
-                android:layout_height="match_parent"
-                android:textSize="30dp"
-                android:layout_gravity="right"
-                android:text="85"
-                android:background="#fff"
-        />
-
-
-
-    </LinearLayout>
-
-    <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:padding="10dp"
-    >
-
-        <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="match_parent"
-                android:text="Pace: "
-                android:textSize="30dp"
-
-        />
-        <Space
-                android:layout_width="101dp"
-                android:layout_height="match_parent"/>
-
-        <TextView
-                android:id="@+id/pace_char"
-                android:layout_width="wrap_content"
-                android:layout_height="match_parent"
-                android:textSize="30dp"
-                android:layout_gravity="right"
-                android:text="85"
-                android:background="#fff"
-        />
-
-
-
-    </LinearLayout>
-
-    <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:padding="10dp"
-    >
-
-        <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="match_parent"
-                android:text="Accoustics: "
-                android:textSize="30dp"
-
-        />
-        <Space
-                android:layout_width="17dp"
-                android:layout_height="match_parent"/>
-
-        <TextView
-                android:id="@+id/accoustics_char"
-                android:layout_width="wrap_content"
-                android:layout_height="match_parent"
-                android:textSize="30dp"
-                android:layout_gravity="right"
-                android:text="85"
-                android:background="#fff"
-        />
-
-
-
-    </LinearLayout>
-
+            <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:padding="10dp">
+                <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="match_parent"
+                        android:text="Energy: "
+                        android:textSize="30dp"/>
+                <Space
+                        android:layout_width="80dp"
+                        android:layout_height="match_parent"/>
+                <TextView
+                        android:id="@+id/energy_char"
+                        android:layout_width="wrap_content"
+                        android:layout_height="match_parent"
+                        android:textSize="30dp"
+                        android:layout_gravity="right"
+                        android:text="85"
+                        android:background="#fff"/>
+            </LinearLayout>
+            <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:padding="10dp">
+                <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="match_parent"
+                        android:text="Lyrics: "
+                        android:textSize="30dp"/>
+                <Space
+                        android:layout_width="91dp"
+                        android:layout_height="match_parent"/>
+                <TextView
+                        android:id="@+id/lyrics_char"
+                        android:layout_width="wrap_content"
+                        android:layout_height="match_parent"
+                        android:textSize="30dp"
+                        android:layout_gravity="right"
+                        android:text="85"
+                        android:background="#fff"/>
+            </LinearLayout>
+            <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:padding="10dp">
+                <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="match_parent"
+                        android:text="Pace: "
+                        android:textSize="30dp"/>
+                <Space
+                        android:layout_width="101dp"
+                        android:layout_height="match_parent"/>
+                <TextView
+                        android:id="@+id/pace_char"
+                        android:layout_width="wrap_content"
+                        android:layout_height="match_parent"
+                        android:textSize="30dp"
+                        android:layout_gravity="right"
+                        android:text="85"
+                        android:background="#fff"/>
+            </LinearLayout>
+            <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:padding="10dp">
+                <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="match_parent"
+                        android:text="Accoustics: "
+                        android:textSize="30dp"/>
+                <Space
+                        android:layout_width="17dp"
+                        android:layout_height="match_parent"/>
+                <TextView
+                        android:id="@+id/accoustics_char"
+                        android:layout_width="wrap_content"
+                        android:layout_height="match_parent"
+                        android:textSize="30dp"
+                        android:layout_gravity="right"
+                        android:text="85"
+                        android:background="#fff"/>
+            </LinearLayout>
+        </LinearLayout>
+    </ScrollView>
 </LinearLayout>
