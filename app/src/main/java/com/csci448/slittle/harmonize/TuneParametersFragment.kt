@@ -17,7 +17,13 @@ import kotlinx.android.synthetic.main.fragment_tune_parameters.*
 
 class TuneParametersFragment : Fragment() {
     companion object {
-        private const val LOG_TAG = "PlatformConnectFragment"
+        private const val LOG_TAG = "TuneParametersFragment"
+        fun createFragment() : Fragment {
+            val arguments = Bundle()
+            val tuneParametersFragment = TuneParametersFragment()
+            tuneParametersFragment.arguments = arguments
+            return tuneParametersFragment
+        }
     }
 
     private fun showDescription(parameterName : String, description : String) {
