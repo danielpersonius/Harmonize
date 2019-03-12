@@ -16,4 +16,19 @@
     <string name="playlist_options_label">Options</string>
     <string name="export_label">Export</string>
     <string name="playlist_image_alt_text">Playlist Image</string>
+    <string name="tune_parameters_banner">Tune Search Parameters</string>
+    <string name="artist_similarity_label">Artist Similarity</string>
+    <string name="energy_parameter_label">Energy</string>
+    <string name="danceability_parameter_label">Danceability</string>
+    <string name="speechiness_parameter_label">Speechiness</string>
+    <string name="loudness_parameter_label">Loudness</string>
+    <string name="valence_parameter_label">Valence</string>
+    <string name="artist_similarity_parameter_description">What proportion of the results should be only from the artists currently in the source</string>
+    <string name="energy_parameter_description">A perceptual measure of intensity and activity</string>
+    <string name="danceability_parameter_description">How suitable a track is for dancing based on a combination of musical elements including tempo, rhythm stability, beat strength, and overall regularity</string>
+    <string name="speechiness_parameter_description">The presence of spoken words in a track</string>
+    <string name="loudness_parameter_description">The overall loudness of a track in decibels (dB)</string>
+    <string name="valence_parameter_description">The presence of an audience in the recording. Higher liveness values represent an increased probability that the track was performed live</string>
 </resources>
+
+
