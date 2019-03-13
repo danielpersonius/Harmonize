@@ -68,7 +68,6 @@ class HomeFragment : Fragment() {
             name.text = getItem(position)._name
 
             view.setOnClickListener {
-                Toast.makeText(context, name.text.toString() + " selected", Toast.LENGTH_SHORT).show()
                 val viewPlaylistIntent = ViewPlaylistActivity.createIntent(context, getItem(position)._name)
                 startActivity(viewPlaylistIntent)
             }
