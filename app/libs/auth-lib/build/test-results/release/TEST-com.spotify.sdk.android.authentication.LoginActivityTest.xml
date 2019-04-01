@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.spotify.sdk.android.authentication.LoginActivityTest" tests="2" skipped="0" failures="0" errors="0" timestamp="2019-03-31T23:22:04" hostname="augustine" time="8.206">
+  <properties/>
+  <testcase name="shouldFinishLoginActivityIfNoAuthRequest" classname="com.spotify.sdk.android.authentication.LoginActivityTest" time="7.508"/>
+  <testcase name="shouldFinishLoginActivityWhenCompleted" classname="com.spotify.sdk.android.authentication.LoginActivityTest" time="0.698"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[No such manifest file: build/intermediates/manifests/full/release/AndroidManifest.xml
+No such manifest file: build/intermediates/manifests/full/release/AndroidManifest.xml
+]]></system-err>
+</testsuite>

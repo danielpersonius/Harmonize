@@ -1,0 +1,2 @@
+<?xml version="1.0" encoding="utf-8"?>
+<merger version="3"><dataSet config="main"><source path="/Users/daniel/root_dir/school/sen/spring/classes/mobile/project/android-auth-1.0/auth-lib/src/main/jniLibs"/></dataSet><dataSet config="release"><source path="/Users/daniel/root_dir/school/sen/spring/classes/mobile/project/android-auth-1.0/auth-lib/src/release/jniLibs"/></dataSet></merger>
