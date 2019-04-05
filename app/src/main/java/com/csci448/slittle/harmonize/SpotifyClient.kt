@@ -16,11 +16,19 @@ class SpotifyClient {
                 val response =
                     get("https://api.spotify.com/v1/me/playlists?access_token=$accessToken&limit=$limit&offset=$offset")
                 // todo: error handling, since app crashes if the json response cannot map to an ApiPlaylistData object
-                // parse JSON
+                // parse JSON into playlist objects
                 val result = Klaxon()
                     .parse<ApiPlaylistData>(response.text)
                 Log.d(LOG_TAG, result.toString())
             }
+        }
+
+        fun getUserInformation(userId : String) {
+            // todo Implement me
+        }
+
+        fun getPlaylistTracks(playlistId : String) {
+            // todo Implement me
         }
     }
 }

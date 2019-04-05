@@ -12,6 +12,7 @@ harmonize spotify workflow
 	e) in `auth-lib/build.gradle` and `auth-sample/build.gradle`, add `'abortOnError false'` to `android/lintOptions`
 	f) `./gradlew build`
 
+
 3) Copy the auth-lib directory into the /app/libs directory in your project’s root directory.
 or 3) Copy the `auth-lib/build/outputs/aar/spotify-auth-version.aar` file into the /app/libs directory in your project’s root directory if just using Streaming functionality.
 
