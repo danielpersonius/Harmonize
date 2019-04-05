@@ -41,6 +41,7 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:background="@drawable/button_border"
+            android:padding="8dp"
             android:textColor="@color/colorBlack"
             android:textSize="24dp"
             android:id="@+id/reset_button"/>
