@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.spotify.sdk.android.authentication.AuthenticationRequestTest" tests="18" skipped="0" failures="0" errors="0" timestamp="2019-03-31T23:22:01" hostname="augustine" time="0.129">
+  <properties/>
+  <testcase name="shouldSetCampaign" classname="com.spotify.sdk.android.authentication.AuthenticationRequestTest" time="0.008"/>
+  <testcase name="shouldThrowWithNullCustomParamKey" classname="com.spotify.sdk.android.authentication.AuthenticationRequestTest" time="0.005"/>
+  <testcase name="shouldThrowIfResponseTypeIsNull" classname="com.spotify.sdk.android.authentication.AuthenticationRequestTest" time="0.005"/>
+  <testcase name="shouldThrowWithNullCustomParamValue" classname="com.spotify.sdk.android.authentication.AuthenticationRequestTest" time="0.004"/>
+  <testcase name="shouldThrowIfRedirectUriIsNull" classname="com.spotify.sdk.android.authentication.AuthenticationRequestTest" time="0.007"/>
+  <testcase name="shouldThrowWithEmptyCustomParamKey" classname="com.spotify.sdk.android.authentication.AuthenticationRequestTest" time="0.004"/>
+  <testcase name="shouldSetScopes" classname="com.spotify.sdk.android.authentication.AuthenticationRequestTest" time="0.004"/>
+  <testcase name="shouldMarshallCorrectly" classname="com.spotify.sdk.android.authentication.AuthenticationRequestTest" time="0.035"/>
+  <testcase name="shouldNotSetNullState" classname="com.spotify.sdk.android.authentication.AuthenticationRequestTest" time="0.003"/>
+  <testcase name="shouldThrowIfRedirectUriIsEmpty" classname="com.spotify.sdk.android.authentication.AuthenticationRequestTest" time="0.005"/>
+  <testcase name="shouldSetState" classname="com.spotify.sdk.android.authentication.AuthenticationRequestTest" time="0.006"/>
+  <testcase name="shouldThrowIfClientIdIsNull" classname="com.spotify.sdk.android.authentication.AuthenticationRequestTest" time="0.004"/>
+  <testcase name="shouldUseDefaultCampaign" classname="com.spotify.sdk.android.authentication.AuthenticationRequestTest" time="0.004"/>
+  <testcase name="shouldNotSetNullScopes" classname="com.spotify.sdk.android.authentication.AuthenticationRequestTest" time="0.005"/>
+  <testcase name="shouldBuildCorrectUri" classname="com.spotify.sdk.android.authentication.AuthenticationRequestTest" time="0.004"/>
+  <testcase name="shouldThrowWithEmptyCustomParamValue" classname="com.spotify.sdk.android.authentication.AuthenticationRequestTest" time="0.004"/>
+  <testcase name="shouldSetCustomParams" classname="com.spotify.sdk.android.authentication.AuthenticationRequestTest" time="0.005"/>
+  <testcase name="shouldNotSetEmptyScopes" classname="com.spotify.sdk.android.authentication.AuthenticationRequestTest" time="0.004"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[No such manifest file: build/intermediates/manifests/full/debug/AndroidManifest.xml
+No such manifest file: build/intermediates/manifests/full/debug/AndroidManifest.xml
+No such manifest file: build/intermediates/manifests/full/debug/AndroidManifest.xml
+No such manifest file: build/intermediates/manifests/full/debug/AndroidManifest.xml
+No such manifest file: build/intermediates/manifests/full/debug/AndroidManifest.xml
+No such manifest file: build/intermediates/manifests/full/debug/AndroidManifest.xml
+No such manifest file: build/intermediates/manifests/full/debug/AndroidManifest.xml
+No such manifest file: build/intermediates/manifests/full/debug/AndroidManifest.xml
+No such manifest file: build/intermediates/manifests/full/debug/AndroidManifest.xml
+No such manifest file: build/intermediates/manifests/full/debug/AndroidManifest.xml
+No such manifest file: build/intermediates/manifests/full/debug/AndroidManifest.xml
+No such manifest file: build/intermediates/manifests/full/debug/AndroidManifest.xml
+No such manifest file: build/intermediates/manifests/full/debug/AndroidManifest.xml
+No such manifest file: build/intermediates/manifests/full/debug/AndroidManifest.xml
+No such manifest file: build/intermediates/manifests/full/debug/AndroidManifest.xml
+No such manifest file: build/intermediates/manifests/full/debug/AndroidManifest.xml
+No such manifest file: build/intermediates/manifests/full/debug/AndroidManifest.xml
+No such manifest file: build/intermediates/manifests/full/debug/AndroidManifest.xml
+]]></system-err>
+</testsuite>

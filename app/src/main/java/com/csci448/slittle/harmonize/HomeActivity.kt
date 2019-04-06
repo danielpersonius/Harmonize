@@ -25,6 +25,7 @@ class HomeActivity : SingleFragmentActivity(), NavigationView.OnNavigationItemSe
 
     }
 
+
     var playlists = mutableListOf(
         Playlist(1,  "playlist #1",  listOf(Track("some song", "some artist", "some album", mapOf("BPM" to "1000")))),
         Playlist(2,  "playlist #2",  listOf(Track("some song", "some artist", "some album", mapOf("BPM" to "1000")))),

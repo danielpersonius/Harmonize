@@ -40,10 +40,11 @@
             android:id="@+id/password_text_field"/>
     <Button
             android:text="@string/forgot_password_text"
-            android:layout_width="match_parent"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
-            android:background="@color/colorWhite"
+            android:padding="8dp"
+            android:background="@drawable/button_border_light"
             android:id="@+id/forgot_pass_button"/>
     <Button
             android:text="@string/login_text"

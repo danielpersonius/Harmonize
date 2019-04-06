@@ -25,6 +25,7 @@
             android:background="@drawable/button_border"
             android:textColor="@color/colorBlack"
             android:textSize="24dp"
+            android:padding="8dp"
             android:id="@+id/login_button"/>
     <Button
             android:text="@string/acc_create_text"

@@ -41,16 +41,16 @@ class ExportFragment : Fragment() {
         Log.d(LOG_TAG, "onViewCreated() called")
         super.onViewCreated(view, savedInstanceState)
 
-        spotify_export.setOnClickListener {
+        export_spotify_button.setOnClickListener {
             Toast.makeText(context, "Exported to Spotify!", Toast.LENGTH_SHORT).show()
         }
-        apple_music_export.setOnClickListener {
+        export_apple_button.setOnClickListener {
             Toast.makeText(context, "Exported to Apple Music!", Toast.LENGTH_SHORT).show()
         }
-        soundcloud_export.setOnClickListener {
+        export_soundcloud_button.setOnClickListener {
             Toast.makeText(context, "Exported to Soundcloud!", Toast.LENGTH_SHORT).show()
         }
-        pandora_export.setOnClickListener {
+        export_pandora_button.setOnClickListener {
             Toast.makeText(context, "Exported to Pandora!", Toast.LENGTH_SHORT).show()
         }
     }

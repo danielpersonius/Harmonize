@@ -71,7 +71,6 @@ class HomeFragment : Fragment() {
             name.text = getItem(position)._name
 
             view.setOnClickListener {
-                Toast.makeText(context, name.text.toString() + " selected", Toast.LENGTH_SHORT).show()
                 val viewPlaylistIntent = ViewPlaylistActivity.createIntent(context, getItem(position)._name)
                 startActivity(viewPlaylistIntent)
             }
@@ -97,6 +96,22 @@ class HomeFragment : Fragment() {
         Log.d(LOG_TAG, "onCreate() called")
 
     }
+
+    override fun onCreateOptionsMenu(menu: Menu?, inflater: MenuInflater?) {
+        super.onCreateOptionsMenu(menu, inflater)
+        inflater?.inflate(R.menu.home_options, menu)
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem?): Boolean =
+    // Handle presses on the action bar menu items
+        when (item?.itemId) {
+            R.id.playlist_create_option -> {
+                val generateIntent = GeneratePlaylistActivity.createIntent(context)
+                startActivity(generateIntent)
+                true
+            }
+            else -> super.onOptionsItemSelected(item)
+        }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         Log.d(LOG_TAG, "onCreateView() called")

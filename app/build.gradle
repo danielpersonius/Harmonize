@@ -24,6 +24,15 @@ android {
 
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
+    // spotify
+    api 'com.spotify.android:auth:1.0.0-alpha'
+    // khttp for http requests
+    implementation "khttp:khttp:0.1.0"
+    // coroutines
+    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:1.1.1"
+    // json parsing
+    implementation 'com.beust:klaxon:5.0.1'
+
     implementation"org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
     implementation 'com.android.support:appcompat-v7:28.0.0'
     implementation 'com.android.support.constraint:constraint-layout:1.1.3'

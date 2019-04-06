@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.spotify.sdk.android.authentication.AuthenticationClientTest" tests="8" skipped="0" failures="0" errors="0" timestamp="2019-03-31T23:22:01" hostname="augustine" time="0.488">
+  <properties/>
+  <testcase name="shouldLaunchIntentForPassedActivity" classname="com.spotify.sdk.android.authentication.AuthenticationClientTest" time="0.293"/>
+  <testcase name="getResponseShouldReturnEmptyWhenSomethingWentWrong" classname="com.spotify.sdk.android.authentication.AuthenticationClientTest" time="0.044"/>
+  <testcase name="getResponseShouldReturnAParcableIfEverythingIsOk" classname="com.spotify.sdk.android.authentication.AuthenticationClientTest" time="0.007"/>
+  <testcase name="shouldCreateAnInstanceOfAuthenticationClientAndSendEvents" classname="com.spotify.sdk.android.authentication.AuthenticationClientTest" time="0.126"/>
+  <testcase name="createLoginActivityIntentShouldReturnAnIntentWithExtrasInIt" classname="com.spotify.sdk.android.authentication.AuthenticationClientTest" time="0.004"/>
+  <testcase name="createLoginActivityIntentShouldThrowExceptionWhenSecondPassedIsNull" classname="com.spotify.sdk.android.authentication.AuthenticationClientTest" time="0.004"/>
+  <testcase name="createLoginActivityIntentShouldThrowExceptionWhenBothPassedIsNull" classname="com.spotify.sdk.android.authentication.AuthenticationClientTest" time="0.003"/>
+  <testcase name="createLoginActivityIntentShouldThrowExceptionWhenFirstPassedIsNull" classname="com.spotify.sdk.android.authentication.AuthenticationClientTest" time="0.004"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[No such manifest file: build/intermediates/manifests/full/debug/AndroidManifest.xml
+No such manifest file: build/intermediates/manifests/full/debug/AndroidManifest.xml
+No such manifest file: build/intermediates/manifests/full/debug/AndroidManifest.xml
+No such manifest file: build/intermediates/manifests/full/debug/AndroidManifest.xml
+No such manifest file: build/intermediates/manifests/full/debug/AndroidManifest.xml
+No such manifest file: build/intermediates/manifests/full/debug/AndroidManifest.xml
+No such manifest file: build/intermediates/manifests/full/debug/AndroidManifest.xml
+No such manifest file: build/intermediates/manifests/full/debug/AndroidManifest.xml
+]]></system-err>
+</testsuite>
