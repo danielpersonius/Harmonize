@@ -79,6 +79,8 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
             Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
                 .setAction("Action", null).show()
             // generate activity/intent
+            val generatePlaylistIntent = GeneratePlaylistActivity.createIntent(baseContext)
+            startActivity(generatePlaylistIntent)
         }
 
         val toggle = ActionBarDrawerToggle(
