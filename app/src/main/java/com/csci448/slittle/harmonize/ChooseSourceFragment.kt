@@ -64,7 +64,7 @@ class ChooseSourceFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         // get user playlists
-        val playlists = SpotifyClient.getUserPlaylists(SpotifyClient.ACCESS_TOKEN, 5, 5) as ApiPlaylistData
+        val playlists = SpotifyClient.getUserPlaylists(SpotifyClient.ACCESS_TOKEN, 20, 1) as ApiPlaylistData
         for (playlist : ApiPlaylist in playlists._playlists) {
             val playlistTextView = TextView(context)
             playlistTextView.text = playlist._name
