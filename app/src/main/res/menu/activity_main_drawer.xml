@@ -17,9 +17,6 @@
             <item
                     android:id="@+id/nav_edit"
                     android:title="@string/edit_source_label"/>
-            <item
-                    android:id="@+id/nav_add"
-                    android:title="@string/connect_banner_label"/>
         </menu>
     </item>
 </menu>

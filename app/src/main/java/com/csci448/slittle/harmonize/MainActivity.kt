@@ -139,8 +139,10 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         // Handle navigation view item clicks here.
         when (item.itemId) {
             R.id.nav_generate -> {
-                val generatePlaylistIntent = GeneratePlaylistActivity.createIntent(baseContext)
-                startActivity(generatePlaylistIntent)
+//                val generatePlaylistIntent = GeneratePlaylistActivity.createIntent(baseContext)
+//                startActivity(generatePlaylistIntent)
+                val connectPlatformIntent = PlatformConnectActivity.createIntent(baseContext)
+                startActivity(connectPlatformIntent)
             }
             R.id.nav_connect -> {
                 val connectPlatformIntent = PlatformConnectActivity.createIntent(baseContext)
