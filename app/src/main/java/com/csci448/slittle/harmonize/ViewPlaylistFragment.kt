@@ -119,6 +119,13 @@ class ViewPlaylistFragment : Fragment() {
 
             tracklist_linearlayout.addView(trackView)
         }
+
+
+
+        // test get playlist tracks call
+//        SpotifyClient.getPlaylistTracks("0npkStKEjy4tCUGUVHGSS2")
+        // test audio features call
+//        SpotifyClient.getTrackAudioFeatures()
     }
 
     override fun onCreateOptionsMenu(menu: Menu?, inflater: MenuInflater?) {

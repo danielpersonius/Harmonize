@@ -75,11 +75,11 @@
                 <SeekBar
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:id="@+id/artist_similarity_spinner"
+                        android:id="@+id/artist_similarity_seekbar"
                         android:paddingStart="30dp"
                         android:paddingEnd="30dp"/>
                 <TextView
-                        android:id="@+id/artist_similarity_spinner_value"
+                        android:id="@+id/artist_similarity_seekbar_value"
                         tools:hint="#"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
@@ -125,11 +125,11 @@
                 <SeekBar
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:id="@+id/energy_parameter_spinner"
+                        android:id="@+id/energy_parameter_seekbar"
                         android:paddingStart="30dp"
                         android:paddingEnd="30dp"/>
                 <TextView
-                        android:id="@+id/energy_parameter_spinner_value"
+                        android:id="@+id/energy_parameter_seekbar_value"
                         tools:hint="#"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
@@ -174,11 +174,11 @@
                 <SeekBar
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:id="@+id/danceability_parameter_spinner"
+                        android:id="@+id/danceability_parameter_seekbar"
                         android:paddingStart="30dp"
                         android:paddingEnd="30dp"/>
                 <TextView
-                        android:id="@+id/danceability_parameter_spinner_value"
+                        android:id="@+id/danceability_parameter_seekbar_value"
                         tools:hint="#"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
@@ -223,11 +223,11 @@
                 <SeekBar
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:id="@+id/speechiness_parameter_spinner"
+                        android:id="@+id/speechiness_parameter_seekbar"
                         android:paddingStart="30dp"
                         android:paddingEnd="30dp"/>
                 <TextView
-                        android:id="@+id/speechiness_parameter_spinner_value"
+                        android:id="@+id/speechiness_parameter_seekbar_value"
                         tools:hint="#"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
@@ -272,11 +272,11 @@
                 <SeekBar
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:id="@+id/loudness_parameter_spinner"
+                        android:id="@+id/loudness_parameter_seekbar"
                         android:paddingStart="30dp"
                         android:paddingEnd="30dp"/>
                 <TextView
-                        android:id="@+id/loudness_parameter_spinner_value"
+                        android:id="@+id/loudness_parameter_seekbar_value"
                         tools:hint="#"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
@@ -321,11 +321,11 @@
                 <SeekBar
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:id="@+id/valence_parameter_spinner"
+                        android:id="@+id/valence_parameter_seekbar"
                         android:paddingStart="30dp"
                         android:paddingEnd="30dp"/>
                 <TextView
-                        android:id="@+id/valence_parameter_spinner_value"
+                        android:id="@+id/valence_parameter_seekbar_value"
                         tools:hint="#"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"

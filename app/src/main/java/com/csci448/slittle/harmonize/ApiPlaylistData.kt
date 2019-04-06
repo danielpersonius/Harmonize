@@ -6,7 +6,7 @@ data class ApiPlaylistData(
     @Json(name = "href")
     val _href : String,
     @Json(name = "items")
-    val _playlists : List<ApiPlaylist>?,
+    val _playlists : List<ApiPlaylist>,
     @Json(name = "limit")
     val _limit : Int,
     @Json(name = "next")
