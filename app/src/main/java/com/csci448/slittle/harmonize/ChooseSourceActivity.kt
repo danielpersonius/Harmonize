@@ -13,7 +13,7 @@ import kotlinx.android.synthetic.main.menu_drawer.*
 class ChooseSourceActivity : SingleFragmentActivity() {
     companion object {
         private const val LOG_TAG = "ChooseSourceActivity"
-        fun createIntent(baseContext: Context): Intent {
+        fun createIntent(baseContext: Context?): Intent {
             val intent = Intent(baseContext, ChooseSourceActivity::class.java)
             return intent
         }

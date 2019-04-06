@@ -25,6 +25,4 @@ data class ApiPlaylist(
     val _type: String,
     @Json(name = "uri")
     val _uri: String
-//    @Json(name = "tracks")
-//    val _tracks: List<ApiTrack>?
 )

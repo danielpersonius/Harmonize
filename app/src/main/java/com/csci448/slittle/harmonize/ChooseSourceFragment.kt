@@ -71,9 +71,20 @@ class ChooseSourceFragment : Fragment() {
             playlistTextView.textSize = 24.0f
             playlistTextView.setOnClickListener {
                 Toast.makeText(context, "${playlist._name} selected!", Toast.LENGTH_SHORT).show()
-                // get this playlists tracks
-                val tracks = SpotifyClient.getPlaylistTracks("0npkStKEjy4tCUGUVHGSS2") as String
-                Log.d(LOG_TAG, tracks)
+                val tracks = SpotifyClient.getPlaylistTracks(playlist._id) as ApiTrack
+                Log.d(LOG_TAG, tracks.toString())
+
+                // for now, just view list of tracks currently in playlist
+                // do this by converting ApiTrack object to list of strings and sending to ViewPlaylistActivity
+                val viewPlaylistIntent = ViewPlaylistActivity.createIntent(context, playlist._name)
+                val trackNames = mutableListOf<String>()
+
+                for(track : T in tracks._tracks) {
+                    val trackData = track._track
+                    trackNames.add(trackData._name)
+                    viewPlaylistIntent.putExtra("TRACK_LIST", arrayListOf(trackNames))
+                }
+                startActivity(viewPlaylistIntent)
             }
             spotify_choose_playlist_scrollview_linearlayout.addView(playlistTextView)
         }

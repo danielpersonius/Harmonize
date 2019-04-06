@@ -4,7 +4,6 @@ import android.content.Context
 import android.content.Intent
 
 class TuneParametersActivity : SingleFragmentActivity() {
-
     companion object {
         private const val LOG_TAG = "TuneParametersActivity"
         fun createIntent(baseContext: Context?): Intent {
