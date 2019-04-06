@@ -3,8 +3,10 @@ import android.app.Activity.RESULT_OK
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import android.support.design.widget.NavigationView
 import android.util.Log
 import android.support.v4.app.Fragment
+import android.support.v4.widget.DrawerLayout
 import android.view.*
 import android.widget.BaseAdapter
 import android.widget.ImageView
@@ -43,7 +45,8 @@ class HomeFragment : Fragment() {
         Playlist(17, "playlist #17", listOf(Track("some song", "some artist", "some album", mapOf("BPM" to "1000")))),
         Playlist(18, "playlist #18", listOf(Track("some song", "some artist", "some album", mapOf("BPM" to "1000"))))
         )
-    var adapter: PlaylistAdapter? = null
+    private var adapter: PlaylistAdapter? = null
+//    private lateinit var drawerLayout: DrawerLayout
 
     inner class PlaylistAdapter : BaseAdapter() {
         override fun getCount(): Int {
@@ -62,7 +65,7 @@ class HomeFragment : Fragment() {
             val inflater = parent?.context?.
                 getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
             val view = inflater.inflate(R.layout.playlist_grid_item,null)
-            val image = view.findViewById<ImageView>(R.id.playlist_grid_playlist_image)
+            //val image = view.findViewById<ImageView>(R.id.playlist_grid_playlist_image)
             val name  = view.findViewById<TextView>(R.id.playlist_grid_playlist_name)
 
             name.text = getItem(position)._name
@@ -91,7 +94,7 @@ class HomeFragment : Fragment() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         Log.d(LOG_TAG, "onCreate() called")
-        setHasOptionsMenu(true)
+
     }
 
     override fun onCreateOptionsMenu(menu: Menu?, inflater: MenuInflater?) {
@@ -112,7 +115,7 @@ class HomeFragment : Fragment() {
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         Log.d(LOG_TAG, "onCreateView() called")
-        return inflater.inflate(R.layout.fragment_home, container, false)
+        return inflater.inflate(R.layout.activity_main, container, false)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {

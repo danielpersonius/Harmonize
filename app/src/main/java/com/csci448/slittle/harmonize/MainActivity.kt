@@ -1,12 +1,12 @@
 package com.csci448.slittle.harmonize
 
 import android.content.Context
-import android.content.Intent
 import android.os.Bundle
 import android.support.design.widget.Snackbar
 import android.support.design.widget.NavigationView
 import android.support.v4.view.GravityCompat
 import android.support.v7.app.ActionBarDrawerToggle
+import android.support.v7.app.AppCompatActivity
 import android.view.*
 import android.widget.BaseAdapter
 import android.widget.ImageView
@@ -15,16 +15,7 @@ import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.app_bar_main.*
 import kotlinx.android.synthetic.main.fragment_home.*
 
-class HomeActivity : SingleFragmentActivity(), NavigationView.OnNavigationItemSelectedListener {
-    companion object {
-        private const val LOG_TAG = "HomeActivity"
-        fun createIntent(baseContext: Context): Intent {
-            val intent = Intent(baseContext, HomeActivity::class.java)
-            return intent
-        }
-
-    }
-
+class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelectedListener {
 
     var playlists = mutableListOf(
         Playlist(1,  "playlist #1",  listOf(Track("some song", "some artist", "some album", mapOf("BPM" to "1000")))),
@@ -144,8 +135,4 @@ class HomeActivity : SingleFragmentActivity(), NavigationView.OnNavigationItemSe
         drawer_layout.closeDrawer(GravityCompat.START)
         return true
     }
-
-    override fun getLogTag() = LOG_TAG
-
-    override fun createFragment() = HomeFragment()
 }
