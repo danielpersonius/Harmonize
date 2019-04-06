@@ -12,6 +12,7 @@ import android.view.*
 import android.widget.BaseAdapter
 import android.widget.ImageView
 import android.widget.TextView
+import android.widget.Toast
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.app_bar_main.*
 import kotlinx.android.synthetic.main.fragment_home.*
@@ -72,8 +73,9 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
             name.text = getItem(position)._name
 
             view.setOnClickListener {
-                val viewPlaylistIntent = ViewPlaylistActivity.createIntent(baseContext, getItem(position)._name)
-                startActivity(viewPlaylistIntent)
+//                val viewPlaylistIntent = ViewPlaylistActivity.createIntent(baseContext, getItem(position)._name)
+//                startActivity(viewPlaylistIntent)
+                Toast.makeText(baseContext, "temporarily unavailable. please generate a new playlist.", Toast.LENGTH_SHORT).show()
             }
 
             return view
