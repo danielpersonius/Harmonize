@@ -47,7 +47,7 @@ class CharFragment : Fragment() {
         Log.d(LOG_TAG, "onViewCreated() called")
         super.onViewCreated(view, savedInstanceState)
         generate_playlist_button.setOnClickListener {
-            val intent = ViewPlaylistActivity.createIntent(context, "Generated Playlist")
+            val intent = GeneratePlaylistActivity.createIntent(context)
             intent.putExtra("Energy", energy_char.text)
             intent.putExtra("Lyrics",            lyrics_char.text)
             intent.putExtra("Pace",      pace_char.text)
