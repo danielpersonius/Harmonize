@@ -11,29 +11,26 @@ import android.view.*
 import android.widget.*
 
 import kotlinx.android.synthetic.main.fragment_view_playlist.*
-import java.util.ArrayList
-import kotlinx.android.synthetic.main.playlist_item.view.*
 
 
-class ViewPlaylistFragment : Fragment() {
+class ViewApiPlaylistFragment : Fragment() {
     companion object {
         private const val LOG_TAG = "ViewPlaylistFragment"
     }
 
     var playlistTitle : String? = "Playlist name"
     // example list of songs
-//    var playlist = mutableListOf(
-//        Track("Divinity", "Porter Robinson", "Worlds", mapOf("BPM" to "90")),
-//        Track("Pink + White", "Frank Ocean", "Blonde", mapOf("BPM" to "160")),
-//        Track("All is Lost", "Getter", "Visceral", mapOf("BPM" to "75")),
-//        Track("Childish", "aiwake", "Childish", mapOf("BPM" to "70")),
-//        Track("Falls - Golden Features Remix", "ODESZA, Sasha Sloan, Golden Features", "Falls (Remixes)", mapOf("BPM" to "125")),
-//        Track("Alamo", "Boombox Cartel, Shoffy", "Cartel", mapOf("BPM" to "87")),
-//        Track("Fears", "MTNS", "Salvage", mapOf("BPM" to "70")),
-//        Track("Sleepless", "Flume, Jezzabell Doran", "Flume", mapOf("BPM" to "80")),
-//        Track("Past Life", "Ekali, Opia", "Past Life", mapOf("BPM" to "97"))
-//    )
-    val playlist = mutableListOf<Track>()
+    var playlist = mutableListOf(
+        Track("Divinity", "Porter Robinson", "Worlds", mapOf("BPM" to "90")),
+        Track("Pink + White", "Frank Ocean", "Blonde", mapOf("BPM" to "160")),
+        Track("All is Lost", "Getter", "Visceral", mapOf("BPM" to "75")),
+        Track("Childish", "aiwake", "Childish", mapOf("BPM" to "70")),
+        Track("Falls - Golden Features Remix", "ODESZA, Sasha Sloan, Golden Features", "Falls (Remixes)", mapOf("BPM" to "125")),
+        Track("Alamo", "Boombox Cartel, Shoffy", "Cartel", mapOf("BPM" to "87")),
+        Track("Fears", "MTNS", "Salvage", mapOf("BPM" to "70")),
+        Track("Sleepless", "Flume, Jezzabell Doran", "Flume", mapOf("BPM" to "80")),
+        Track("Past Life", "Ekali, Opia", "Past Life", mapOf("BPM" to "97"))
+    )
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
@@ -55,7 +52,7 @@ class ViewPlaylistFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         Log.d(LOG_TAG, "onViewCreated() called")
         super.onViewCreated(view, savedInstanceState)
-        //Toast.makeText(context, "press to play, long press to view characteristics", Toast.LENGTH_LONG).show()
+        Toast.makeText(context, "press to play, long press to view characteristics", Toast.LENGTH_LONG).show()
 
         // rotation
         if (savedInstanceState != null) {
@@ -68,19 +65,13 @@ class ViewPlaylistFragment : Fragment() {
             val extras = intent?.extras
             if (extras != null) {
                 playlistTitle = extras.getString("PLAYLIST_NAME")
-                val trackList = extras.getStringArrayList("TRACK_LIST")as List<ArrayList<String>>
-                val tempList = trackList.get(0)
-
-                for(trackname : String in tempList) {
-                    playlist.add(Track(trackname, "artistname", "albumname", mutableMapOf("BPM" to "IDK")))
-                }
             }
         }
 
         playlist_name_banner.text = playlistTitle
 
         // change name on long press
-        editable_icon.setOnClickListener {
+        playlist_name_banner.setOnLongClickListener {
             Toast.makeText(context, "Change name", Toast.LENGTH_SHORT).show()
             val titleEditTextBox = EditText(context)
             // dialog box for input
@@ -118,7 +109,7 @@ class ViewPlaylistFragment : Fragment() {
                 Toast.makeText(context, "Play song", Toast.LENGTH_SHORT).show()
             }
             // metadata(e.g. song characteristics) on long press
-            trackView.song_info_icon.setOnClickListener {
+            trackView.setOnLongClickListener {
                 val intent = CharActivity.createIntent(context)
                 startActivity(intent)
                 true
@@ -128,6 +119,13 @@ class ViewPlaylistFragment : Fragment() {
 
             tracklist_linearlayout.addView(trackView)
         }
+
+
+
+        // test get playlist tracks call
+//        SpotifyClient.getPlaylistTracks("0npkStKEjy4tCUGUVHGSS2")
+        // test audio features call
+//        SpotifyClient.getTrackAudioFeatures()
     }
 
     override fun onCreateOptionsMenu(menu: Menu?, inflater: MenuInflater?) {
@@ -136,7 +134,7 @@ class ViewPlaylistFragment : Fragment() {
     }
 
     override fun onOptionsItemSelected(item: MenuItem?): Boolean =
-        // Handle presses on the action bar menu items
+    // Handle presses on the action bar menu items
         when (item?.itemId) {
             R.id.playlist_menu_export_option -> {
                 val exportIntent = ExportActivity.createIntent(context)

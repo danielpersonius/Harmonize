@@ -35,6 +35,7 @@
     <string name="speechiness_parameter_description">The presence of spoken words in a track</string>
     <string name="loudness_parameter_description">The overall loudness of a track in decibels (dB)</string>
     <string name="valence_parameter_description">The presence of an audience in the recording. Higher liveness values represent an increased probability that the track was performed live</string>
+    <string name="choose_playlist_banner">Choose Playlist</string>
 
     <string name="navigation_drawer_open">Open navigation drawer</string>
     <string name="navigation_drawer_close">Close navigation drawer</string>

@@ -11,7 +11,6 @@ import android.view.*
 import android.widget.BaseAdapter
 import android.widget.ImageView
 import android.widget.TextView
-import android.widget.Toast
 import kotlinx.android.synthetic.main.fragment_home.*
 
 class HomeFragment : Fragment() {

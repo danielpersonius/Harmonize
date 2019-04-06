@@ -16,7 +16,8 @@ class GeneratePlaylistFragment : Fragment() {
 
     // temporary intent creator since each button on this page launches TuneParametersActivity
     private fun launchIntent(){
-        val intent = TuneParametersActivity.createIntent(context)
+//        val intent = TuneParametersActivity.createIntent(context)
+        val intent = ChooseSourceActivity.createIntent(context)
         startActivity(intent)
     }
 
@@ -50,13 +51,16 @@ class GeneratePlaylistFragment : Fragment() {
             launchIntent()
         }
         generate_from_soundcloud_button.setOnClickListener {
-            launchIntent()
+            // noop for now
+            //launchIntent()
         }
         generate_from_apple_button.setOnClickListener {
-            launchIntent()
+            // noop for now
+            // launchIntent()
         }
         generate_from_pandora_button.setOnClickListener {
-            launchIntent()
+            // noop for now
+            // launchIntent()
         }
     }
 

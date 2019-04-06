@@ -37,7 +37,7 @@ class PlatformConnectActivity : SingleFragmentActivity() {
         super.onActivityResult(requestCode, resultCode, data)
         if (resultCode != RESULT_OK) { return }
         if (data == null) { return }
-        Log.d(LOG_TAG, "onActivityResult() called: $requestCode")
+//        Log.d(LOG_TAG, "onActivityResult() called: $requestCode")
 
         // Spotify login activity
         if (requestCode == SPOTIFY_LOGIN_REQUEST_CODE) {
@@ -50,9 +50,10 @@ class PlatformConnectActivity : SingleFragmentActivity() {
                     // Handle successful response
                     Toast.makeText(this, "Connected to Spotify with token: ${response.accessToken}", Toast.LENGTH_SHORT).show()
                     ACCESS_TOKEN = response.accessToken
-                    // example: get list of user's playlists
-                    // todo: move this
-                    SpotifyClient.getUserPlaylists(ACCESS_TOKEN, 5, 5)
+                    SpotifyClient.ACCESS_TOKEN = response.accessToken
+
+                    val generateActivityIntent = GeneratePlaylistActivity.createIntent(this)
+                    startActivity(generateActivityIntent)
                 }
 
                 // Auth flow returned an error
@@ -63,8 +64,8 @@ class PlatformConnectActivity : SingleFragmentActivity() {
                 }
 
                 else -> {
+                    // handle other cases
                     // Most likely auth flow was cancelled
-                    // Handle other cases
                     Toast.makeText(this, "Something else happened.", Toast.LENGTH_SHORT).show()
                 }
             }

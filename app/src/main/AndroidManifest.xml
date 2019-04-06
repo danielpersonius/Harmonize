@@ -12,14 +12,14 @@
             android:supportsRtl="true"
             android:theme="@style/Theme.AppCompat.Light.NoActionBar">
 
-        <activity android:name=".LaunchActivity">
+        <activity android:name=".PlatformConnectActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
 
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
-        <activity android:name=".PlatformConnectActivity"
+        <activity android:name=".LaunchActivity"
                   android:parentActivityName=".HomeActivity"/>
         <activity android:name=".PassResetActivity"
                   android:parentActivityName=".LoginActivity"/>
@@ -33,6 +33,7 @@
                   android:parentActivityName=".HomeActivity"/>
 
         <activity android:name=".GeneratePlaylistActivity"/>
+        <activity android:name=".ChooseSourceActivity"/>
 
         <activity android:name=".ExportActivity"
                   android:parentActivityName=".ViewPlaylistActivity"/>
