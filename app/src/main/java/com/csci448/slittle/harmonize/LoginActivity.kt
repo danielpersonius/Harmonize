@@ -28,7 +28,7 @@ class LoginActivity : AppCompatActivity(){
 
     //checkLogin will eventually check credentials against a database or similar
     private fun checkLogin(){
-        val homeIntent = HomeActivity.createIntent( baseContext)
+        val homeIntent = MainActivity.createIntent( baseContext)
         startActivity(homeIntent)
     }
 

@@ -1,6 +1,7 @@
 package com.csci448.slittle.harmonize
 
 import android.content.Context
+import android.content.Intent
 import android.os.Bundle
 import android.support.design.widget.Snackbar
 import android.support.design.widget.NavigationView
@@ -16,6 +17,15 @@ import kotlinx.android.synthetic.main.app_bar_main.*
 import kotlinx.android.synthetic.main.fragment_home.*
 
 class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelectedListener {
+
+    companion object {
+        private const val LOG_TAG = "HomeActivity"
+        fun createIntent(baseContext: Context): Intent {
+            val intent = Intent(baseContext, MainActivity::class.java)
+            return intent
+        }
+
+    }
 
     var playlists = mutableListOf(
         Playlist(1,  "playlist #1",  listOf(Track("some song", "some artist", "some album", mapOf("BPM" to "1000")))),
@@ -76,11 +86,15 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         setSupportActionBar(toolbar)
 
         fab.setOnClickListener { view ->
-            Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                .setAction("Action", null).show()
+            //Snackbar.make(view, "Create now", Snackbar.LENGTH_LONG)
+              //  .setAction("Action", null).show()
             // generate activity/intent
-            val generatePlaylistIntent = GeneratePlaylistActivity.createIntent(baseContext)
-            startActivity(generatePlaylistIntent)
+//            val generatePlaylistIntent = GeneratePlaylistActivity.createIntent(baseContext)
+//            startActivity(generatePlaylistIntent)
+
+            // have to connect to spotify each time for now until we persist access token
+            val connectIntent = PlatformConnectActivity.createIntent(baseContext)
+            startActivity(connectIntent)
         }
 
         val toggle = ActionBarDrawerToggle(
