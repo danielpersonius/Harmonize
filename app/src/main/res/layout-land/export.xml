@@ -8,9 +8,6 @@
         android:layout_weight="-1"
         android:orientation="vertical">
 
-    <Space
-            android:layout_width="match_parent"
-            android:layout_height="100dp"/>
     <ImageView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -51,7 +48,7 @@
                 android:scaleType="fitXY"
                 android:contentDescription="@string/soundcloud_platform_banner"
                 app:layout_constraintCircle="@+id/export_spotify_button"
-                app:layout_constraintCircleAngle="135"
+                app:layout_constraintCircleAngle="110"
                 app:layout_constraintCircleRadius="90dp"/>
         <ImageButton
                 android:id="@+id/export_apple_button"
@@ -62,7 +59,7 @@
                 android:scaleType="fitXY"
                 android:contentDescription="@string/apple_platform_banner"
                 app:layout_constraintCircle="@+id/export_spotify_button"
-                app:layout_constraintCircleAngle="225"
+                app:layout_constraintCircleAngle="250"
                 app:layout_constraintCircleRadius="90dp"/>
         <ImageButton
                 android:id="@+id/export_pandora_button"
@@ -74,7 +71,7 @@
                 android:contentDescription="@string/pandora_platform_banner"
                 app:layout_constraintCircle="@+id/export_spotify_button"
                 app:layout_constraintCircleAngle="180"
-                app:layout_constraintCircleRadius="125dp"/>
+                app:layout_constraintCircleRadius="75dp"/>
     </android.support.constraint.ConstraintLayout>
 
 </LinearLayout>

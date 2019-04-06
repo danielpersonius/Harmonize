@@ -1,15 +1,23 @@
 package com.csci448.slittle.harmonize
 
+import android.content.Context
 import android.content.Intent
 import android.util.Log
 import android.widget.Toast
 import com.spotify.sdk.android.authentication.AuthenticationClient
 import com.spotify.sdk.android.authentication.AuthenticationResponse
 
+
 class PlatformConnectActivity : SingleFragmentActivity() {
 
     companion object {
         private const val LOG_TAG = "PlatformConnectActivity"
+
+        fun createIntent(baseContext: Context?): Intent {
+            val intent = Intent(baseContext, PlatformConnectActivity::class.java)
+            return intent
+        }
+
         val CLIENT_ID = "96fb37843a5e4e92a1a8c4c5168e3371"
         // Request code will be used to verify if result comes from the login activity. Can be set to any integer.
         val SPOTIFY_LOGIN_REQUEST_CODE = 1

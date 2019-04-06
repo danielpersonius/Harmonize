@@ -12,6 +12,7 @@ import android.widget.*
 
 import kotlinx.android.synthetic.main.fragment_view_playlist.*
 import java.util.ArrayList
+import kotlinx.android.synthetic.main.playlist_item.view.*
 
 
 class ViewPlaylistFragment : Fragment() {
@@ -54,7 +55,7 @@ class ViewPlaylistFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         Log.d(LOG_TAG, "onViewCreated() called")
         super.onViewCreated(view, savedInstanceState)
-        Toast.makeText(context, "press to play, long press to view characteristics", Toast.LENGTH_LONG).show()
+        //Toast.makeText(context, "press to play, long press to view characteristics", Toast.LENGTH_LONG).show()
 
         // rotation
         if (savedInstanceState != null) {
@@ -79,7 +80,7 @@ class ViewPlaylistFragment : Fragment() {
         playlist_name_banner.text = playlistTitle
 
         // change name on long press
-        playlist_name_banner.setOnLongClickListener {
+        editable_icon.setOnClickListener {
             Toast.makeText(context, "Change name", Toast.LENGTH_SHORT).show()
             val titleEditTextBox = EditText(context)
             // dialog box for input
@@ -117,7 +118,7 @@ class ViewPlaylistFragment : Fragment() {
                 Toast.makeText(context, "Play song", Toast.LENGTH_SHORT).show()
             }
             // metadata(e.g. song characteristics) on long press
-            trackView.setOnLongClickListener {
+            trackView.song_info_icon.setOnClickListener {
                 val intent = CharActivity.createIntent(context)
                 startActivity(intent)
                 true

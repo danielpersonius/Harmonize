@@ -7,6 +7,7 @@ import android.util.Log
 import android.support.v4.app.Fragment
 import android.view.*
 import android.widget.Toast
+import kotlinx.android.synthetic.main.characteristics.*
 
 class CharFragment : Fragment() {
 
@@ -45,6 +46,16 @@ class CharFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         Log.d(LOG_TAG, "onViewCreated() called")
         super.onViewCreated(view, savedInstanceState)
+        generate_playlist_button.setOnClickListener {
+            val intent = GeneratePlaylistActivity.createIntent(context)
+            intent.putExtra("Energy", energy_char.text)
+            intent.putExtra("Lyrics",            lyrics_char.text)
+            intent.putExtra("Pace",      pace_char.text)
+            intent.putExtra("Accoustics",       accoustics_char.text)
+
+            startActivity(intent)
+        }
+
     }
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {

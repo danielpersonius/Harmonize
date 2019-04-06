@@ -13,5 +13,5 @@
             android:horizontalSpacing="10dp"
             android:numColumns="3"
             android:verticalSpacing="10dp"
-            android:paddingTop="10dp"/>
+            android:paddingTop="75dp"/>
 </LinearLayout>

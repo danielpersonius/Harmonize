@@ -1,28 +1,21 @@
 package com.csci448.slittle.harmonize
-import android.app.Activity.RESULT_OK
+
 import android.content.Context
-import android.content.Intent
 import android.os.Bundle
+import android.support.design.widget.Snackbar
 import android.support.design.widget.NavigationView
-import android.util.Log
-import android.support.v4.app.Fragment
-import android.support.v4.widget.DrawerLayout
+import android.support.v4.view.GravityCompat
+import android.support.v7.app.ActionBarDrawerToggle
+import android.support.v7.app.AppCompatActivity
 import android.view.*
 import android.widget.BaseAdapter
 import android.widget.ImageView
 import android.widget.TextView
+import kotlinx.android.synthetic.main.activity_main.*
+import kotlinx.android.synthetic.main.app_bar_main.*
 import kotlinx.android.synthetic.main.fragment_home.*
 
-class HomeFragment : Fragment() {
-    companion object {
-        private const val LOG_TAG = "HomeFragment"
-        fun createFragment() : Fragment {
-            val arguments = Bundle()
-            val homeFragment = HomeFragment()
-            homeFragment.arguments = arguments
-            return homeFragment
-        }
-    }
+class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelectedListener {
 
     var playlists = mutableListOf(
         Playlist(1,  "playlist #1",  listOf(Track("some song", "some artist", "some album", mapOf("BPM" to "1000")))),
@@ -43,9 +36,8 @@ class HomeFragment : Fragment() {
         Playlist(16, "playlist #16", listOf(Track("some song", "some artist", "some album", mapOf("BPM" to "1000")))),
         Playlist(17, "playlist #17", listOf(Track("some song", "some artist", "some album", mapOf("BPM" to "1000")))),
         Playlist(18, "playlist #18", listOf(Track("some song", "some artist", "some album", mapOf("BPM" to "1000"))))
-        )
-    private var adapter: PlaylistAdapter? = null
-//    private lateinit var drawerLayout: DrawerLayout
+    )
+    private lateinit var adapter: PlaylistAdapter
 
     inner class PlaylistAdapter : BaseAdapter() {
         override fun getCount(): Int {
@@ -64,13 +56,13 @@ class HomeFragment : Fragment() {
             val inflater = parent?.context?.
                 getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
             val view = inflater.inflate(R.layout.playlist_grid_item,null)
-            //val image = view.findViewById<ImageView>(R.id.playlist_grid_playlist_image)
+            val image = view.findViewById<ImageView>(R.id.playlist_grid_playlist_image)
             val name  = view.findViewById<TextView>(R.id.playlist_grid_playlist_name)
 
             name.text = getItem(position)._name
 
             view.setOnClickListener {
-                val viewPlaylistIntent = ViewPlaylistActivity.createIntent(context, getItem(position)._name)
+                val viewPlaylistIntent = ViewPlaylistActivity.createIntent(baseContext, getItem(position)._name)
                 startActivity(viewPlaylistIntent)
             }
 
@@ -78,85 +70,69 @@ class HomeFragment : Fragment() {
         }
 
     }
-
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        super.onActivityResult(requestCode, resultCode, data)
-        if (resultCode != RESULT_OK) { return }
-        if (data == null) { return }
-    }
-
-    override fun onAttach(context: Context?) {
-        super.onAttach(context)
-        Log.d(LOG_TAG, "onAttach() called")
-    }
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        Log.d(LOG_TAG, "onCreate() called")
+        setContentView(R.layout.activity_main)
+        setSupportActionBar(toolbar)
 
-    }
-
-    override fun onCreateOptionsMenu(menu: Menu?, inflater: MenuInflater?) {
-        super.onCreateOptionsMenu(menu, inflater)
-        inflater?.inflate(R.menu.home_options, menu)
-    }
-
-    override fun onOptionsItemSelected(item: MenuItem?): Boolean =
-    // Handle presses on the action bar menu items
-        when (item?.itemId) {
-            R.id.playlist_create_option -> {
-                val generateIntent = GeneratePlaylistActivity.createIntent(context)
-                startActivity(generateIntent)
-                true
-            }
-            else -> super.onOptionsItemSelected(item)
+        fab.setOnClickListener { view ->
+            Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
+                .setAction("Action", null).show()
+            // generate activity/intent
+            val generatePlaylistIntent = GeneratePlaylistActivity.createIntent(baseContext)
+            startActivity(generatePlaylistIntent)
         }
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        Log.d(LOG_TAG, "onCreateView() called")
-        return inflater.inflate(R.layout.activity_main, container, false)
-    }
+        val toggle = ActionBarDrawerToggle(
+            this, drawer_layout, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close
+        )
+        drawer_layout.addDrawerListener(toggle)
+        toggle.syncState()
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        Log.d(LOG_TAG, "onViewCreated() called")
-        super.onViewCreated(view, savedInstanceState)
+        nav_view.setNavigationItemSelectedListener(this)
 
         adapter = PlaylistAdapter()
         home_playlist_grid.adapter = adapter
     }
 
-    override fun onActivityCreated(savedInstanceState: Bundle?) {
-        super.onActivityCreated(savedInstanceState)
-        Log.d(LOG_TAG, "onActivityCreated() called")
+    override fun onBackPressed() {
+        if (drawer_layout.isDrawerOpen(GravityCompat.START)) {
+            drawer_layout.closeDrawer(GravityCompat.START)
+        } else {
+            super.onBackPressed()
+        }
     }
 
-    override fun onStart() {
-        super.onStart()
-        Log.d(LOG_TAG, "onStart() called")
+    override fun onCreateOptionsMenu(menu: Menu): Boolean {
+        // Inflate the menu; this adds items to the action bar if it is present.
+        menuInflater.inflate(R.menu.main, menu)
+        return true
     }
 
-    override fun onResume() {
-        super.onResume()
-        Log.d(LOG_TAG, "onResume() called")
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        // Handle action bar item clicks here. The action bar will
+        // automatically handle clicks on the Home/Up button, so long
+        // as you specify a parent activity in AndroidManifest.xml.
+        when (item.itemId) {
+            R.id.action_settings -> return true
+            else -> return super.onOptionsItemSelected(item)
+        }
     }
 
-    override fun onPause() {
-        super.onPause()
-        Log.d(LOG_TAG, "onPause() called")
-    }
+    override fun onNavigationItemSelected(item: MenuItem): Boolean {
+        // Handle navigation view item clicks here.
+        when (item.itemId) {
+            R.id.nav_generate -> {
+                val generatePlaylistIntent = GeneratePlaylistActivity.createIntent(baseContext)
+                startActivity(generatePlaylistIntent)
+            }
+            R.id.nav_connect -> {
+                val connectPlatformIntent = PlatformConnectActivity.createIntent(baseContext)
+                startActivity(connectPlatformIntent)
+            }
+        }
 
-    override fun onStop() {
-        super.onStop()
-        Log.d(LOG_TAG, "onStop() called")
-    }
-
-    override fun onDestroy() {
-        super.onDestroy()
-        Log.d(LOG_TAG, "onDestroy() called")
-    }
-
-    override fun onDetach() {
-        super.onDetach()
-        Log.d(LOG_TAG, "onDetach() called")
+        drawer_layout.closeDrawer(GravityCompat.START)
+        return true
     }
 }

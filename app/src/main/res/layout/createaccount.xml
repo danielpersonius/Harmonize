@@ -5,14 +5,18 @@
         xmlns:app="http://schemas.android.com/apk/res-auto"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="@color/colorBackground"
         android:layout_weight="-1"
         android:orientation="vertical">
 
     <Space
             android:layout_width="match_parent"
             android:layout_height="100dp"/>
+    <ImageView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
 
+            app:srcCompat="@mipmap/harmonize_launcher_foreground"
+            android:id="@+id/imageView"/>
     <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -25,61 +29,39 @@
             android:layout_width="match_parent"
             android:layout_height="100dp"/>
 
-    <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:padding="10dp"
-    >
 
-        <TextView
+        <EditText
+                android:hint="@string/user_email_text"
                 android:layout_width="wrap_content"
-                android:layout_height="match_parent"
-                android:text="Email: "
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:textColor="@color/colorBlack"
                 android:textSize="24dp"
-        />
+                android:backgroundTint="@color/colorPrimaryDark"
+                android:textCursorDrawable ="@null"
+                android:id="@+id/username_text_field"/>
+
 
 
         <EditText
-                android:id="@+id/new_email"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:layout_weight="0"
-        />
-
-
-    </LinearLayout>
-
-    <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:padding="10dp"
-    >
-
-        <TextView
+                android:hint="@string/password_text"
                 android:layout_width="wrap_content"
-                android:layout_height="match_parent"
-                android:text="Password: "
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:textColor="@color/colorBlack"
                 android:textSize="24dp"
-        />
+                android:backgroundTint="@color/colorPrimaryDark"
+                android:textCursorDrawable ="@null"
+                android:id="@+id/password_text_field"/>
 
-
-        <EditText
-                android:id="@+id/new_password"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:inputType="textPassword"
-        />
-
-
-    </LinearLayout>
 
 <Button
         android:id="@+id/new_acc_btn"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Create Account"
+        android:padding="8dp"
+        android:background="@drawable/button_border"
+        android:text="@string/acc_create_text"
         android:layout_gravity="center"
 />
 

@@ -5,12 +5,12 @@
         xmlns:app="http://schemas.android.com/apk/res-auto"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        tools:context=".PassResetActivity"
         android:layout_weight="-1"
         android:orientation="vertical">
+
     <Space
             android:layout_width="match_parent"
-            android:layout_height="100dp"/>
+            android:layout_height="50dp"/>
     <ImageView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -18,13 +18,18 @@
             app:srcCompat="@mipmap/harmonize_launcher_foreground"
             android:id="@+id/imageView"/>
     <TextView
-            android:text="@string/password_reset_prompt"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:gravity="center_horizontal"
-            android:textSize="36dp"
-            android:textColor="@color/colorBlack"
-            android:id="@+id/pass_reset_prompt"/>
+            android:text="Create New Account"
+            android:textSize="30dp"
+            android:gravity="center"
+            android:textStyle="bold"
+    />
+    <Space
+            android:layout_width="match_parent"
+            android:layout_height="30dp"/>
+
+
     <EditText
             android:hint="@string/user_email_text"
             android:layout_width="wrap_content"
@@ -35,15 +40,29 @@
             android:backgroundTint="@color/colorPrimaryDark"
             android:textCursorDrawable ="@null"
             android:id="@+id/username_text_field"/>
-    <Button
-            android:text="@string/pass_reset_text"
+
+
+
+    <EditText
+            android:hint="@string/password_text"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
-            android:background="@drawable/button_border"
-            android:padding="8dp"
             android:textColor="@color/colorBlack"
             android:textSize="24dp"
-            android:id="@+id/reset_button"/>
+            android:backgroundTint="@color/colorPrimaryDark"
+            android:textCursorDrawable ="@null"
+            android:id="@+id/password_text_field"/>
+
+
+    <Button
+            android:id="@+id/new_acc_btn"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:padding="8dp"
+            android:background="@drawable/button_border"
+            android:text="@string/acc_create_text"
+            android:layout_gravity="center"
     />
+
 </LinearLayout>
