@@ -53,15 +53,21 @@ class ViewPlaylistFragment : Fragment() {
             val intent = activity?.intent
             val extras = intent?.extras
             if (extras != null) {
-                val playlistId = extras.getString("PLAYLIST_ID") ?: ""
-                tracks = SpotifyClient.getPlaylistTracks(playlistId) as MutableList<Track>// as String// as List<Track>// as ApiTrack
                 playlistTitle = extras.getString("PLAYLIST_NAME")
+                val playlistId = extras.getString("PLAYLIST_ID") ?: ""
+                tracks = SpotifyClient.getPlaylistTracks(playlistId) as MutableList<Track>
+                Log.d(LOG_TAG, "tracks count: ${tracks.size}")
+                // audio features api call
+                for (track : Track in tracks) {
+                    val audioFeatures = SpotifyClient.getTrackAudioFeatures(track._id) as MutableMap<String, String>
+                    track._metadata = audioFeatures
+                }
             }
         }
 
         playlist_name_banner.text = playlistTitle
 
-        // change name on long press
+        // change name pen icon press
         editable_icon.setOnClickListener {
             Toast.makeText(context, "Change name", Toast.LENGTH_SHORT).show()
             val titleEditTextBox = EditText(context)
@@ -80,10 +86,10 @@ class ViewPlaylistFragment : Fragment() {
             }
             val dialog: AlertDialog = builder.create()
             dialog.show()
-//            true
         }
 
         tracks.forEach {
+            val track = it
             val inflater        = context?.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
             val trackView             = inflater.inflate(R.layout.playlist_item,null)
             val songNameTextView   = trackView.findViewById<TextView>(R.id.playlist_song_name)
@@ -91,10 +97,10 @@ class ViewPlaylistFragment : Fragment() {
             val albumNameTextView  = trackView.findViewById<TextView>(R.id.playlist_album_name)
 
             // it is name of iterator
-            songNameTextView.text   = it._name
+            songNameTextView.text   = track._name
             // make into loop
-            artistNameTextView.text = it._artists.toString()
-            albumNameTextView.text  = it._album
+            artistNameTextView.text = track._artists.toString()
+            albumNameTextView.text  = track._album
 
             // play song on press
             trackView.setOnClickListener {
@@ -102,9 +108,8 @@ class ViewPlaylistFragment : Fragment() {
             }
             // metadata(e.g. song characteristics) on long press
             trackView.song_info_icon.setOnClickListener {
-                val intent = CharActivity.createIntent(context)
+                val intent = TrackCharacteristicsActivity.createIntent(context, track._metadata)
                 startActivity(intent)
-//                true
             }
 
             // todo swipe left or right to delete song from list

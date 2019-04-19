@@ -73,6 +73,7 @@ class SpotifyClient {
                 val itemsData = JSONArray(result.getString("items"))
                 for(i in 0 until itemsData.length()) {
                     val trackData = JSONObject(JSONObject(itemsData[i].toString()).getString("track"))
+                    val trackId = trackData.getString("id")
                     val trackName = trackData.getString("name")
                     val albumName = JSONObject(trackData.getString("album")).getString("name")
                     val artists = JSONArray(trackData.getString("artists"))
@@ -82,20 +83,39 @@ class SpotifyClient {
                         artistNames.add(artist.getString("name"))
                     }
 
-                    tracks.add(Track(trackName, artistNames, albumName))
+                    tracks.add(Track(trackId, trackName, artistNames, albumName))
                 }
 
                 tracks
             }
         }
 
-        fun getTrackAudioFeatures(trackId : String) {
+        fun getTrackAudioAnalysis(trackId : String) {
+            // todo implement me
+        }
+
+        fun getTrackAudioFeatures(trackId : String) : Any? = runBlocking {
             Log.d(LOG_TAG, "getTrackAudioFeatures() called")
-            CoroutineScope(Dispatchers.IO).launch {
-                val response =
-                    get("GET https://api.spotify.com/v1/audio-features/$trackId?access_token=$ACCESS_TOKEN")
-                Log.d(LOG_TAG, "audio features: ${response.text}")
+
+            val audioFeatures = mutableMapOf<String, String>()
+            if (::ACCESS_TOKEN.isInitialized) {
+                withContext(Dispatchers.IO) {
+                    val response =
+                        get("https://api.spotify.com/v1/audio-features/$trackId", headers=mapOf("Authorization" to "Bearer $ACCESS_TOKEN"))
+                    val result = JSONObject(response.text)
+                    audioFeatures["danceability"]     = result.getString("danceability")
+                    audioFeatures["energy"]           = result.getString("energy")
+                    audioFeatures["loudness"]         = result.getString("loudness")
+                    audioFeatures["speechiness"]      = result.getString("speechiness")
+                    audioFeatures["acousticness"]     = result.getString("acousticness")
+                    audioFeatures["instrumentalness"] = result.getString("instrumentalness")
+                    audioFeatures["liveness"]         = result.getString("liveness")
+                    audioFeatures["valence"]          = result.getString("valence")
+                    audioFeatures["tempo"]            = result.getString("tempo")
+                    audioFeatures["time_signature"]   = result.getString("time_signature")
+                }
             }
+            audioFeatures
         }
 
         fun generatePlaylist(sourcePlaylistName : String,

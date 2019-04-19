@@ -39,7 +39,7 @@
         <activity android:name=".ExportActivity"
                   android:parentActivityName=".ViewPlaylistActivity"/>
 
-        <activity android:name=".CharActivity"
+        <activity android:name=".TrackCharacteristicsActivity"
                   android:parentActivityName=".ViewPlaylistActivity"/>
 
         <activity

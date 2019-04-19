@@ -28,6 +28,11 @@
     <string name="danceability_parameter_label">Danceability</string>
     <string name="speechiness_parameter_label">Speechiness</string>
     <string name="loudness_parameter_label">Loudness</string>
+    <string name="acousticness_parameter_label">Acousticness</string>
+    <string name="instrumentalness_parameter_label">Instrumentalness</string>
+    <string name="liveness_parameter_label">Liveness</string>
+    <string name="tempo_parameter_label">Tempo</string>
+    <string name="time_signature_parameter_label">Time Signature</string>
     <string name="valence_parameter_label">Valence</string>
     <string name="artist_similarity_parameter_description">What proportion of the results should be only from the artists currently in the source</string>
     <string name="energy_parameter_description">A perceptual measure of intensity and activity</string>

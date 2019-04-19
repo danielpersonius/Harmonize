@@ -21,15 +21,15 @@ class ViewApiPlaylistFragment : Fragment() {
     var playlistTitle : String? = "Playlist name"
     // example list of songs
     var playlist = mutableListOf(
-        Track("Divinity",     listOf("Porter Robinson"), "Worlds"),//, mapOf("BPM" to "90")),
-        Track("Pink + White", listOf("Frank Ocean"), "Blonde"),//, mapOf("BPM" to "160")),
-        Track("All is Lost",  listOf("Getter"), "Visceral"),//, mapOf("BPM" to "75")),
-        Track("Childish",     listOf("aiwake"), "Childish"),//, mapOf("BPM" to "70")),
-        Track("Falls - Golden Features Remix", listOf("ODESZA, Sasha Sloan, Golden Features"), "Falls (Remixes)"),//, mapOf("BPM" to "125")),
-        Track("Alamo", listOf("Boombox Cartel, Shoffy"), "Cartel"),//, mapOf("BPM" to "87")),
-        Track("Fears", listOf("MTNS"), "Salvage"),//, mapOf("BPM" to "70")),
-        Track("Sleepless", listOf("Flume, Jezzabell Doran"), "Flume"),//, "Flume", mapOf("BPM" to "80")),
-        Track("Past Life", listOf("Ekali", "Opia"), "Past Life")//, mapOf("BPM" to "97"))
+        Track("id","Divinity",     listOf("Porter Robinson"), "Worlds"),//, mapOf("BPM" to "90")),
+        Track("id","Pink + White", listOf("Frank Ocean"), "Blonde"),//, mapOf("BPM" to "160")),
+        Track("id","All is Lost",  listOf("Getter"), "Visceral"),//, mapOf("BPM" to "75")),
+        Track("id","Childish",     listOf("aiwake"), "Childish"),//, mapOf("BPM" to "70")),
+        Track("id","Falls - Golden Features Remix", listOf("ODESZA, Sasha Sloan, Golden Features"), "Falls (Remixes)"),//, mapOf("BPM" to "125")),
+        Track("id","Alamo", listOf("Boombox Cartel, Shoffy"), "Cartel"),//, mapOf("BPM" to "87")),
+        Track("id","Fears", listOf("MTNS"), "Salvage"),//, mapOf("BPM" to "70")),
+        Track("id","Sleepless", listOf("Flume, Jezzabell Doran"), "Flume"),//, "Flume", mapOf("BPM" to "80")),
+        Track("id","Past Life", listOf("Ekali", "Opia"), "Past Life")//, mapOf("BPM" to "97"))
     )
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
@@ -93,6 +93,7 @@ class ViewApiPlaylistFragment : Fragment() {
         }
 
         playlist.forEach {
+            val track = it
             val inflater        = context?.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
             val trackView             = inflater.inflate(R.layout.playlist_item,null)
             val songNameTextView   = trackView.findViewById<TextView>(R.id.playlist_song_name)
@@ -100,10 +101,10 @@ class ViewApiPlaylistFragment : Fragment() {
             val albumNameTextView  = trackView.findViewById<TextView>(R.id.playlist_album_name)
 
             // it is name of iterator
-            songNameTextView.text   = it._name
+            songNameTextView.text   = track._name
             // change to loop
-            artistNameTextView.text = it._artists.toString()
-            albumNameTextView.text  = it._album
+            artistNameTextView.text = track._artists.toString()
+            albumNameTextView.text  = track._album
 
             // play song on press
             trackView.setOnClickListener {
@@ -111,7 +112,7 @@ class ViewApiPlaylistFragment : Fragment() {
             }
             // metadata(e.g. song characteristics) on long press
             trackView.setOnLongClickListener {
-                val intent = CharActivity.createIntent(context)
+                val intent = TrackCharacteristicsActivity.createIntent(context, track._metadata)
                 startActivity(intent)
                 true
             }
