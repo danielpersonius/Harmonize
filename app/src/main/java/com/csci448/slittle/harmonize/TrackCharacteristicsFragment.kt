@@ -19,6 +19,7 @@ class TrackCharacteristicsFragment : Fragment() {
         }
     }
 
+    private lateinit var trackName : String
     private var audioFeatures = mutableMapOf<String, String>()
 
     /**
@@ -69,6 +70,8 @@ class TrackCharacteristicsFragment : Fragment() {
             val intent = activity?.intent
             val extras = intent?.extras
             if (extras != null) {
+                trackName = extras.getString("track_name") ?: "Song"
+
                 audioFeatures["danceability"]     = extras.getString("danceability")     ?: "undefined"
                 audioFeatures["energy"]           = extras.getString("energy")           ?: "undefined"
                 audioFeatures["loudness"]         = extras.getString("loudness")         ?: "undefined"
@@ -83,9 +86,7 @@ class TrackCharacteristicsFragment : Fragment() {
             }
         }
 
-        Log.d(LOG_TAG, "$audioFeatures")
-
-        // show values
+        track_characteristics_label.text = trackName + " Characteristics"
         danceability_value.text     = convertValueToPercentage(audioFeatures["danceability"])
         energy_value.text           = convertValueToPercentage(audioFeatures["energy"])
         loudness_value.text         = audioFeatures["loudness"]

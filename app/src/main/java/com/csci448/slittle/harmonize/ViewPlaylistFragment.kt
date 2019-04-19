@@ -108,7 +108,7 @@ class ViewPlaylistFragment : Fragment() {
             }
             // metadata(e.g. song characteristics) on long press
             trackView.song_info_icon.setOnClickListener {
-                val intent = TrackCharacteristicsActivity.createIntent(context, track._metadata)
+                val intent = TrackCharacteristicsActivity.createIntent(context, track._name, track._metadata)
                 startActivity(intent)
             }
 

@@ -112,7 +112,7 @@ class ViewApiPlaylistFragment : Fragment() {
             }
             // metadata(e.g. song characteristics) on long press
             trackView.setOnLongClickListener {
-                val intent = TrackCharacteristicsActivity.createIntent(context, track._metadata)
+                val intent = TrackCharacteristicsActivity.createIntent(context, track._name, track._metadata)
                 startActivity(intent)
                 true
             }
