@@ -81,11 +81,13 @@ class PlatformConnectFragment : Fragment() {
     override fun onStart() {
         super.onStart()
         Log.d(LOG_TAG, "onStart() called")
+        connect_progress_circle.visibility = GONE
     }
 
     override fun onResume() {
         super.onResume()
         Log.d(LOG_TAG, "onResume() called")
+        connect_progress_circle.visibility = GONE
     }
 
     override fun onPause() {
