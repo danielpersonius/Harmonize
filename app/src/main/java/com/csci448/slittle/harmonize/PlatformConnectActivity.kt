@@ -48,7 +48,7 @@ class PlatformConnectActivity : SingleFragmentActivity() {
                 // Response was successful and contains auth token
                 AuthenticationResponse.Type.TOKEN -> {
                     // Handle successful response
-                    Toast.makeText(this, "Connected to Spotify with token: ${response.accessToken}", Toast.LENGTH_SHORT).show()
+                    //Toast.makeText(this, "Connected to Spotify with token: ${response.accessToken}", Toast.LENGTH_SHORT).show()
                     ACCESS_TOKEN = response.accessToken
                     SpotifyClient.ACCESS_TOKEN = response.accessToken
 

@@ -7,7 +7,6 @@ import android.util.Log
 import android.support.v4.app.Fragment
 import android.view.*
 import android.widget.TextView
-import android.widget.Toast
 import kotlinx.android.synthetic.main.fragment_choose_source.*
 
 class ChooseSourceFragment : Fragment() {

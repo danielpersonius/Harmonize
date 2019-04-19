@@ -6,6 +6,8 @@ import android.os.Bundle
 import android.util.Log
 import android.support.v4.app.Fragment
 import android.view.*
+import android.view.View.GONE
+import android.view.View.VISIBLE
 import android.widget.Toast
 import kotlinx.android.synthetic.main.fragment_connect.*
 import com.spotify.sdk.android.authentication.AuthenticationClient
@@ -13,17 +15,14 @@ import com.spotify.sdk.android.authentication.AuthenticationRequest
 import com.spotify.sdk.android.authentication.AuthenticationResponse
 
 class PlatformConnectFragment : Fragment() {
-
     companion object {
         private const val LOG_TAG = "PlatformConnectFragment"
     }
 
-    private val CLIENT_SECRET = "84ce3a2b19c74df7900d1d6d588a14d2"
-
     private fun loginToSpotify() {
         val builder = AuthenticationRequest.Builder(PlatformConnectActivity.CLIENT_ID,
-                                                                            AuthenticationResponse.Type.TOKEN,
-                                                                            PlatformConnectActivity.REDIRECT_URI)
+                                                                             AuthenticationResponse.Type.TOKEN,
+                                                                             PlatformConnectActivity.REDIRECT_URI)
         builder.setScopes(arrayOf("streaming", "user-library-read", "playlist-read-private"))
         builder.setShowDialog(true)
         val request = builder.build()
@@ -56,9 +55,11 @@ class PlatformConnectFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         Log.d(LOG_TAG, "onViewCreated() called")
         super.onViewCreated(view, savedInstanceState)
+        connect_progress_circle.visibility = GONE
 
         connect_spotify_button.setOnClickListener {
-            Toast.makeText(context, "Connecting Spotify!", Toast.LENGTH_SHORT).show()
+//            Toast.makeText(context, "Connecting Spotify!", Toast.LENGTH_SHORT).show()
+            connect_progress_circle.visibility = VISIBLE
             loginToSpotify()
         }
         connect_apple_button.setOnClickListener {
