@@ -44,7 +44,7 @@ class ChooseSourceFragment : Fragment() {
     }
 
     override fun onOptionsItemSelected(item: MenuItem?): Boolean =
-    // Handle presses on the action bar menu items
+        // Handle presses on the action bar menu items
         when (item?.itemId) {
             R.id.playlist_create_option -> {
                 val generateIntent = GeneratePlaylistActivity.createIntent(context)
@@ -63,32 +63,18 @@ class ChooseSourceFragment : Fragment() {
         Log.d(LOG_TAG, "onViewCreated() called")
         super.onViewCreated(view, savedInstanceState)
 
-        // get user playlists
-        val playlists = SpotifyClient.getUserPlaylists(SpotifyClient.ACCESS_TOKEN, 20, 1) as ApiPlaylistData
-        for (playlist : ApiPlaylist in playlists._playlists) {
+        val playlists = SpotifyClient.getUserPlaylists(SpotifyClient.ACCESS_TOKEN, 20, 0) as List<Playlist>// as ApiPlaylistData
+        for (playlist : Playlist in playlists) {
             val playlistTextView = TextView(context)
             playlistTextView.text = playlist._name
             playlistTextView.textSize = 24.0f
             playlistTextView.setOnClickListener {
-                Toast.makeText(context, "${playlist._name} selected!", Toast.LENGTH_SHORT).show()
-                val tracks = SpotifyClient.getPlaylistTracks(playlist._id) as ApiTrack
-                Log.d(LOG_TAG, tracks.toString())
-
-                // for now, just view list of tracks currently in playlist
-                // do this by converting ApiTrack object to list of strings and sending to ViewPlaylistActivity
                 val viewPlaylistIntent = ViewPlaylistActivity.createIntent(context, playlist._name)
-                val trackNames = mutableListOf<String>()
-
-                for(track : T in tracks._tracks) {
-                    val trackData = track._track
-                    trackNames.add(trackData._name)
-                    viewPlaylistIntent.putExtra("TRACK_LIST", arrayListOf(trackNames))
-                }
+                viewPlaylistIntent.putExtra("PLAYLIST_ID", playlist._id)
                 startActivity(viewPlaylistIntent)
             }
             spotify_choose_playlist_scrollview_linearlayout.addView(playlistTextView)
         }
-
     }
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {

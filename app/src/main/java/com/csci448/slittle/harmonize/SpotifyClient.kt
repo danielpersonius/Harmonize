@@ -10,6 +10,9 @@ import com.spotify.sdk.android.authentication.AuthenticationResponse
 import khttp.get
 import kotlinx.coroutines.*
 import java.net.URLEncoder
+import org.json.JSONArray
+import org.json.JSONException
+import org.json.JSONObject
 
 class SpotifyClient {
     companion object {
@@ -31,17 +34,26 @@ class SpotifyClient {
             Log.d(LOG_TAG, "getUserPlaylists() called")
 
             withContext(Dispatchers.IO) {
+                val playlists = mutableListOf<Playlist>()
                 val response =
                     get("https://api.spotify.com/v1/me/playlists?access_token=$accessToken&limit=$limit&offset=$offset")
-                try {
-                    val result = Klaxon()
-                        .parse<ApiPlaylistData>(response.text)
-                    result
+                val result = JSONObject(response.text)
+                val p = JSONArray(result.getString("items"))
+                for(i in 0 until p.length()-1) {
+                    val playlistData = JSONObject(p[i].toString())
+                    val href = playlistData.getString("href")
+                    val id = playlistData.getString("id")
+                    val name = playlistData.getString("name")
+                    val collaborative = playlistData.getBoolean("collaborative")
+                    val owner = playlistData.getString("owner")
+                    val public = playlistData.getBoolean("public")
+                    val type = playlistData.getString("type")
+                    val uri = playlistData.getString("uri")
+                    playlists.add(
+                        Playlist(href, id, name, collaborative, owner, public, type, uri, null)
+                    )
                 }
-                catch (e: JsonParsingException) {
-                    Log.d(LOG_TAG, "Could not parse json: ${e.message}")
-                    null
-                }
+                playlists
             }
         }
 
@@ -51,24 +63,29 @@ class SpotifyClient {
 
         fun getPlaylistTracks(playlistId : String) : Any? = runBlocking {
             Log.d(LOG_TAG, "getPlaylistTracks() called")
-            val items = URLEncoder.encode("items(track(artists, id, name, type))", "utf-8")
+            val items = URLEncoder.encode("items(track(album, artists, id, name, type))", "utf-8")
 
             withContext(Dispatchers.IO) {
-                try {
-                    val response =
+                val tracks = mutableListOf<Track>()
+                val response =
                         get("https://api.spotify.com/v1/playlists/$playlistId/tracks?fields=$items", headers=mapOf("Authorization" to "Bearer $ACCESS_TOKEN"))
+                val result = JSONObject(response.text)
+                val itemsData = JSONArray(result.getString("items"))
+                for(i in 0 until itemsData.length()) {
+                    val trackData = JSONObject(JSONObject(itemsData[i].toString()).getString("track"))
+                    val trackName = trackData.getString("name")
+                    val albumName = JSONObject(trackData.getString("album")).getString("name")
+                    val artists = JSONArray(trackData.getString("artists"))
+                    val artistNames = mutableListOf<String>()
+                    for(j in 0 until artists.length()) {
+                        val artist = JSONObject(artists[j].toString())
+                        artistNames.add(artist.getString("name"))
+                    }
 
-                    // get rid of top level json key to avoid extra data classes
-                    val trimmedResponse = response.text.substring(response.text.indexOf("[") + 1, response.text.lastIndexOf("]")) + "}"
+                    tracks.add(Track(trackName, artistNames, albumName))
+                }
 
-                    val result = Klaxon()
-                    .parse<ApiTrack>(response.text)
-                    result
-                }
-                catch (e: Exception) {
-                    Log.d(LOG_TAG, "parsing error: ${e.message}")
-                    null
-                }
+                tracks
             }
         }
 

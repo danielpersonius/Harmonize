@@ -11,7 +11,6 @@ import android.view.*
 import android.widget.*
 
 import kotlinx.android.synthetic.main.fragment_view_playlist.*
-import java.util.ArrayList
 import kotlinx.android.synthetic.main.playlist_item.view.*
 
 
@@ -21,19 +20,7 @@ class ViewPlaylistFragment : Fragment() {
     }
 
     var playlistTitle : String? = "Playlist name"
-    // example list of songs
-//    var playlist = mutableListOf(
-//        Track("Divinity", "Porter Robinson", "Worlds", mapOf("BPM" to "90")),
-//        Track("Pink + White", "Frank Ocean", "Blonde", mapOf("BPM" to "160")),
-//        Track("All is Lost", "Getter", "Visceral", mapOf("BPM" to "75")),
-//        Track("Childish", "aiwake", "Childish", mapOf("BPM" to "70")),
-//        Track("Falls - Golden Features Remix", "ODESZA, Sasha Sloan, Golden Features", "Falls (Remixes)", mapOf("BPM" to "125")),
-//        Track("Alamo", "Boombox Cartel, Shoffy", "Cartel", mapOf("BPM" to "87")),
-//        Track("Fears", "MTNS", "Salvage", mapOf("BPM" to "70")),
-//        Track("Sleepless", "Flume, Jezzabell Doran", "Flume", mapOf("BPM" to "80")),
-//        Track("Past Life", "Ekali, Opia", "Past Life", mapOf("BPM" to "97"))
-//    )
-    val playlist = mutableListOf<Track>()
+    var tracks = mutableListOf<Track>()
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
@@ -55,7 +42,6 @@ class ViewPlaylistFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         Log.d(LOG_TAG, "onViewCreated() called")
         super.onViewCreated(view, savedInstanceState)
-        //Toast.makeText(context, "press to play, long press to view characteristics", Toast.LENGTH_LONG).show()
 
         // rotation
         if (savedInstanceState != null) {
@@ -67,13 +53,9 @@ class ViewPlaylistFragment : Fragment() {
             val intent = activity?.intent
             val extras = intent?.extras
             if (extras != null) {
+                val playlistId = extras.getString("PLAYLIST_ID") ?: ""
+                tracks = SpotifyClient.getPlaylistTracks(playlistId) as MutableList<Track>// as String// as List<Track>// as ApiTrack
                 playlistTitle = extras.getString("PLAYLIST_NAME")
-                val trackList = extras.getStringArrayList("TRACK_LIST")as List<ArrayList<String>>
-                val tempList = trackList.get(0)
-
-                for(trackname : String in tempList) {
-                    playlist.add(Track(trackname, "artistname", "albumname", mutableMapOf("BPM" to "IDK")))
-                }
             }
         }
 
@@ -98,10 +80,10 @@ class ViewPlaylistFragment : Fragment() {
             }
             val dialog: AlertDialog = builder.create()
             dialog.show()
-            true
+//            true
         }
 
-        playlist.forEach {
+        tracks.forEach {
             val inflater        = context?.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
             val trackView             = inflater.inflate(R.layout.playlist_item,null)
             val songNameTextView   = trackView.findViewById<TextView>(R.id.playlist_song_name)
@@ -110,7 +92,8 @@ class ViewPlaylistFragment : Fragment() {
 
             // it is name of iterator
             songNameTextView.text   = it._name
-            artistNameTextView.text = it._artist
+            // make into loop
+            artistNameTextView.text = it._artists.toString()
             albumNameTextView.text  = it._album
 
             // play song on press
@@ -121,7 +104,7 @@ class ViewPlaylistFragment : Fragment() {
             trackView.song_info_icon.setOnClickListener {
                 val intent = CharActivity.createIntent(context)
                 startActivity(intent)
-                true
+//                true
             }
 
             // todo swipe left or right to delete song from list

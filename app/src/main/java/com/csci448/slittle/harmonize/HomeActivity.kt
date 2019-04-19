@@ -27,24 +27,25 @@ class HomeActivity : SingleFragmentActivity(), NavigationView.OnNavigationItemSe
 
 
     var playlists = mutableListOf(
-        Playlist(1,  "playlist #1",  listOf(Track("some song", "some artist", "some album", mapOf("BPM" to "1000")))),
-        Playlist(2,  "playlist #2",  listOf(Track("some song", "some artist", "some album", mapOf("BPM" to "1000")))),
-        Playlist(3,  "playlist #3",  listOf(Track("some song", "some artist", "some album", mapOf("BPM" to "1000")))),
-        Playlist(4,  "playlist #4",  listOf(Track("some song", "some artist", "some album", mapOf("BPM" to "1000")))),
-        Playlist(5,  "playlist #5",  listOf(Track("some song", "some artist", "some album", mapOf("BPM" to "1000")))),
-        Playlist(6,  "playlist #6",  listOf(Track("some song", "some artist", "some album", mapOf("BPM" to "1000")))),
-        Playlist(7,  "playlist #7",  listOf(Track("some song", "some artist", "some album", mapOf("BPM" to "1000")))),
-        Playlist(8,  "playlist #8",  listOf(Track("some song", "some artist", "some album", mapOf("BPM" to "1000")))),
-        Playlist(9,  "playlist #9",  listOf(Track("some song", "some artist", "some album", mapOf("BPM" to "1000")))),
-        Playlist(10, "playlist #10", listOf(Track("some song", "some artist", "some album", mapOf("BPM" to "1000")))),
-        Playlist(11, "playlist #11", listOf(Track("some song", "some artist", "some album", mapOf("BPM" to "1000")))),
-        Playlist(12, "playlist #12", listOf(Track("some song", "some artist", "some album", mapOf("BPM" to "1000")))),
-        Playlist(13, "playlist #13", listOf(Track("some song", "some artist", "some album", mapOf("BPM" to "1000")))),
-        Playlist(14, "playlist #14", listOf(Track("some song", "some artist", "some album", mapOf("BPM" to "1000")))),
-        Playlist(15, "playlist #15", listOf(Track("some song", "some artist", "some album", mapOf("BPM" to "1000")))),
-        Playlist(16, "playlist #16", listOf(Track("some song", "some artist", "some album", mapOf("BPM" to "1000")))),
-        Playlist(17, "playlist #17", listOf(Track("some song", "some artist", "some album", mapOf("BPM" to "1000")))),
-        Playlist(18, "playlist #18", listOf(Track("some song", "some artist", "some album", mapOf("BPM" to "1000"))))
+        Playlist("href", "1",  "playlist #1",  false, "owner", false, "playlist", "uri", listOf(Track("some song", listOf("some artist"), "some album"))),//, mapOf("BPM" to "1000")))),
+        Playlist("href", "1",  "playlist #1",  false, "owner", false, "playlist", "uri", listOf(Track("some song", listOf("some artist"), "some album"))),//, mapOf("BPM" to "1000")))),
+        Playlist("href", "1",  "playlist #1",  false, "owner", false, "playlist", "uri", listOf(Track("some song", listOf("some artist"), "some album"))),//, mapOf("BPM" to "1000")))),
+        Playlist("href", "1",  "playlist #1",  false, "owner", false, "playlist", "uri", listOf(Track("some song", listOf("some artist"), "some album"))),//, mapOf("BPM" to "1000")))),
+        Playlist("href", "1",  "playlist #1",  false, "owner", false, "playlist", "uri", listOf(Track("some song", listOf("some artist"), "some album"))),//, mapOf("BPM" to "1000")))),
+        Playlist("href", "1",  "playlist #1",  false, "owner", false, "playlist", "uri", listOf(Track("some song", listOf("some artist"), "some album"))),//, mapOf("BPM" to "1000")))),
+        Playlist("href", "1",  "playlist #1",  false, "owner", false, "playlist", "uri", listOf(Track("some song", listOf("some artist"), "some album"))),//, mapOf("BPM" to "1000")))),
+        Playlist("href", "1",  "playlist #1",  false, "owner", false, "playlist", "uri", listOf(Track("some song", listOf("some artist"), "some album"))),//, mapOf("BPM" to "1000")))),
+        Playlist("href", "1",  "playlist #1",  false, "owner", false, "playlist", "uri", listOf(Track("some song", listOf("some artist"), "some album"))),//, mapOf("BPM" to "1000")))),
+        Playlist("href", "1",  "playlist #1",  false, "owner", false, "playlist", "uri", listOf(Track("some song", listOf("some artist"), "some album"))),//, mapOf("BPM" to "1000")))),
+        Playlist("href", "1",  "playlist #1",  false, "owner", false, "playlist", "uri", listOf(Track("some song", listOf("some artist"), "some album"))),//, mapOf("BPM" to "1000")))),
+        Playlist("href", "1",  "playlist #1",  false, "owner", false, "playlist", "uri", listOf(Track("some song", listOf("some artist"), "some album"))),//, mapOf("BPM" to "1000")))),
+        Playlist("href", "1",  "playlist #1",  false, "owner", false, "playlist", "uri", listOf(Track("some song", listOf("some artist"), "some album"))),//, mapOf("BPM" to "1000")))),
+        Playlist("href", "1",  "playlist #1",  false, "owner", false, "playlist", "uri", listOf(Track("some song", listOf("some artist"), "some album"))),//, mapOf("BPM" to "1000")))),
+        Playlist("href", "1",  "playlist #1",  false, "owner", false, "playlist", "uri", listOf(Track("some song", listOf("some artist"), "some album"))),//, mapOf("BPM" to "1000")))),
+        Playlist("href", "1",  "playlist #1",  false, "owner", false, "playlist", "uri", listOf(Track("some song", listOf("some artist"), "some album"))),//, mapOf("BPM" to "1000")))),
+        Playlist("href", "1",  "playlist #1",  false, "owner", false, "playlist", "uri", listOf(Track("some song", listOf("some artist"), "some album"))),//, mapOf("BPM" to "1000")))),
+        Playlist("href", "1",  "playlist #1",  false, "owner", false, "playlist", "uri", listOf(Track("some song", listOf("some artist"), "some album"))),//, mapOf("BPM" to "1000")))),
+        Playlist("href", "1",  "playlist #1",  false, "owner", false, "playlist", "uri", listOf(Track("some song", listOf("some artist"), "some album")))//, mapOf("BPM" to "1000")))),
     )
     private lateinit var adapter: PlaylistAdapter
 

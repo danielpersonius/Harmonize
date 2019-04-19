@@ -21,15 +21,15 @@ class ViewApiPlaylistFragment : Fragment() {
     var playlistTitle : String? = "Playlist name"
     // example list of songs
     var playlist = mutableListOf(
-        Track("Divinity", "Porter Robinson", "Worlds", mapOf("BPM" to "90")),
-        Track("Pink + White", "Frank Ocean", "Blonde", mapOf("BPM" to "160")),
-        Track("All is Lost", "Getter", "Visceral", mapOf("BPM" to "75")),
-        Track("Childish", "aiwake", "Childish", mapOf("BPM" to "70")),
-        Track("Falls - Golden Features Remix", "ODESZA, Sasha Sloan, Golden Features", "Falls (Remixes)", mapOf("BPM" to "125")),
-        Track("Alamo", "Boombox Cartel, Shoffy", "Cartel", mapOf("BPM" to "87")),
-        Track("Fears", "MTNS", "Salvage", mapOf("BPM" to "70")),
-        Track("Sleepless", "Flume, Jezzabell Doran", "Flume", mapOf("BPM" to "80")),
-        Track("Past Life", "Ekali, Opia", "Past Life", mapOf("BPM" to "97"))
+        Track("Divinity",     listOf("Porter Robinson"), "Worlds"),//, mapOf("BPM" to "90")),
+        Track("Pink + White", listOf("Frank Ocean"), "Blonde"),//, mapOf("BPM" to "160")),
+        Track("All is Lost",  listOf("Getter"), "Visceral"),//, mapOf("BPM" to "75")),
+        Track("Childish",     listOf("aiwake"), "Childish"),//, mapOf("BPM" to "70")),
+        Track("Falls - Golden Features Remix", listOf("ODESZA, Sasha Sloan, Golden Features"), "Falls (Remixes)"),//, mapOf("BPM" to "125")),
+        Track("Alamo", listOf("Boombox Cartel, Shoffy"), "Cartel"),//, mapOf("BPM" to "87")),
+        Track("Fears", listOf("MTNS"), "Salvage"),//, mapOf("BPM" to "70")),
+        Track("Sleepless", listOf("Flume, Jezzabell Doran"), "Flume"),//, "Flume", mapOf("BPM" to "80")),
+        Track("Past Life", listOf("Ekali", "Opia"), "Past Life")//, mapOf("BPM" to "97"))
     )
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
@@ -101,7 +101,8 @@ class ViewApiPlaylistFragment : Fragment() {
 
             // it is name of iterator
             songNameTextView.text   = it._name
-            artistNameTextView.text = it._artist
+            // change to loop
+            artistNameTextView.text = it._artists.toString()
             albumNameTextView.text  = it._album
 
             // play song on press
