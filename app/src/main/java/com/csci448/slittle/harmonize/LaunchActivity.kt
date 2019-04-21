@@ -1,7 +1,9 @@
 package com.csci448.slittle.harmonize
 
+import android.content.Intent
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
+import android.os.SystemClock.sleep
 import android.util.Log
 import kotlinx.android.synthetic.main.harmo_login.*
 
@@ -12,21 +14,10 @@ class LaunchActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.harmo_login)
         Log.d(LOG_TAG, "onCreate() called")
-        login_button.setOnClickListener {LaunchLogin()}
-        acc_create_button.setOnClickListener{LaunchAccCreate()}
-    }
-
-
-    fun LaunchLogin(){
-        val loginIntent = LoginActivity.createIntent( baseContext)
-        startActivity(loginIntent)
-
-    }
-    fun LaunchAccCreate(){
-        val accountIntent = AccCreateActivity.createIntent( baseContext)
-        startActivity(accountIntent)
+        val launchIntent = PlatformConnectActivity.createIntent(baseContext)
+        startActivity(launchIntent)
+        finish()
     }
 
     override fun onStart() {
