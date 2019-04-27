@@ -38,6 +38,7 @@ class SpotifyClient {
                 val response =
                     get("https://api.spotify.com/v1/me/playlists?access_token=$accessToken&limit=$limit&offset=$offset")
                 val result = JSONObject(response.text)
+                Log.d(LOG_TAG, result.toString())
                 val p = JSONArray(result.getString("items"))
                 for(i in 0 until p.length()-1) {
                     val playlistData = JSONObject(p[i].toString())
