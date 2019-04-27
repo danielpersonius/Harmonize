@@ -86,29 +86,19 @@ class TuneParametersFragment : Fragment() {
         }
 
         generate_playlist_button.setOnClickListener {
-//            val intent = ViewPlaylistActivity.createIntent(context, "Generated Playlist")
-//            intent.putExtra("ARTIST_SIMILARITY_VALUE", artist_similarity_seekbar.progress)
-//            intent.putExtra("ENERGY_VALUE",            energy_parameter_seekbar.progress)
-//            intent.putExtra("DANCEABILITY_VALUE",      danceability_parameter_seekbar.progress)
-//            intent.putExtra("SPEECHINESS_VALUE",       speechiness_parameter_seekbar.progress)
-//            intent.putExtra("LOUDNESS_VALUE",          loudness_parameter_seekbar.progress)
-//            intent.putExtra("VALENCE_VALUE",           valence_parameter_seekbar.progress)
-
-            //startActivity(intent)
-
             if (playlistId != null) {
-                SpotifyClient.generatePlaylist(playlistId.toString(),
-                                               seedArtists,
-                                               seedGenres,
-                                               seedTracks,
-                                               100,
-                                               artist_similarity_seekbar.progress,
-                                               danceability_parameter_seekbar.progress,
-                                               energy_parameter_seekbar.progress,
-                                               speechiness_parameter_seekbar.progress,
-                                               loudness_parameter_seekbar.progress,
-                                               valence_parameter_seekbar.progress,
-                                               10)
+//                SpotifyClient.generatePlaylist(playlistId.toString(),
+//                                               seedArtists,
+//                                               seedGenres,
+//                                               seedTracks,
+//                                               100,
+//                                               artist_similarity_seekbar.progress,
+//                                               danceability_parameter_seekbar.progress,
+//                                               energy_parameter_seekbar.progress,
+//                                               speechiness_parameter_seekbar.progress,
+//                                               loudness_parameter_seekbar.progress,
+//                                               valence_parameter_seekbar.progress,
+//                                               10)
             }
         }
 
