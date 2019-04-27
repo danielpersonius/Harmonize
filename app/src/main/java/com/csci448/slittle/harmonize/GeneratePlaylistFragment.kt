@@ -6,6 +6,8 @@ import android.os.Bundle
 import android.util.Log
 import android.support.v4.app.Fragment
 import android.view.*
+import android.view.View.GONE
+import android.view.View.VISIBLE
 import kotlinx.android.synthetic.main.fragment_generate_playlist.*
 
 class GeneratePlaylistFragment : Fragment() {
@@ -46,20 +48,25 @@ class GeneratePlaylistFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         Log.d(LOG_TAG, "onViewCreated() called")
         super.onViewCreated(view, savedInstanceState)
+        generate_playlist_progress_circle.visibility = GONE
 
         generate_from_spotify_button.setOnClickListener {
-            launchIntent()
+            generate_playlist_progress_circle.visibility = VISIBLE
+                launchIntent()
         }
         generate_from_soundcloud_button.setOnClickListener {
             // noop for now
+            //generate_playlist_progress_circle.visibility = VISIBLE
             //launchIntent()
         }
         generate_from_apple_button.setOnClickListener {
             // noop for now
+            //generate_playlist_progress_circle.visibility = VISIBLE
             // launchIntent()
         }
         generate_from_pandora_button.setOnClickListener {
             // noop for now
+            //generate_playlist_progress_circle.visibility = VISIBLE
             // launchIntent()
         }
     }
@@ -72,11 +79,13 @@ class GeneratePlaylistFragment : Fragment() {
     override fun onStart() {
         super.onStart()
         Log.d(LOG_TAG, "onStart() called")
+        generate_playlist_progress_circle.visibility = GONE
     }
 
     override fun onResume() {
         super.onResume()
         Log.d(LOG_TAG, "onResume() called")
+        generate_playlist_progress_circle.visibility = GONE
     }
 
     override fun onPause() {

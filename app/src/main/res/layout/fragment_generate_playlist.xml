@@ -88,7 +88,17 @@
                 app:layout_constraintCircle="@+id/generate_from_spotify_button"
                 app:layout_constraintCircleAngle="180"
                 app:layout_constraintCircleRadius="125dp"/>
+        <ProgressBar
+                android:id="@+id/generate_playlist_progress_circle"
+                style="?android:attr/progressBarStyleLarge"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:layout_constraintTop_toBottomOf="@+id/generate_from_pandora_button" android:layout_marginStart="8dp"
+                app:layout_constraintStart_toStartOf="parent" android:layout_marginEnd="8dp"
+                app:layout_constraintEnd_toEndOf="parent" android:layout_marginBottom="8dp"
+                app:layout_constraintBottom_toBottomOf="parent"
+                android:visibility="gone"
+        />
     </android.support.constraint.ConstraintLayout>
-
 </RelativeLayout>
 
