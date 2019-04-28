@@ -13,6 +13,7 @@
     <TextView
             android:id="@+id/choose_playlist_label"
             android:text="@string/choose_playlist_banner"
+            android:textColor="@color/colorBlack"
             android:textSize="32sp"
             android:gravity="center"
             android:textAlignment="center"
@@ -26,6 +27,7 @@
         <LinearLayout
                 android:id="@+id/spotify_choose_playlist_scrollview_linearlayout"
                 android:layout_width="match_parent"
+                android:textColor="@color/colorBlack"
                 android:layout_height="wrap_content"
                 android:orientation="vertical">
         </LinearLayout>

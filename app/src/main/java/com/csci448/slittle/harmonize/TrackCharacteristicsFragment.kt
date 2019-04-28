@@ -61,7 +61,7 @@ class TrackCharacteristicsFragment : Fragment() {
 
         // rotation
         if (savedInstanceState != null) {
-//            playlistTitle = savedInstanceState.getString("PLAYLIST_NAME")
+            trackName = savedInstanceState.getString("PLAYLIST_NAME")
 
         }
 
@@ -86,7 +86,7 @@ class TrackCharacteristicsFragment : Fragment() {
             }
         }
 
-        track_characteristics_label.text = trackName + " Characteristics"
+        track_characteristics_label.text = trackName + getString(R.string.characteristics_string)
         danceability_value.text     = convertValueToPercentage(audioFeatures["danceability"])
         energy_value.text           = convertValueToPercentage(audioFeatures["energy"])
         loudness_value.text         = audioFeatures["loudness"]
@@ -112,6 +112,7 @@ class TrackCharacteristicsFragment : Fragment() {
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
+
         Log.d(LOG_TAG, "onActivityCreated() called")
     }
 

@@ -2,6 +2,7 @@ package com.csci448.slittle.harmonize
 
 import android.content.Context
 import android.content.Intent
+import android.os.Bundle
 import android.util.Log
 
 class TrackCharacteristicsActivity : SingleFragmentActivity() {
@@ -18,6 +19,9 @@ class TrackCharacteristicsActivity : SingleFragmentActivity() {
         }
     }
 
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+    }
     override fun getLogTag() = LOG_TAG
 
     override fun createFragment() = TrackCharacteristicsFragment()

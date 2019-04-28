@@ -23,13 +23,15 @@
             android:paddingStart="10dp"/>
     <LinearLayout
             android:orientation="horizontal"
-            android:layout_width="wrap_content"
+            android:gravity="center"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_weight="1">
+            >
         <TextView
                 tools:hint="Artist name"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_marginEnd="10dp"
                 android:id="@+id/playlist_artist_name"
                 android:paddingEnd="10dp"
                 android:paddingStart="10dp"/>
@@ -46,12 +48,18 @@
                 android:paddingEnd="10dp"
                 android:paddingStart="10dp"/>
 
+        <Space
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                />
         <ImageView
                 android:id="@+id/song_info_icon"
                 android:src="@drawable/ic_info_icon"
                 android:clickable="true"
                 android:focusable="true"
                 android:scaleType="fitXY"
+                android:layout_gravity="end"
                 android:paddingStart="5dp"
                 android:paddingEnd="5dp"
                 android:paddingBottom="5dp"
