@@ -21,15 +21,15 @@ class ViewApiPlaylistFragment : Fragment() {
     var playlistTitle : String? = "Playlist name"
     // example list of songs
     var playlist = mutableListOf(
-        Track("id","Divinity",     listOf("Porter Robinson"), "Worlds"),//, mapOf("BPM" to "90")),
-        Track("id","Pink + White", listOf("Frank Ocean"), "Blonde"),//, mapOf("BPM" to "160")),
-        Track("id","All is Lost",  listOf("Getter"), "Visceral"),//, mapOf("BPM" to "75")),
-        Track("id","Childish",     listOf("aiwake"), "Childish"),//, mapOf("BPM" to "70")),
-        Track("id","Falls - Golden Features Remix", listOf("ODESZA, Sasha Sloan, Golden Features"), "Falls (Remixes)"),//, mapOf("BPM" to "125")),
-        Track("id","Alamo", listOf("Boombox Cartel, Shoffy"), "Cartel"),//, mapOf("BPM" to "87")),
-        Track("id","Fears", listOf("MTNS"), "Salvage"),//, mapOf("BPM" to "70")),
-        Track("id","Sleepless", listOf("Flume, Jezzabell Doran"), "Flume"),//, "Flume", mapOf("BPM" to "80")),
-        Track("id","Past Life", listOf("Ekali", "Opia"), "Past Life")//, mapOf("BPM" to "97"))
+        Track("id","Divinity",     listOf("Porter Robinson"), listOf("idk"), "Worlds"),//, mapOf("BPM" to "90")),
+        Track("id","Pink + White", listOf("Frank Ocean"), listOf("idk"),"Blonde"),//, mapOf("BPM" to "160")),
+        Track("id","All is Lost",  listOf("Getter"), listOf("idk"),"Visceral"),//, mapOf("BPM" to "75")),
+        Track("id","Childish",     listOf("aiwake"), listOf("idk"),"Childish"),//, mapOf("BPM" to "70")),
+        Track("id","Falls - Golden Features Remix", listOf("ODESZA, Sasha Sloan, Golden Features"), listOf("idk"),"Falls (Remixes)"),//, mapOf("BPM" to "125")),
+        Track("id","Alamo", listOf("Boombox Cartel, Shoffy"), listOf("idk"),"Cartel"),//, mapOf("BPM" to "87")),
+        Track("id","Fears", listOf("MTNS"), listOf("idk"),"Salvage"),//, mapOf("BPM" to "70")),
+        Track("id","Sleepless", listOf("Flume, Jezzabell Doran"), listOf("idk"),"Flume"),//, "Flume", mapOf("BPM" to "80")),
+        Track("id","Past Life", listOf("Ekali", "Opia"), listOf("idk"),"Past Life")//, mapOf("BPM" to "97"))
     )
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
@@ -103,7 +103,7 @@ class ViewApiPlaylistFragment : Fragment() {
             // it is name of iterator
             songNameTextView.text   = track._name
             // change to loop
-            artistNameTextView.text = track._artists.toString()
+            artistNameTextView.text = track._artistNames.toString()
             albumNameTextView.text  = track._album
 
             // play song on press

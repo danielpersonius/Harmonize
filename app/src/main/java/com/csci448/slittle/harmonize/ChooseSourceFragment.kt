@@ -75,11 +75,18 @@ class ChooseSourceFragment : Fragment() {
             playlistTextView.textSize = 24.0f
             playlistTextView.ellipsize = TextUtils.TruncateAt.END
             playlistTextView.maxLines = 1
+
             playlistTextView.setOnClickListener {
-//                val viewPlaylistIntent = ViewPlaylistActivity.createIntent(context, playlist._name)
+                // need to be IDs, not names
+                val allArtists = mutableSetOf<String>()
+                val tracks = SpotifyClient.getPlaylistTracks(playlist._id) as MutableList<Track>
+                for (track : Track in tracks) {
+                    allArtists.addAll(track._artistIds)
+                }
                 val tuneParametersIntent = TuneParametersActivity.createIntent(context, playlist._name)
-//                viewPlaylistIntent.putExtra("PLAYLIST_ID", playlist._id)
                 tuneParametersIntent.putExtra("PLAYLIST_ID", playlist._id)
+                tuneParametersIntent.putExtra("PLAYLIST_ARTISTS", ArrayList(allArtists))
+                tuneParametersIntent.putExtra("PLAYLIST_TRACKS", arrayListOf(tracks))
                 // show spinner progress bar
                 choose_source_progress_circle.visibility = VISIBLE
                 startActivity(tuneParametersIntent)

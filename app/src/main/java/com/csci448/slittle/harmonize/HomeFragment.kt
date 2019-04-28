@@ -25,8 +25,8 @@ class HomeFragment : Fragment() {
     }
 
     var playlists = mutableListOf(
-        Playlist("href", "1",  "playlist #1",  false, "owner", false, "playlist", "uri", listOf(Track("id","some song", listOf("some artist"), "some album"))),// mapOf("BPM" to "1000")))),
-        Playlist("href", "1",  "playlist #1",  false, "owner", false, "playlist", "uri", listOf(Track("id","some song", listOf("some artist"), "some album")))// mapOf("BPM" to "1000"))))
+        Playlist("href", "1",  "playlist #1",  false, "owner", false, "playlist", "uri", listOf(Track("id","some song", listOf("some artist"), listOf("idk"), "some album"))),// mapOf("BPM" to "1000")))),
+        Playlist("href", "1",  "playlist #1",  false, "owner", false, "playlist", "uri", listOf(Track("id","some song", listOf("some artist"), listOf("idk"), "some album")))// mapOf("BPM" to "1000"))))
         )
     private var adapter: PlaylistAdapter? = null
 //    private lateinit var drawerLayout: DrawerLayout

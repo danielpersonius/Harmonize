@@ -39,7 +39,6 @@ class SpotifyClient {
                 val response =
                     get("https://api.spotify.com/v1/me/playlists?access_token=$accessToken&limit=$limit&offset=$offset")
                 val result = JSONObject(response.text)
-                Log.d(LOG_TAG, result.toString())
                 val p = JSONArray(result.getString("items"))
                 for(i in 0 until p.length()-1) {
                     val playlistData = JSONObject(p[i].toString())
@@ -80,12 +79,14 @@ class SpotifyClient {
                     val albumName = JSONObject(trackData.getString("album")).getString("name")
                     val artists = JSONArray(trackData.getString("artists"))
                     val artistNames = mutableListOf<String>()
+                    val artistIds = mutableListOf<String>()
                     for(j in 0 until artists.length()) {
                         val artist = JSONObject(artists[j].toString())
                         artistNames.add(artist.getString("name"))
+                        artistIds.add(artist.getString("id"))
                     }
 
-                    tracks.add(Track(trackId, trackName, artistNames, albumName))
+                    tracks.add(Track(trackId, trackName, artistNames, artistIds, albumName))
                 }
 
                 tracks
@@ -120,10 +121,9 @@ class SpotifyClient {
             audioFeatures
         }
 
-        // todo implement me
-        // search by each artist
-        // get all tracks
-        // filter duplicates across all artists
+        // todo vary feature buffer if no results
+        // todo maybe make call for each artist, not just 5. will have to see if fast enough
+        // possible flow: search by each artist, get all tracks, filter duplicates across all artists
 
         fun generatePlaylist(sourceId : String,
                              seedArtists : List<String>,
@@ -137,12 +137,12 @@ class SpotifyClient {
                              loudness : Int,
                              valence : Int,
                              buffer : Int) : Any? = runBlocking {
-            Log.d(LOG_TAG, "generatePlaylist() called")
+            Log.d(LOG_TAG, "generatePlaylist($danceability, $energy, $speechiness, $loudness, $valence, $buffer) called")
             val suggestedTracks = mutableListOf<Track>()
 
             if (::ACCESS_TOKEN.isInitialized) {
                 withContext(Dispatchers.IO) {
-                    var requestString = "GET https://api.spotify.com/v1/recommendations?limit=$limit"
+                    var requestString = "https://api.spotify.com/v1/recommendations?limit=$limit"
 
                     var seedArtistsString = ""
                     // todo - limited to 5 seed values, but will find a workaround
@@ -153,7 +153,7 @@ class SpotifyClient {
                             seedArtistsString += "%2C"
                         }
                     }
-                    requestString += "seed_artists=$seedArtistsString"
+                    requestString += "&seed_artists=$seedArtistsString"
 
                     // same for genres and tracks
 
@@ -173,13 +173,35 @@ class SpotifyClient {
                         requestString += "&min_valence=${valence-buffer}&max_valence=${valence+buffer}"
                     }
 
-                    val response = get(requestString, headers=mapOf("Authorization" to "Bearer $ACCESS_TOKEN"))
-                    if (response.statusCode == 200) {
-                        val result = JSONObject(response.text)
-                    }
+//                    Log.d(LOG_TAG, "request: $requestString")
 
+                    val response = get(requestString, headers=mapOf("Authorization" to "Bearer $ACCESS_TOKEN"))
+                    when(response.statusCode) {
+                        200 -> {
+                            val result = JSONObject(response.text)
+                            val tracks = JSONArray(result.getString("tracks"))
+                            for(i in 0 until tracks.length()) {
+                                val track = JSONObject(tracks[i].toString())
+                                val trackId = track.getString("id")
+                                val trackName = track.getString("name")
+                                val albumName = JSONObject(track.getString("album")).getString("name")
+                                val artists = JSONArray(track.getString("artists"))
+                                val artistNames = mutableListOf<String>()
+                                val artistIds = mutableListOf<String>()
+                                for(j in 0 until artists.length()) {
+                                    val artist = JSONObject(artists[j].toString())
+                                    artistNames.add(artist.getString("name"))
+                                    artistIds.add(artist.getString("id"))
+                                }
+                                suggestedTracks.add(Track(trackId, trackName, artistNames, artistIds, albumName))
+                            }
+                        }
+                        400 -> Log.d(LOG_TAG, "bad request")
+                        else -> Log.d(LOG_TAG, response.statusCode.toString())
+                    }
                 }
             }
+//            Log.d(LOG_TAG, suggestedTracks.toString())
             suggestedTracks
         }
     }
