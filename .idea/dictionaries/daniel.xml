@@ -4,9 +4,11 @@
       <w>acousticness</w>
       <w>danceability</w>
       <w>instrumentalness</w>
+      <w>khttp</w>
       <w>liveness</w>
       <w>playlists</w>
       <w>speechiness</w>
+      <w>spotify</w>
     </words>
   </dictionary>
 </component>

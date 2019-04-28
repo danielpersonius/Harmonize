@@ -1,24 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<LinearLayout
+<RelativeLayout
         xmlns:android="http://schemas.android.com/apk/res/android"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:orientation="vertical">
-
-    <Space
-            android:layout_width="match_parent"
-            android:layout_height="10dp"/>
-
-    <TextView
-            android:id="@+id/choose_playlist_label"
-            android:text="@string/choose_playlist_banner"
-            android:textColor="@color/colorBlack"
-            android:textSize="32sp"
-            android:gravity="center"
-            android:textAlignment="center"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"/>
+        android:orientation="vertical"
+        android:gravity="center_horizontal">
     <ScrollView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -27,10 +14,30 @@
         <LinearLayout
                 android:id="@+id/spotify_choose_playlist_scrollview_linearlayout"
                 android:layout_width="match_parent"
-                android:textColor="@color/colorBlack"
                 android:layout_height="wrap_content"
                 android:orientation="vertical">
+
+            <TextView
+                    android:id="@+id/choose_playlist_label"
+                    android:text="@string/choose_playlist_banner"
+                    android:textSize="32sp"
+                    android:gravity="center"
+                    android:textAlignment="center"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="15dp"/>
         </LinearLayout>
 
     </ScrollView>
-</LinearLayout>
+    <ProgressBar
+            android:id="@+id/choose_source_progress_circle"
+            style="?android:attr/progressBarStyleLarge"
+            android:layout_gravity="center_horizontal"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerHorizontal="true"
+            android:layout_alignParentBottom="true"
+            android:layout_marginBottom="30dp"
+            android:layout_marginEnd="30dp"
+            android:visibility="gone"/>
+</RelativeLayout>

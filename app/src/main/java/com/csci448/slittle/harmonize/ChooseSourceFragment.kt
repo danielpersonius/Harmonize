@@ -5,7 +5,10 @@ import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import android.support.v4.app.Fragment
+import android.text.TextUtils
 import android.view.*
+import android.view.View.GONE
+import android.view.View.VISIBLE
 import android.widget.TextView
 import kotlinx.android.synthetic.main.fragment_choose_source.*
 
@@ -61,16 +64,25 @@ class ChooseSourceFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         Log.d(LOG_TAG, "onViewCreated() called")
         super.onViewCreated(view, savedInstanceState)
+        // hide spinner progress bar
+        choose_source_progress_circle.visibility = GONE
 
-        val playlists = SpotifyClient.getUserPlaylists(SpotifyClient.ACCESS_TOKEN, 20, 0) as List<Playlist>// as ApiPlaylistData
+        // todo 50 is the max limit, so look into paginating
+        val playlists = SpotifyClient.getUserPlaylists(SpotifyClient.ACCESS_TOKEN, 50, 0) as List<Playlist>
         for (playlist : Playlist in playlists) {
             val playlistTextView = TextView(context)
             playlistTextView.text = playlist._name
             playlistTextView.textSize = 24.0f
+            playlistTextView.ellipsize = TextUtils.TruncateAt.END
+            playlistTextView.maxLines = 1
             playlistTextView.setOnClickListener {
-                val viewPlaylistIntent = ViewPlaylistActivity.createIntent(context, playlist._name)
-                viewPlaylistIntent.putExtra("PLAYLIST_ID", playlist._id)
-                startActivity(viewPlaylistIntent)
+//                val viewPlaylistIntent = ViewPlaylistActivity.createIntent(context, playlist._name)
+                val tuneParametersIntent = TuneParametersActivity.createIntent(context, playlist._name)
+//                viewPlaylistIntent.putExtra("PLAYLIST_ID", playlist._id)
+                tuneParametersIntent.putExtra("PLAYLIST_ID", playlist._id)
+                // show spinner progress bar
+                choose_source_progress_circle.visibility = VISIBLE
+                startActivity(tuneParametersIntent)
             }
             spotify_choose_playlist_scrollview_linearlayout.addView(playlistTextView)
         }
@@ -84,11 +96,15 @@ class ChooseSourceFragment : Fragment() {
     override fun onStart() {
         super.onStart()
         Log.d(LOG_TAG, "onStart() called")
+        // hide spinner progress bar
+        choose_source_progress_circle.visibility = GONE
     }
 
     override fun onResume() {
         super.onResume()
         Log.d(LOG_TAG, "onResume() called")
+        // hide spinner progress bar
+        choose_source_progress_circle.visibility = GONE
     }
 
     override fun onPause() {

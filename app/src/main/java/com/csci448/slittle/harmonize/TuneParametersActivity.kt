@@ -6,8 +6,10 @@ import android.content.Intent
 class TuneParametersActivity : SingleFragmentActivity() {
     companion object {
         private const val LOG_TAG = "TuneParametersActivity"
-        fun createIntent(baseContext: Context?): Intent {
+        // need to pass playlistName so this activity can pass it along to view playlist
+        fun createIntent(baseContext: Context?, playlistName : String): Intent {
             val intent = Intent(baseContext, TuneParametersActivity::class.java)
+            intent.putExtra("PLAYLIST_NAME", playlistName)
             return intent
         }
     }

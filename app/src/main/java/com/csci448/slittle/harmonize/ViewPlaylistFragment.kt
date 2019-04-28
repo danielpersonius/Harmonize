@@ -54,13 +54,9 @@ class ViewPlaylistFragment : Fragment() {
             val extras = intent?.extras
             if (extras != null) {
                 playlistTitle = extras.getString("PLAYLIST_NAME")
-                val playlistId = extras.getString("PLAYLIST_ID") ?: ""
-                tracks = SpotifyClient.getPlaylistTracks(playlistId) as MutableList<Track>
-                Log.d(LOG_TAG, "tracks count: ${tracks.size}")
-                // audio features api call
-                for (track : Track in tracks) {
-                    val audioFeatures = SpotifyClient.getTrackAudioFeatures(track._id) as MutableMap<String, String>
-                    track._metadata = audioFeatures
+                val playlistId = extras.getString("PLAYLIST_ID") ?: null
+                if (playlistId != null) {
+                    tracks = SpotifyClient.getPlaylistTracks(playlistId) as MutableList<Track>
                 }
             }
         }
@@ -89,6 +85,7 @@ class ViewPlaylistFragment : Fragment() {
         }
 
         tracks.forEach {
+            // it is name of iterator
             val track = it
             val inflater        = context?.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
             val trackView             = inflater.inflate(R.layout.playlist_item,null)
@@ -96,10 +93,18 @@ class ViewPlaylistFragment : Fragment() {
             val artistNameTextView = trackView.findViewById<TextView>(R.id.playlist_artist_name)
             val albumNameTextView  = trackView.findViewById<TextView>(R.id.playlist_album_name)
 
-            // it is name of iterator
             songNameTextView.text   = track._name
-            // make into loop
-            artistNameTextView.text = track._artists.toString()
+            val artists = track._artists
+            var artistsText = ""
+            for (i in 0 until artists.size) {
+                if (i < artists.size - 1) {
+                    artistsText += "${artists[i]}, "
+                }
+                else {
+                    artistsText += artists[i]
+                }
+            }
+            artistNameTextView.text = artistsText
             albumNameTextView.text  = track._album
 
             // play song on press
@@ -108,6 +113,8 @@ class ViewPlaylistFragment : Fragment() {
             }
             // metadata(e.g. song characteristics) on long press
             trackView.song_info_icon.setOnClickListener {
+                val audioFeatures = SpotifyClient.getTrackAudioFeatures(track._id) as MutableMap<String, String>
+                track._metadata = audioFeatures
                 val intent = TrackCharacteristicsActivity.createIntent(context, track._name, track._metadata)
                 startActivity(intent)
             }

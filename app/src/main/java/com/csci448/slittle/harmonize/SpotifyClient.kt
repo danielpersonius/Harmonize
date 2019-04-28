@@ -13,6 +13,7 @@ import java.net.URLEncoder
 import org.json.JSONArray
 import org.json.JSONException
 import org.json.JSONObject
+import kotlin.math.min
 
 class SpotifyClient {
     companion object {
@@ -38,6 +39,7 @@ class SpotifyClient {
                 val response =
                     get("https://api.spotify.com/v1/me/playlists?access_token=$accessToken&limit=$limit&offset=$offset")
                 val result = JSONObject(response.text)
+                Log.d(LOG_TAG, result.toString())
                 val p = JSONArray(result.getString("items"))
                 for(i in 0 until p.length()-1) {
                     val playlistData = JSONObject(p[i].toString())
@@ -118,15 +120,67 @@ class SpotifyClient {
             audioFeatures
         }
 
-        fun generatePlaylist(sourcePlaylistName : String,
+        // todo implement me
+        // search by each artist
+        // get all tracks
+        // filter duplicates across all artists
+
+        fun generatePlaylist(sourceId : String,
+                             seedArtists : List<String>,
+                             seedGenres : List<String>,
+                             seedTracks : List<String>,
+                             limit : Int,
                              artist_similarity : Int,
-                             energy : Int,
-                             danceability : Int,
+                             danceability : Int = -1,
+                             energy : Int = -1,
                              speechiness : Int,
                              loudness : Int,
-                             valence : Int) {
+                             valence : Int,
+                             buffer : Int) : Any? = runBlocking {
             Log.d(LOG_TAG, "generatePlaylist() called")
-            // todo implement me
+            val suggestedTracks = mutableListOf<Track>()
+
+            if (::ACCESS_TOKEN.isInitialized) {
+                withContext(Dispatchers.IO) {
+                    var requestString = "GET https://api.spotify.com/v1/recommendations?limit=$limit"
+
+                    var seedArtistsString = ""
+                    // todo - limited to 5 seed values, but will find a workaround
+                    for (i in 0 until min(5,seedArtists.size)) {
+                        seedArtistsString += seedArtists[i]
+                        if (i < seedArtists.size-1) {
+                            // url encoded space
+                            seedArtistsString += "%2C"
+                        }
+                    }
+                    requestString += "seed_artists=$seedArtistsString"
+
+                    // same for genres and tracks
+
+                    if (danceability > -1) {
+                    requestString += "&min_danceability=${danceability-buffer}&max_danceability=${danceability+buffer}"
+                    }
+                    if (energy > -1) {
+                        requestString += "&min_energy=${energy-buffer}&max_energy=${energy+buffer}"
+                    }
+                    if (speechiness > -1) {
+                        requestString += "&min_speechiness=${danceability-buffer}&max_speechiness=${speechiness+buffer}"
+                    }
+                    if (loudness > -1) {
+                        requestString += "&min_loudness=${loudness-buffer}&max_loudness=${loudness+buffer}"
+                    }
+                    if (valence > -1) {
+                        requestString += "&min_valence=${valence-buffer}&max_valence=${valence+buffer}"
+                    }
+
+                    val response = get(requestString, headers=mapOf("Authorization" to "Bearer $ACCESS_TOKEN"))
+                    if (response.statusCode == 200) {
+                        val result = JSONObject(response.text)
+                    }
+
+                }
+            }
+            suggestedTracks
         }
     }
 

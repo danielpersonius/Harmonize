@@ -25,6 +25,11 @@ class TuneParametersFragment : Fragment() {
         }
     }
 
+    var playlistId : String? = null
+    var seedArtists = mutableListOf<String>()
+    var seedGenres = mutableListOf<String>()
+    var seedTracks = mutableListOf<String>()
+
     private fun showDescription(parameterName : String, description : String) {
         val descriptionTextView = TextView(context)
         descriptionTextView.text = description
@@ -65,16 +70,36 @@ class TuneParametersFragment : Fragment() {
         Log.d(LOG_TAG, "onViewCreated() called")
         super.onViewCreated(view, savedInstanceState)
 
-        generate_playlist_button.setOnClickListener {
-            val intent = ViewPlaylistActivity.createIntent(context, "Generated Playlist")
-            intent.putExtra("ARTIST_SIMILARITY_VALUE", artist_similarity_seekbar.progress)
-            intent.putExtra("ENERGY_VALUE",            energy_parameter_seekbar.progress)
-            intent.putExtra("DANCEABILITY_VALUE",      danceability_parameter_seekbar.progress)
-            intent.putExtra("SPEECHINESS_VALUE",       speechiness_parameter_seekbar.progress)
-            intent.putExtra("LOUDNESS_VALUE",          loudness_parameter_seekbar.progress)
-            intent.putExtra("VALENCE_VALUE",           valence_parameter_seekbar.progress)
+        // rotation
+        if (savedInstanceState != null) {
+            playlistId = savedInstanceState.getString("PLAYLIST_ID")
+        }
+        else {
+            val intent = activity?.intent
+            val extras = intent?.extras
+            if (extras != null) {
+                playlistId = extras.getString("PLAYLIST_ID") ?: null
+                seedArtists = extras.getStringArrayList("PLAYLIST_ARTISTS") as MutableList<String>
+                seedGenres = extras.getStringArrayList("PLAYLIST_GENRES") as MutableList<String>
+                seedTracks = extras.getStringArrayList("PLAYLIST_TRACKS") as MutableList<String>
+            }
+        }
 
-            startActivity(intent)
+        generate_playlist_button.setOnClickListener {
+            if (playlistId != null) {
+//                SpotifyClient.generatePlaylist(playlistId.toString(),
+//                                               seedArtists,
+//                                               seedGenres,
+//                                               seedTracks,
+//                                               100,
+//                                               artist_similarity_seekbar.progress,
+//                                               danceability_parameter_seekbar.progress,
+//                                               energy_parameter_seekbar.progress,
+//                                               speechiness_parameter_seekbar.progress,
+//                                               loudness_parameter_seekbar.progress,
+//                                               valence_parameter_seekbar.progress,
+//                                               10)
+            }
         }
 
         artist_similarity_info_button.setOnClickListener {
