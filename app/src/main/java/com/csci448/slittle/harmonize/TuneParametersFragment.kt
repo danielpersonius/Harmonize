@@ -25,12 +25,13 @@ class TuneParametersFragment : Fragment() {
         }
     }
 
-    var playlistId : String? = null
-    var seedArtists : ArrayList<String>? = arrayListOf()
-    var seedGenres = mutableListOf<String>()
-    var seedTracks = mutableListOf<String>()
+    private var playlistId   : String? = null
+    private var playlistName : String  = ""
+    private var seedArtists  : ArrayList<String>? = arrayListOf()
+    private var seedGenres   = mutableListOf<String>()
+    private var seedTracks   = mutableListOf<String>()
     private val featureParameterBuffer = 50
-    private val suggestedTrackLimit = 100
+    private val suggestedTrackLimit    = 100
 
     private fun showDescription(parameterName : String, description : String) {
         val descriptionTextView = TextView(context)
@@ -83,6 +84,7 @@ class TuneParametersFragment : Fragment() {
             val intent = activity?.intent
             val extras = intent?.extras
             if (extras != null) {
+                playlistName = extras.getString("PLAYLIST_NAME") ?: ""
                 playlistId = extras.getString("PLAYLIST_ID") ?: null
                 seedArtists = extras.getStringArrayList("PLAYLIST_ARTISTS")
 //                seedGenres = extras.getStringArrayList("PLAYLIST_GENRES") as MutableList<String>
@@ -135,7 +137,7 @@ class TuneParametersFragment : Fragment() {
                                                loudness,
                                                valence,
                                                featureParameterBuffer) as List<Track>
-                val viewPlaylistIntent = ViewPlaylistActivity.createIntent(context, "new playlist")
+                val viewPlaylistIntent = ViewPlaylistActivity.createIntent(context, "$playlistName Suggested")
                 viewPlaylistIntent.putExtra("PLAYLIST_TRACKS", ArrayList(suggestedTracks))
                 startActivity(viewPlaylistIntent)
             }

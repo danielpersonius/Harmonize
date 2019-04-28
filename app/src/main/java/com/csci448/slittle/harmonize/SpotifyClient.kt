@@ -8,6 +8,7 @@ import com.spotify.sdk.android.authentication.AuthenticationClient
 import com.spotify.sdk.android.authentication.AuthenticationRequest
 import com.spotify.sdk.android.authentication.AuthenticationResponse
 import khttp.get
+import khttp.post
 import kotlinx.coroutines.*
 import java.net.URLEncoder
 import org.json.JSONArray
@@ -19,16 +20,22 @@ class SpotifyClient {
     companion object {
         private const val LOG_TAG = "SpotifyClient"
         lateinit var ACCESS_TOKEN : String
+        private const val CLIENT_ID = "96fb37843a5e4e92a1a8c4c5168e3371"
+        // Request code will be used to verify if result comes from the login activity. Can be set to any integer.
+        private const val SPOTIFY_LOGIN_REQUEST_CODE = 1
+        // can be anything really
+        private const val REDIRECT_URI = "com.csci448.slittle.harmonize://callback"
+        private const val CLIENT_SECRET = "84ce3a2b19c74df7900d1d6d588a14d2"
 
-        private fun login(activity : Activity) {
-            val builder = AuthenticationRequest.Builder(PlatformConnectActivity.CLIENT_ID,
+        fun login(activity : Activity) {
+            val builder = AuthenticationRequest.Builder(CLIENT_ID,
                 AuthenticationResponse.Type.TOKEN,
-                PlatformConnectActivity.REDIRECT_URI)
-            builder.setScopes(arrayOf("streaming", "user-library-read", "playlist-read-private"))
+                REDIRECT_URI)
+            builder.setScopes(arrayOf("user-read-private", "streaming", "user-library-modify", "playlist-modify-private", "playlist-modify-public", "user-library-read", "playlist-read-private"))
             builder.setShowDialog(true)
             val request = builder.build()
 
-            AuthenticationClient.openLoginActivity(activity, PlatformConnectActivity.SPOTIFY_LOGIN_REQUEST_CODE, request)
+            AuthenticationClient.openLoginActivity(activity, SPOTIFY_LOGIN_REQUEST_CODE, request)
         }
 
         fun getUserPlaylists(accessToken : String, limit : Int, offset : Int) : Any? = runBlocking {
@@ -58,8 +65,19 @@ class SpotifyClient {
             }
         }
 
-        fun getUserInformation(userId : String) {
-            // todo Implement me
+        fun getUserInformation(userId : String) : Any? = runBlocking {
+            withContext(Dispatchers.IO) {
+                val response =
+                    get("https://api.spotify.com/v1/me", headers=mapOf("Authorization" to "Bearer $ACCESS_TOKEN"))
+                when (response.statusCode) {
+                    200 -> {
+                        val result = JSONObject(response.text)
+                    }
+                    else -> {
+                        Log.d(LOG_TAG, "Something went wrong: ${response.statusCode}")
+                    }
+                }
+            }
         }
 
         fun getPlaylistTracks(playlistId : String) : Any? = runBlocking {
@@ -201,10 +219,58 @@ class SpotifyClient {
                     }
                 }
             }
-//            Log.d(LOG_TAG, suggestedTracks.toString())
             suggestedTracks
         }
+
+        // todo add options, like collaborative, public, etc. as parameters
+        fun exportPlaylist(userId       : String,
+                           playlistName : String,
+                           tracks       : List<Track>
+                          ) : Any? = runBlocking {
+            Log.d(LOG_TAG, "exportPlaylist() called")
+
+            // true if playlist both created and tracks added
+            var success = false
+            if (::ACCESS_TOKEN.isInitialized) {
+                if (tracks.isNotEmpty()) {
+                    withContext(Dispatchers.IO) {
+                        // create playlist
+                        val createResponse = post("https://api.spotify.com/v1/users/$userId/playlists?" +
+                                                               "name=$playlistName&" +
+                                                               "public=false" +
+                                                               "&description=\"test description\""
+                                                               , headers=mapOf("Authorization" to "Bearer $ACCESS_TOKEN"))
+                        when (createResponse.statusCode) {
+                            201 -> {
+                                // get new playlist name and id
+                                val playlistId = JSONObject(createResponse.text).getString("id")
+
+                                // add tracks
+                                var addRequestString = "https://api.spotify.com/v1/playlists/$playlistId/tracks?"
+                                for (i in 0 until tracks.size) {
+                                    addRequestString += "spotify%3Atrack%3A${tracks[i]._id}"
+                                    if (i < tracks.size - 1) {
+                                        addRequestString += ","
+                                    }
+                                }
+                                val addResponse = post(addRequestString, headers=mapOf("Authorization" to "Bearer $ACCESS_TOKEN"))
+                                when (addResponse.statusCode) {
+                                    200 -> {
+                                        success = true
+                                        Log.d(LOG_TAG, "tracks added to new playlist \'$playlistName\'!")
+                                    }
+                                    else -> Log.d(LOG_TAG, "Something went wrong when adding tracks: ${addResponse.statusCode}")
+                                }
+                            }
+                            else -> {
+                                Log.d(LOG_TAG, "Something went wrong creating a new playlist: ${createResponse.statusCode}")
+                            }
+                        }
+
+                    }
+                }
+            }
+            success
+        }
     }
-
-
 }

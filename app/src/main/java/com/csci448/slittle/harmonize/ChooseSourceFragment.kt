@@ -84,6 +84,7 @@ class ChooseSourceFragment : Fragment() {
                     allArtists.addAll(track._artistIds)
                 }
                 val tuneParametersIntent = TuneParametersActivity.createIntent(context, playlist._name)
+                tuneParametersIntent.putExtra("PLAYLIST_NAME", playlist._name)
                 tuneParametersIntent.putExtra("PLAYLIST_ID", playlist._id)
                 tuneParametersIntent.putExtra("PLAYLIST_ARTISTS", ArrayList(allArtists))
                 tuneParametersIntent.putExtra("PLAYLIST_TRACKS", arrayListOf(tracks))

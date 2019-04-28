@@ -86,7 +86,8 @@ class TrackCharacteristicsFragment : Fragment() {
             }
         }
 
-        track_characteristics_label.text = trackName + getString(R.string.characteristics_string)
+        val banner = trackName + getString(R.string.characteristics_string)
+        track_characteristics_label.text = banner
         danceability_value.text     = convertValueToPercentage(audioFeatures["danceability"])
         energy_value.text           = convertValueToPercentage(audioFeatures["energy"])
         loudness_value.text         = audioFeatures["loudness"]
@@ -97,17 +98,6 @@ class TrackCharacteristicsFragment : Fragment() {
         valence_value.text          = convertValueToPercentage(audioFeatures["valence"])
         tempo_value.text            = audioFeatures["tempo"]
         time_signature_value.text   = audioFeatures["time_signature"]
-
-        generate_playlist_button.setOnClickListener {
-            val intent = GeneratePlaylistActivity.createIntent(context)
-//            intent.putExtra("Energy", energy_value.text)
-//            intent.putExtra("Lyrics",            lyrics_char.text)
-//            intent.putExtra("Pace",      pace_char.text)
-//            intent.putExtra("Accoustics",       accoustics_char.text)
-
-            startActivity(intent)
-        }
-
     }
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {

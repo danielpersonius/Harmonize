@@ -254,18 +254,6 @@
                         android:gravity="end"
                         android:background="#fff"/>
             </LinearLayout>
-
-
-
-            <Button
-                    android:id="@+id/generate_playlist_button"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/nav_item_generate_label"
-                    android:layout_gravity="center"
-
-            />
-
         </LinearLayout>
 
 
