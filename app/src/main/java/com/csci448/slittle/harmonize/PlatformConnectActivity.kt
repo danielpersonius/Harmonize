@@ -37,7 +37,6 @@ class PlatformConnectActivity : SingleFragmentActivity() {
         super.onActivityResult(requestCode, resultCode, data)
         if (resultCode != RESULT_OK) { return }
         if (data == null) { return }
-//        Log.d(LOG_TAG, "onActivityResult() called: $requestCode")
 
         // Spotify login activity
         if (requestCode == SPOTIFY_LOGIN_REQUEST_CODE) {
@@ -48,7 +47,6 @@ class PlatformConnectActivity : SingleFragmentActivity() {
                 // Response was successful and contains auth token
                 AuthenticationResponse.Type.TOKEN -> {
                     // Handle successful response
-                    //Toast.makeText(this, "Connected to Spotify with token: ${response.accessToken}", Toast.LENGTH_SHORT).show()
                     ACCESS_TOKEN = response.accessToken
                     SpotifyClient.ACCESS_TOKEN = response.accessToken
 

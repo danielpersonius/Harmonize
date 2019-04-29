@@ -1,4 +1,5 @@
 package com.csci448.slittle.harmonize
+import android.app.Activity
 import android.app.Activity.RESULT_OK
 import android.content.Context
 import android.content.Intent
@@ -23,7 +24,7 @@ class PlatformConnectFragment : Fragment() {
         val builder = AuthenticationRequest.Builder(PlatformConnectActivity.CLIENT_ID,
                                                                              AuthenticationResponse.Type.TOKEN,
                                                                              PlatformConnectActivity.REDIRECT_URI)
-        builder.setScopes(arrayOf("streaming", "user-library-read", "playlist-read-private"))
+        builder.setScopes(arrayOf("user-read-private", "streaming", "user-library-modify", "playlist-modify-private", "playlist-modify-public", "user-library-read", "playlist-read-private"))
         builder.setShowDialog(true)
         val request = builder.build()
 
@@ -61,6 +62,7 @@ class PlatformConnectFragment : Fragment() {
 //            Toast.makeText(context, "Connecting Spotify!", Toast.LENGTH_SHORT).show()
             connect_progress_circle.visibility = VISIBLE
             loginToSpotify()
+//            SpotifyClient.login(activity as Activity)
         }
         connect_apple_button.setOnClickListener {
             Toast.makeText(context, "Connecting Apple Music!", Toast.LENGTH_SHORT).show()

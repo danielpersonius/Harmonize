@@ -25,10 +25,13 @@ class TuneParametersFragment : Fragment() {
         }
     }
 
-    var playlistId : String? = null
-    var seedArtists = mutableListOf<String>()
-    var seedGenres = mutableListOf<String>()
-    var seedTracks = mutableListOf<String>()
+    private var playlistId   : String? = null
+    private var playlistName : String  = ""
+    private var seedArtists  : ArrayList<String>? = arrayListOf()
+    private var seedGenres   = mutableListOf<String>()
+    private var seedTracks   = mutableListOf<String>()
+    private val featureParameterBuffer = 50
+    private val suggestedTrackLimit    = 100
 
     private fun showDescription(parameterName : String, description : String) {
         val descriptionTextView = TextView(context)
@@ -70,6 +73,9 @@ class TuneParametersFragment : Fragment() {
         Log.d(LOG_TAG, "onViewCreated() called")
         super.onViewCreated(view, savedInstanceState)
 
+        // disable artist similarity for now
+        artist_similarity_seekbar.isEnabled = false
+
         // rotation
         if (savedInstanceState != null) {
             playlistId = savedInstanceState.getString("PLAYLIST_ID")
@@ -79,27 +85,62 @@ class TuneParametersFragment : Fragment() {
             val extras = intent?.extras
             Log.d(LOG_TAG, extras.toString())
             if (extras != null) {
+                playlistName = extras.getString("PLAYLIST_NAME") ?: ""
                 playlistId = extras.getString("PLAYLIST_ID") ?: null
-                seedArtists = extras.getStringArrayList("PLAYLIST_ARTISTS") as MutableList<String>
-                seedGenres = extras.getStringArrayList("PLAYLIST_GENRES") as MutableList<String>
+                seedArtists = extras.getStringArrayList("PLAYLIST_ARTISTS")
+//                seedGenres = extras.getStringArrayList("PLAYLIST_GENRES") as MutableList<String>
                 seedTracks = extras.getStringArrayList("PLAYLIST_TRACKS") as MutableList<String>
             }
         }
 
         generate_playlist_button.setOnClickListener {
             if (playlistId != null) {
-//                SpotifyClient.generatePlaylist(playlistId.toString(),
-//                                               seedArtists,
-//                                               seedGenres,
-//                                               seedTracks,
-//                                               100,
-//                                               artist_similarity_seekbar.progress,
-//                                               danceability_parameter_seekbar.progress,
-//                                               energy_parameter_seekbar.progress,
-//                                               speechiness_parameter_seekbar.progress,
-//                                               loudness_parameter_seekbar.progress,
-//                                               valence_parameter_seekbar.progress,
-//                                               10)
+                // user didn't supply a value, so set to default and exclude from search
+                val artistSimilarity =
+                    if (artist_similarity_seekbar.progress == 0)
+                        -1
+                    else
+                        artist_similarity_seekbar.progress
+                val danceability =
+                    if (danceability_parameter_seekbar.progress == 0)
+                        -1
+                    else
+                        danceability_parameter_seekbar.progress
+                val energy =
+                    if (energy_parameter_seekbar.progress == 0)
+                        -1
+                    else
+                        energy_parameter_seekbar.progress
+                val speechiness =
+                    if (speechiness_parameter_seekbar.progress == 0)
+                        -1
+                    else
+                        speechiness_parameter_seekbar.progress
+                val loudness =
+                    if (loudness_parameter_seekbar.progress == 0)
+                        -1
+                    else
+                        loudness_parameter_seekbar.progress
+                val valence =
+                    if (valence_parameter_seekbar.progress == 0)
+                        -1
+                    else
+                        artist_similarity_seekbar.progress
+                val suggestedTracks = SpotifyClient.generatePlaylist(playlistId.toString(),
+                                               seedArtists!!.toList(),
+                                               seedGenres,
+                                               seedTracks,
+                                               suggestedTrackLimit,
+                                               artistSimilarity,
+                                               danceability,
+                                               energy,
+                                               speechiness,
+                                               loudness,
+                                               valence,
+                                               featureParameterBuffer) as List<Track>
+                val viewPlaylistIntent = ViewPlaylistActivity.createIntent(context, "$playlistName Suggested")
+                viewPlaylistIntent.putExtra("PLAYLIST_TRACKS", ArrayList(suggestedTracks))
+                startActivity(viewPlaylistIntent)
             }
         }
 

@@ -20,7 +20,7 @@ class ViewPlaylistFragment : Fragment() {
     }
 
     var playlistTitle : String? = "Playlist name"
-    var tracks = mutableListOf<Track>()
+    var tracks : List<Track> = arrayListOf()
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
@@ -55,9 +55,10 @@ class ViewPlaylistFragment : Fragment() {
             if (extras != null) {
                 playlistTitle = extras.getString("PLAYLIST_NAME")
                 val playlistId = extras.getString("PLAYLIST_ID") ?: null
-                if (playlistId != null) {
-                    tracks = SpotifyClient.getPlaylistTracks(playlistId) as MutableList<Track>
-                }
+                tracks = extras.getStringArrayList("PLAYLIST_TRACKS") as List<Track>
+//                if (playlistId != null) {
+//                    tracks = SpotifyClient.getPlaylistTracks(playlistId) as MutableList<Track>
+//                }
             }
         }
 
@@ -94,7 +95,7 @@ class ViewPlaylistFragment : Fragment() {
             val albumNameTextView  = trackView.findViewById<TextView>(R.id.playlist_album_name)
 
             songNameTextView.text   = track._name
-            val artists = track._artists
+            val artists = track._artistNames
             var artistsText = ""
             for (i in 0 until artists.size) {
                 if (i < artists.size - 1) {
