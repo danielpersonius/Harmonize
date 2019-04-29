@@ -77,6 +77,7 @@ class TuneParametersFragment : Fragment() {
         else {
             val intent = activity?.intent
             val extras = intent?.extras
+            Log.d(LOG_TAG, extras.toString())
             if (extras != null) {
                 playlistId = extras.getString("PLAYLIST_ID") ?: null
                 seedArtists = extras.getStringArrayList("PLAYLIST_ARTISTS") as MutableList<String>
