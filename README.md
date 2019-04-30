@@ -19,3 +19,4 @@ Final project for CSCI448. A customizable music recommendation system.
 - blacklist artists, genres and tracks
 - compare full suggested playlists to tracks kept by user and build a recemmendation model from that
 - display that model to the user and allow for modifications and Erasure
+- optionally seed from user's recent history
