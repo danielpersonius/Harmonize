@@ -136,6 +136,8 @@ class ViewPlaylistFragment : Fragment() {
         when (item?.itemId) {
             R.id.playlist_menu_export_option -> {
                 val exportIntent = ExportActivity.createIntent(context)
+                exportIntent.putExtra("PLAYLIST_NAME", playlistTitle)
+                exportIntent.putExtra("PLAYLIST_TRACKS", arrayListOf(tracks))
                 startActivity(exportIntent)
                 true
             }

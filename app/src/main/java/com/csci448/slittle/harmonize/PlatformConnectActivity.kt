@@ -49,6 +49,8 @@ class PlatformConnectActivity : SingleFragmentActivity() {
                     // Handle successful response
                     ACCESS_TOKEN = response.accessToken
                     SpotifyClient.ACCESS_TOKEN = response.accessToken
+                    // get user info like ID and Name
+                    SpotifyClient.getUserInformation()
 
                     val generateActivityIntent = GeneratePlaylistActivity.createIntent(this)
                     startActivity(generateActivityIntent)

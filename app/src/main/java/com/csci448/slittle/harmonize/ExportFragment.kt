@@ -10,10 +10,12 @@ import android.widget.Toast
 import kotlinx.android.synthetic.main.export.*
 
 class ExportFragment : Fragment() {
-
     companion object {
         private const val LOG_TAG = "ExportFragment"
     }
+
+    private lateinit var playlistTitle : String
+    var tracks : List<Track> = arrayListOf()
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
@@ -41,17 +43,37 @@ class ExportFragment : Fragment() {
         Log.d(LOG_TAG, "onViewCreated() called")
         super.onViewCreated(view, savedInstanceState)
 
+        // rotation
+        if (savedInstanceState != null) {
+            playlistTitle = savedInstanceState.getString("PLAYLIST_NAME")
+        }
+
+        // extras would overwrite values from saved instance state
+        else {
+            val intent = activity?.intent
+            val extras = intent?.extras
+            if (extras != null) {
+                playlistTitle = if (extras.containsKey("PLAYLIST_NAME")) extras.getString("PLAYLIST_NAME") else "suggested playlist"
+                tracks = extras.getStringArrayList("PLAYLIST_TRACKS") as List<Track>
+            }
+        }
+
         export_spotify_button.setOnClickListener {
-            Toast.makeText(context, "Exported to Spotify!", Toast.LENGTH_SHORT).show()
+            Toast.makeText(context, "Exporting to Spotify...", Toast.LENGTH_SHORT).show()
+            SpotifyClient.exportPlaylist(playlistTitle, tracks)
+
+//            val viewPlaylistIntent = ViewPlaylistActivity.createIntent(context, playlistTitle)
+//            viewPlaylistIntent.putExtra("PLAYLIST_TRACKS", arrayListOf(tracks))
+//            startActivity(viewPlaylistIntent)
         }
         export_apple_button.setOnClickListener {
-            Toast.makeText(context, "Exported to Apple Music!", Toast.LENGTH_SHORT).show()
+            Toast.makeText(context, "no action", Toast.LENGTH_SHORT).show()
         }
         export_soundcloud_button.setOnClickListener {
-            Toast.makeText(context, "Exported to Soundcloud!", Toast.LENGTH_SHORT).show()
+            Toast.makeText(context, "no action", Toast.LENGTH_SHORT).show()
         }
         export_pandora_button.setOnClickListener {
-            Toast.makeText(context, "Exported to Pandora!", Toast.LENGTH_SHORT).show()
+            Toast.makeText(context, "no action", Toast.LENGTH_SHORT).show()
         }
     }
 

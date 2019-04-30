@@ -3,6 +3,7 @@ import android.app.Activity
 import android.app.Activity.RESULT_OK
 import android.content.Context
 import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import android.util.Log
 import android.support.v4.app.Fragment
@@ -22,13 +23,19 @@ class PlatformConnectFragment : Fragment() {
 
     private fun loginToSpotify() {
         val builder = AuthenticationRequest.Builder(PlatformConnectActivity.CLIENT_ID,
-                                                                             AuthenticationResponse.Type.TOKEN,
-                                                                             PlatformConnectActivity.REDIRECT_URI)
-        builder.setScopes(arrayOf("user-read-private", "streaming", "user-library-modify", "playlist-modify-private", "playlist-modify-public", "user-library-read", "playlist-read-private"))
+                                                    AuthenticationResponse.Type.TOKEN,
+                                                    PlatformConnectActivity.REDIRECT_URI)
         builder.setShowDialog(true)
+        builder.setScopes(arrayOf("user-read-private", "streaming", "user-library-modify", "playlist-modify-private", "playlist-modify-public", "user-library-read", "playlist-read-private"))
         val request = builder.build()
 
         AuthenticationClient.openLoginActivity(activity, PlatformConnectActivity.SPOTIFY_LOGIN_REQUEST_CODE, request)
+    }
+
+    private fun logoutFromSpotify() {
+        val intent = Intent(Intent.ACTION_VIEW)
+        intent.data = Uri.parse("https://accounts.spotify.com")
+        startActivity(intent)
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
@@ -74,6 +81,22 @@ class PlatformConnectFragment : Fragment() {
             Toast.makeText(context, "Connecting Pandora!", Toast.LENGTH_SHORT).show()
         }
     }
+
+    override fun onCreateOptionsMenu(menu: Menu?, inflater: MenuInflater?) {
+        super.onCreateOptionsMenu(menu, inflater)
+        inflater?.inflate(R.menu.platform_connect_options, menu)
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem?): Boolean =
+        // Handle presses on the action bar menu items
+        when (item?.itemId) {
+            R.id.logout_spotify_option -> {
+//                SpotifyClient.logout() as Boolean
+                logoutFromSpotify()
+                true
+            }
+            else -> super.onOptionsItemSelected(item)
+        }
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
