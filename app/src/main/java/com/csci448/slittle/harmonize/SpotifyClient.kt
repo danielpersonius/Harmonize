@@ -2,6 +2,8 @@ package com.csci448.slittle.harmonize
 
 import android.app.Activity
 import android.util.Log
+import android.widget.Toast
+import com.beust.klaxon.Json
 import com.beust.klaxon.JsonParsingException
 import com.beust.klaxon.Klaxon
 import com.spotify.sdk.android.authentication.AuthenticationClient
@@ -14,7 +16,12 @@ import java.net.URLEncoder
 import org.json.JSONArray
 import org.json.JSONException
 import org.json.JSONObject
+import org.json.JSONStringer
 import kotlin.math.min
+import kotlin.js.*
+import android.content.pm.PackageManager
+
+
 
 class SpotifyClient {
     companion object {
@@ -207,8 +214,6 @@ class SpotifyClient {
                         requestString += "&min_valence=${valence-buffer}&max_valence=${valence+buffer}"
                     }
 
-//                    Log.d(LOG_TAG, "request: $requestString")
-
                     val response = get(requestString, headers=mapOf("Authorization" to "Bearer $ACCESS_TOKEN"))
                     when(response.statusCode) {
                         200 -> {
@@ -239,44 +244,39 @@ class SpotifyClient {
         }
 
         // todo add options, like collaborative, public, etc. as parameters
+        // returns a nullable String
         fun exportPlaylist(playlistName : String,
-                           tracks       : List<Track>
+                           trackIds     : List<String>
                           ) : Any? = runBlocking {
-            Log.d(LOG_TAG, "exportPlaylist($playlistName, ...) called with user id: $USER_ID")
-            Log.d(LOG_TAG, "user id: $USER_ID")
-
             // true if playlist both created and tracks added
-            var success = false
+//            var success = false
+            var playlistId : String? = null
             if (::ACCESS_TOKEN.isInitialized) {
-                if (tracks.isNotEmpty()) {
+                if (trackIds.isNotEmpty()) {
                     withContext(Dispatchers.IO) {
                         // create playlist
-//                        val requestString = "https://api.spotify.com/v1/users/$USER_ID/playlists?name=${URLEncoder.encode(playlistName, "utf-8")}&public=false&description=test"
-//                        val requestString = "https://api.spotify.com/v1/users/$USER_ID/playlists?\"name\"=\"name\"&\"public\"=false&\"description\"=\"test\""
-//                        val requestString = "https://api.spotify.com/v1/users/$USER_ID/playlists?\"name\"=\"name\""
-
                         val requestString = "https://api.spotify.com/v1/users/$USER_ID/playlists"
-                        val createResponse = post("https://api.spotify.com/v1/playlists", data = mapOf("name" to "test"), headers = mapOf("Authorization" to "Bearer $ACCESS_TOKEN"))
-                        Log.d(LOG_TAG, createResponse.text)
+                        // data argument doesn't actually convert map to proper JSON
+                        val createResponse = post(requestString,
+                                                           data = JSONObject(mapOf("name" to playlistName, "public" to "false", "description" to "test description")).toString(),
+                                                           headers = mapOf("Authorization" to "Bearer $ACCESS_TOKEN", "Content-Type" to "application/json"))
                         when (createResponse.statusCode) {
                             201 -> {
-                                Log.d(LOG_TAG, "201!")
                                 // get new playlist name and id
-                                val playlistId = JSONObject(createResponse.text).getString("id")
-
+                                playlistId = JSONObject(createResponse.text).getString("id")
                                 // add tracks
-                                var addRequestString = "https://api.spotify.com/v1/playlists/$playlistId/tracks?"
-                                for (i in 0 until tracks.size) {
-                                    addRequestString += "spotify%3Atrack%3A${tracks[i]._id}"
-                                    if (i < tracks.size - 1) {
-                                        addRequestString += ","
-                                    }
+                                val uris = mutableListOf<String>() //                                var addRequestString = "https://api.spotify.com/v1/playlists/$playlistId/tracks?uris="
+                                for (i in 0 until trackIds.size) { //
+                                    uris.add("spotify:track:${trackIds[i]}")
                                 }
-                                val addResponse = post(addRequestString, headers=mapOf("Authorization" to "Bearer $ACCESS_TOKEN"))
+                                val addRequestString = "https://api.spotify.com/v1/playlists/$playlistId/tracks"
+                                val addResponse = post(addRequestString,
+                                                                data = JSONObject(mapOf("uris" to uris)).toString(),
+                                                                headers = mapOf("Authorization" to "Bearer $ACCESS_TOKEN", "Content-Type" to "application/json"))
                                 when (addResponse.statusCode) {
-                                    200 -> {
-                                        success = true
-                                        Log.d(LOG_TAG, "tracks added to new playlist \'$playlistName\'!")
+                                    201 -> {
+//                                        success = true
+//                                        val snapshotId = JSONObject(addResponse.text).getString("snapshot_id")
                                     }
                                     else -> Log.d(LOG_TAG, "Something went wrong when adding tracks: ${addResponse.text}")
                                 }
@@ -289,7 +289,20 @@ class SpotifyClient {
                     }
                 }
             }
-            success
+//            success
+            playlistId
         }
+
+//        fun isSpotifyInstalled() {
+//            val pm = getActivity().getPackageManager()
+//            var isSpotifyInstalled: Boolean
+//            try {
+//                pm.getPackageInfo("com.spotify.music", 0)
+//                isSpotifyInstalled = true
+//            } catch (e: PackageManager.NameNotFoundException) {
+//                isSpotifyInstalled = false
+//            }
+//
+//        }
     }
 }

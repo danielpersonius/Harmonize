@@ -2,6 +2,7 @@ package com.csci448.slittle.harmonize
 import android.app.Activity.RESULT_OK
 import android.content.Context
 import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import android.util.Log
 import android.support.v4.app.Fragment
@@ -15,7 +16,7 @@ class ExportFragment : Fragment() {
     }
 
     private lateinit var playlistTitle : String
-    var tracks : List<Track> = arrayListOf()
+    private var trackIds  : ArrayList<String>? = arrayListOf()
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
@@ -46,6 +47,7 @@ class ExportFragment : Fragment() {
         // rotation
         if (savedInstanceState != null) {
             playlistTitle = savedInstanceState.getString("PLAYLIST_NAME")
+            trackIds = savedInstanceState.getStringArrayList("PLAYLIST_TRACK_IDS")
         }
 
         // extras would overwrite values from saved instance state
@@ -54,17 +56,20 @@ class ExportFragment : Fragment() {
             val extras = intent?.extras
             if (extras != null) {
                 playlistTitle = if (extras.containsKey("PLAYLIST_NAME")) extras.getString("PLAYLIST_NAME") else "suggested playlist"
-                tracks = extras.getStringArrayList("PLAYLIST_TRACKS") as List<Track>
+                trackIds = extras.getStringArrayList("PLAYLIST_TRACK_IDS")
             }
         }
 
         export_spotify_button.setOnClickListener {
             Toast.makeText(context, "Exporting to Spotify...", Toast.LENGTH_SHORT).show()
-            SpotifyClient.exportPlaylist(playlistTitle, tracks)
-
-//            val viewPlaylistIntent = ViewPlaylistActivity.createIntent(context, playlistTitle)
-//            viewPlaylistIntent.putExtra("PLAYLIST_TRACKS", arrayListOf(tracks))
-//            startActivity(viewPlaylistIntent)
+            val playlistId = SpotifyClient.exportPlaylist(playlistTitle, trackIds!!.toList()) as String?
+            if (playlistId != null) {
+                val redirectURI = "spotify:user:${SpotifyClient.USER_ID}:playlist:$playlistId"
+                val intent = Intent(Intent.ACTION_VIEW)
+                intent.data = Uri.parse(redirectURI)
+                intent.putExtra(Intent.EXTRA_REFERRER, Uri.parse("android-app://" + context!!.packageName))
+                startActivity(intent)
+            }
         }
         export_apple_button.setOnClickListener {
             Toast.makeText(context, "no action", Toast.LENGTH_SHORT).show()
