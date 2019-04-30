@@ -20,3 +20,4 @@ Final project for CSCI448. A customizable music recommendation system.
 - compare full suggested playlists to tracks kept by user and build a recemmendation model from that
 - display that model to the user and allow for modifications and Erasure
 - optionally seed from user's recent history
+- long press suggested track to add to seed playlist
