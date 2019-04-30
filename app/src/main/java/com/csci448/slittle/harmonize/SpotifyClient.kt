@@ -245,11 +245,23 @@ class SpotifyClient {
 
         // todo add options, like collaborative, public, etc. as parameters
         // returns a nullable String
-        fun exportPlaylist(playlistName : String,
-                           trackIds     : List<String>
+        fun exportPlaylist(playlistName    : String,
+                           trackIds        : List<String>,
+                           tunedParameters : Map<String, String> = mapOf()
                           ) : Any? = runBlocking {
-            // true if playlist both created and tracks added
-//            var success = false
+            // beautify tuned parameters
+            var tunedParametersString = "["
+            for ((key, value) in tunedParameters) {
+                if (value == "-1") {
+                    tunedParametersString += "$key = None, "
+                }
+                else {
+                    tunedParametersString += "$key = $value, "
+                }
+            }
+            // remove last comma and add square bracket
+            tunedParametersString = tunedParametersString.substring(0, tunedParametersString.lastIndexOf(',')) + "]"
+
             var playlistId : String? = null
             if (::ACCESS_TOKEN.isInitialized) {
                 if (trackIds.isNotEmpty()) {
@@ -258,15 +270,21 @@ class SpotifyClient {
                         val requestString = "https://api.spotify.com/v1/users/$USER_ID/playlists"
                         // data argument doesn't actually convert map to proper JSON
                         val createResponse = post(requestString,
-                                                           data = JSONObject(mapOf("name" to playlistName, "public" to "false", "description" to "test description")).toString(),
+                                                           data = JSONObject(
+                                                               mapOf(
+                                                                   "name" to playlistName,
+                                                                   "public" to "false",
+                                                                   "description" to "suggested from Harmonize with parameters:$tunedParametersString"
+                                                               )
+                                                           ).toString(),
                                                            headers = mapOf("Authorization" to "Bearer $ACCESS_TOKEN", "Content-Type" to "application/json"))
                         when (createResponse.statusCode) {
                             201 -> {
                                 // get new playlist name and id
                                 playlistId = JSONObject(createResponse.text).getString("id")
                                 // add tracks
-                                val uris = mutableListOf<String>() //                                var addRequestString = "https://api.spotify.com/v1/playlists/$playlistId/tracks?uris="
-                                for (i in 0 until trackIds.size) { //
+                                val uris = mutableListOf<String>()
+                                for (i in 0 until trackIds.size) {
                                     uris.add("spotify:track:${trackIds[i]}")
                                 }
                                 val addRequestString = "https://api.spotify.com/v1/playlists/$playlistId/tracks"
@@ -275,7 +293,6 @@ class SpotifyClient {
                                                                 headers = mapOf("Authorization" to "Bearer $ACCESS_TOKEN", "Content-Type" to "application/json"))
                                 when (addResponse.statusCode) {
                                     201 -> {
-//                                        success = true
 //                                        val snapshotId = JSONObject(addResponse.text).getString("snapshot_id")
                                     }
                                     else -> Log.d(LOG_TAG, "Something went wrong when adding tracks: ${addResponse.text}")
@@ -289,11 +306,10 @@ class SpotifyClient {
                     }
                 }
             }
-//            success
             playlistId
         }
 
-//        fun isSpotifyInstalled() {
+//        fun isSpotifyInstalled() { // move to an activity
 //            val pm = getActivity().getPackageManager()
 //            var isSpotifyInstalled: Boolean
 //            try {

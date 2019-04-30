@@ -21,6 +21,7 @@ class ViewPlaylistFragment : Fragment() {
 
     var playlistTitle : String? = "Playlist name"
     var tracks : List<Track> = arrayListOf()
+    var tunedParameters : HashMap<String, String> = hashMapOf()
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
@@ -56,6 +57,7 @@ class ViewPlaylistFragment : Fragment() {
                 playlistTitle = extras.getString("PLAYLIST_NAME")
                 val playlistId = extras.getString("PLAYLIST_ID") ?: null
                 tracks = extras.getStringArrayList("PLAYLIST_TRACKS") as List<Track>
+                tunedParameters = extras.getSerializable("TUNED_PARAMETERS") as HashMap<String, String>
 //                if (playlistId != null) {
 //                    tracks = SpotifyClient.getPlaylistTracks(playlistId) as MutableList<Track>
 //                }
@@ -75,7 +77,8 @@ class ViewPlaylistFragment : Fragment() {
             builder.setView(titleEditTextBox)
             builder.setPositiveButton("Done") {_, _ ->
                 // todo persist name change
-                playlist_name_banner.text = titleEditTextBox.text.toString()
+                playlistTitle = titleEditTextBox.text.toString()
+                playlist_name_banner.text = playlistTitle
             }
 
             builder.setNegativeButton("Cancel") {_, _ ->
@@ -143,6 +146,7 @@ class ViewPlaylistFragment : Fragment() {
                     trackIds.add(track._id)
                 }
                 exportIntent.putExtra("PLAYLIST_TRACK_IDS", ArrayList(trackIds))
+                exportIntent.putExtra("TUNED_PARAMETERS", tunedParameters)
                 startActivity(exportIntent)
                 true
             }
