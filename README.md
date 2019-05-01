@@ -8,9 +8,9 @@ Final project for CSCI448. A customizable music recommendation system.
 - seed recemmendation with all artists, tracks, and genres, not just 5
 - variable feature parameter buffer
 - add buffer to exported playlist description
-- in-app player
 - let user delete tracks from suggested playlists before export 
 - logout from/deauthorize Spotify 
+- paginate playlists and tracks with recursive getters
 
 ### layouts
 - change song characteristics view to a popup/dialog box
