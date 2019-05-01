@@ -3,9 +3,6 @@ package com.csci448.slittle.harmonize
 import android.app.Activity
 import android.util.Log
 import android.widget.Toast
-import com.beust.klaxon.Json
-import com.beust.klaxon.JsonParsingException
-import com.beust.klaxon.Klaxon
 import com.spotify.sdk.android.authentication.AuthenticationClient
 import com.spotify.sdk.android.authentication.AuthenticationRequest
 import com.spotify.sdk.android.authentication.AuthenticationResponse
@@ -28,12 +25,22 @@ class SpotifyClient {
         private const val LOG_TAG = "SpotifyClient"
         lateinit var ACCESS_TOKEN : String
         lateinit var USER_ID : String
+        lateinit var USER_NAME : String
         private const val CLIENT_ID = "96fb37843a5e4e92a1a8c4c5168e3371"
         // Request code will be used to verify if result comes from the login activity. Can be set to any integer.
         private const val SPOTIFY_LOGIN_REQUEST_CODE = 1
         // can be anything really
         private const val REDIRECT_URI = "com.csci448.slittle.harmonize://callback"
         private const val CLIENT_SECRET = "84ce3a2b19c74df7900d1d6d588a14d2"
+
+        fun getAuthenticationRequest() : AuthenticationRequest {
+            val builder = AuthenticationRequest.Builder(PlatformConnectActivity.CLIENT_ID,
+                AuthenticationResponse.Type.TOKEN,
+                PlatformConnectActivity.REDIRECT_URI)
+            builder.setShowDialog(true)
+            builder.setScopes(arrayOf("user-read-private", "streaming", "user-library-modify", "playlist-modify-private", "playlist-modify-public", "user-library-read", "playlist-read-private"))
+            return builder.build()
+        }
 
         fun login(activity : Activity) {
             val builder = AuthenticationRequest.Builder(CLIENT_ID,
@@ -93,7 +100,7 @@ class SpotifyClient {
                         val result = JSONObject(response.text)
 //                        Log.d(LOG_TAG, result.toString())
                         val memberIsPremium = result.getString("product")
-                        val displayName = result.getString("display_name")
+                        USER_NAME = result.getString("display_name")
                         USER_ID = result.getString("id")
                     }
                     else -> {

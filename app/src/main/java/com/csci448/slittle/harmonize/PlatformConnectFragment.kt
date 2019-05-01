@@ -1,10 +1,11 @@
 package com.csci448.slittle.harmonize
-import android.app.Activity
 import android.app.Activity.RESULT_OK
+import android.content.ContentValues
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
+import android.provider.BaseColumns
 import android.util.Log
 import android.support.v4.app.Fragment
 import android.view.*
@@ -21,15 +22,59 @@ class PlatformConnectFragment : Fragment() {
         private const val LOG_TAG = "PlatformConnectFragment"
     }
 
-    private fun loginToSpotify() {
-        val builder = AuthenticationRequest.Builder(PlatformConnectActivity.CLIENT_ID,
-                                                    AuthenticationResponse.Type.TOKEN,
-                                                    PlatformConnectActivity.REDIRECT_URI)
-        builder.setShowDialog(true)
-        builder.setScopes(arrayOf("user-read-private", "streaming", "user-library-modify", "playlist-modify-private", "playlist-modify-public", "user-library-read", "playlist-read-private"))
-        val request = builder.build()
+    private lateinit var dbHelper : SpotifyReaderDbHelper
 
-        AuthenticationClient.openLoginActivity(activity, PlatformConnectActivity.SPOTIFY_LOGIN_REQUEST_CODE, request)
+    private fun connectToPlatform(platform : String) {
+        Log.d(LOG_TAG, "connectToPlatform() called")
+        var userId      : String? = null
+        var userName    : String? = null
+        var accessToken : String? = null
+
+        val db = dbHelper.readableDatabase
+        // specify the columns to retrieve
+        val projection = arrayOf(
+            BaseColumns._ID,
+            SpotifyReaderContract.UserEntry.USER_ID,
+            SpotifyReaderContract.UserEntry.USER_NAME,
+            SpotifyReaderContract.UserEntry.PLATFORM,
+            SpotifyReaderContract.UserEntry.ACCESS_TOKEN)
+        val selection = "${SpotifyReaderContract.UserEntry.PLATFORM} = ?"
+        val selectionArgs = arrayOf(platform)
+
+        val cursor = db.query(
+            SpotifyReaderContract.UserEntry.TABLE_NAME,
+            projection,
+            selection,     // The columns for the WHERE clause
+            selectionArgs, // The values for the WHERE clause
+            null,
+            null,
+            null
+        )
+
+        with(cursor) {
+            while (moveToNext()) {
+                //val rowId = getLong(getColumnIndexOrThrow(BaseColumns._ID))
+                userId = getString(getColumnIndexOrThrow(SpotifyReaderContract.UserEntry.USER_ID))
+                userName = getString(getColumnIndexOrThrow(SpotifyReaderContract.UserEntry.USER_NAME))
+                accessToken = getString(getColumnIndexOrThrow(SpotifyReaderContract.UserEntry.ACCESS_TOKEN))
+            }
+        }
+
+        if (accessToken == null) {
+            loginToSpotify()
+        }
+        // user already has an access token
+        else {
+            SpotifyClient.ACCESS_TOKEN = accessToken as String
+            val generateActivityIntent = GeneratePlaylistActivity.createIntent(context)
+            startActivity(generateActivityIntent)
+        }
+
+        cursor.close()
+    }
+
+    private fun loginToSpotify() {
+        AuthenticationClient.openLoginActivity(activity, PlatformConnectActivity.SPOTIFY_LOGIN_REQUEST_CODE, SpotifyClient.getAuthenticationRequest())
     }
 
     private fun logoutFromSpotify() {
@@ -65,11 +110,11 @@ class PlatformConnectFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         connect_progress_circle.visibility = GONE
 
+        dbHelper = SpotifyReaderDbHelper(context)
+
         connect_spotify_button.setOnClickListener {
-//            Toast.makeText(context, "Connecting Spotify!", Toast.LENGTH_SHORT).show()
             connect_progress_circle.visibility = VISIBLE
-            loginToSpotify()
-//            SpotifyClient.login(activity as Activity)
+            connectToPlatform("Spotify")
         }
         connect_apple_button.setOnClickListener {
             Toast.makeText(context, "Connecting Apple Music!", Toast.LENGTH_SHORT).show()

@@ -1,5 +1,6 @@
 package com.csci448.slittle.harmonize
 
+import android.content.ContentValues
 import android.content.Context
 import android.content.Intent
 import android.util.Log
@@ -27,6 +28,8 @@ class PlatformConnectActivity : SingleFragmentActivity() {
         lateinit var ACCESS_TOKEN: String
     }
 
+    private lateinit var dbHelper : SpotifyReaderDbHelper
+
     override fun getLogTag() = LOG_TAG
 
     override fun createFragment() = PlatformConnectFragment()
@@ -37,6 +40,8 @@ class PlatformConnectActivity : SingleFragmentActivity() {
         super.onActivityResult(requestCode, resultCode, data)
         if (resultCode != RESULT_OK) { return }
         if (data == null) { return }
+
+        dbHelper = SpotifyReaderDbHelper(baseContext)
 
         // Spotify login activity
         if (requestCode == SPOTIFY_LOGIN_REQUEST_CODE) {
@@ -51,6 +56,8 @@ class PlatformConnectActivity : SingleFragmentActivity() {
                     SpotifyClient.ACCESS_TOKEN = response.accessToken
                     // get user info like ID and Name
                     SpotifyClient.getUserInformation()
+                    // this
+                    storeSpotifyUser(SpotifyClient.USER_ID, SpotifyClient.USER_NAME, SpotifyClient.ACCESS_TOKEN)
 
                     val generateActivityIntent = GeneratePlaylistActivity.createIntent(this)
                     startActivity(generateActivityIntent)
@@ -69,6 +76,29 @@ class PlatformConnectActivity : SingleFragmentActivity() {
                     Toast.makeText(this, "Something else happened.", Toast.LENGTH_SHORT).show()
                 }
             }
+        }
+    }
+
+    private fun storeSpotifyUser(userId : String,
+                                 userName : String,
+                                 accessToken : String) {
+        Log.d(LOG_TAG, "storeSpotifyUser() called")
+        // Gets the data repository in write mode
+        val db = dbHelper.writableDatabase
+        // Create a new map of values, where column names are the keys
+        val values = ContentValues().apply {
+            put(SpotifyReaderContract.UserEntry.USER_ID, userId)
+            put(SpotifyReaderContract.UserEntry.USER_NAME, userName)
+            put(SpotifyReaderContract.UserEntry.PLATFORM, "Spotify")
+            put(SpotifyReaderContract.UserEntry.ACCESS_TOKEN, accessToken)
+        }
+
+        // Insert the new row, returning the primary key value of the new row
+        val newRowId = db?.insert(SpotifyReaderContract.UserEntry.TABLE_NAME, null, values)
+
+        if (newRowId == -1L) {
+            // conflict with pre-existing data
+            Log.d(LOG_TAG, "new row id = -1. conflict with pre-existing id")
         }
     }
 }
