@@ -110,7 +110,7 @@ class SpotifyClient {
             }
         }
 
-        fun getPlaylistTracks(playlistId : String) : Any? = runBlocking {
+        fun getPlaylistTracks(playlistId : String) : MutableList<Track> = runBlocking {
             Log.d(LOG_TAG, "getPlaylistTracks() called")
             val items = URLEncoder.encode("items(track(album, artists, id, name, type))", "utf-8")
 
