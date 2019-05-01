@@ -1,9 +1,11 @@
 package com.csci448.slittle.harmonize
 import android.app.Activity.RESULT_OK
+import android.content.ContentValues
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
+import android.provider.BaseColumns
 import android.util.Log
 import android.support.v4.app.Fragment
 import android.view.*
@@ -18,8 +20,26 @@ class ExportFragment : Fragment() {
     private lateinit var playlistTitle : String
     private var trackIds = arrayListOf<String>()
     private var tunedParameters = mutableMapOf<String, String>()
+    private var newPlaylistData : Pair<String?, String?>? = null
+    private lateinit var dbHelper : SpotifyReaderDbHelper
+    private var insertId : Long? = null
 
+    private fun updatePlaylistInDb (href : String, id : String, name : String) : Int {
+        // Gets the data repository in write mode
+        val db = dbHelper.writableDatabase
 
+        val values = ContentValues().apply {
+            put(SpotifyReaderContract.PlaylistEntry.PLAYLIST_HREF, href)
+            put(SpotifyReaderContract.PlaylistEntry.PLAYLIST_ID, id)
+        }
+
+        val selection = "${BaseColumns._ID}=?"
+        val selectionArgs = arrayOf(name)
+        return db.update(SpotifyReaderContract.PlaylistEntry.TABLE_NAME,
+                         values,
+                         selection,
+                         selectionArgs)
+    }
     private fun openOtherApp(uri : String) {
         val intent = Intent(Intent.ACTION_VIEW)
         intent.data = Uri.parse(uri)
@@ -58,6 +78,7 @@ class ExportFragment : Fragment() {
             playlistTitle = savedInstanceState.getString("PLAYLIST_NAME")
             trackIds = savedInstanceState.getStringArrayList("PLAYLIST_TRACK_IDS")
             tunedParameters = savedInstanceState.getSerializable("TUNED_PARAMETERS") as HashMap<String, String>
+            insertId = savedInstanceState.getLong("PLAYLIST_INSERT_ID")
         }
 
         // extras would overwrite values from saved instance state
@@ -73,12 +94,20 @@ class ExportFragment : Fragment() {
 
         export_spotify_button.setOnClickListener {
             Toast.makeText(context, "Exporting to Spotify...", Toast.LENGTH_SHORT).show()
-            val playlistId = SpotifyClient.exportPlaylist(playlistTitle,
-                                                                 trackIds.toList(),
-                                                                 tunedParameters) as String?
+            newPlaylistData = SpotifyClient.exportPlaylist(playlistTitle,
+                                                           trackIds.toList(),
+                                                           tunedParameters)
 
-            if (playlistId != null) {
-                val redirectURI = "spotify:user:${SpotifyClient.USER_ID}:playlist:$playlistId"
+            if (newPlaylistData != null) {
+                // update db with new id and href
+                val newPlaylistId = newPlaylistData?.first
+                val newPlaylistHref = newPlaylistData?.second
+                if (insertId != -1L && newPlaylistId != null && newPlaylistHref != null) {
+                    updatePlaylistInDb(newPlaylistHref, newPlaylistId, playlistTitle)
+                }
+
+                // open spotify app
+                val redirectURI = "spotify:user:${SpotifyClient.USER_ID}:playlist:$newPlaylistId"
                 openOtherApp(redirectURI)
             }
         }

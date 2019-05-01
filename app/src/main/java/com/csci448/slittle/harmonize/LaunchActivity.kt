@@ -15,7 +15,8 @@ class LaunchActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         Log.d(LOG_TAG, "onCreate() called")
-        val launchIntent = PlatformConnectActivity.createIntent(baseContext)
+//        val launchIntent = PlatformConnectActivity.createIntent(baseContext)
+        val launchIntent = MainActivity.createIntent(baseContext)
         startActivity(launchIntent)
         finish()
     }

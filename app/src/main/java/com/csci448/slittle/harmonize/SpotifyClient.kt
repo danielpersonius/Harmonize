@@ -79,7 +79,7 @@ class SpotifyClient {
                     val type = playlistData.getString("type")
                     val uri = playlistData.getString("uri")
                     playlists.add(
-                        Playlist(href, id, name, collaborative, owner, public, type, uri, null)
+                        Playlist(null, href, id, name, collaborative, owner, public, type, uri, null)
                     )
                 }
                 playlists
@@ -250,7 +250,7 @@ class SpotifyClient {
         fun exportPlaylist(playlistName    : String,
                            trackIds        : List<String>,
                            tunedParameters : Map<String, String> = mapOf()
-                          ) : String? = runBlocking {
+                          ) : Pair<String?, String?>? = runBlocking {
             // beautify tuned parameters
             var tunedParametersString = "["
             for ((key, value) in tunedParameters) {
@@ -265,6 +265,7 @@ class SpotifyClient {
             tunedParametersString = tunedParametersString.substring(0, tunedParametersString.lastIndexOf(',')) + "]"
 
             var playlistId : String? = null
+            var playlistHref : String? = null
             if (::ACCESS_TOKEN.isInitialized) {
                 if (trackIds.isNotEmpty()) {
                     withContext(Dispatchers.IO) {
@@ -282,8 +283,9 @@ class SpotifyClient {
                                                            headers = mapOf("Authorization" to "Bearer $ACCESS_TOKEN", "Content-Type" to "application/json"))
                         when (createResponse.statusCode) {
                             201 -> {
-                                // get new playlist name and id
-                                playlistId = JSONObject(createResponse.text).getString("id")
+                                // get new playlist id and href
+                                playlistId   = JSONObject(createResponse.text).getString("id")
+                                playlistHref = JSONObject(createResponse.text).getString("href")
                                 // add tracks
                                 val uris = mutableListOf<String>()
                                 for (i in 0 until trackIds.size) {
@@ -308,11 +310,11 @@ class SpotifyClient {
                     }
                 }
             }
-            playlistId
+            Pair(playlistId, playlistHref)
         }
 
-        // todo a bit of the last track is heard when playing a new track. tried to fix with volume control, but not working yet
-        // todo change to App Remote SDK, instead of using the Web Api
+        // todo - a bit of the last track is heard when playing a new track. tried to fix with volume control, but not working yet
+        // todo - change to App Remote SDK, instead of using the Web Api
         fun startPlayback(uri : String,
                           isPaused : Boolean) : Any? = runBlocking {
             val deviceId = getUserDevices()

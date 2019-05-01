@@ -3,10 +3,12 @@ package com.csci448.slittle.harmonize
 import android.content.ContentValues
 import android.content.Context
 import android.content.Intent
+import android.os.Bundle
 import android.util.Log
 import android.widget.Toast
 import com.spotify.sdk.android.authentication.AuthenticationClient
 import com.spotify.sdk.android.authentication.AuthenticationResponse
+import kotlinx.android.synthetic.main.app_bar_main.*
 
 
 class PlatformConnectActivity : SingleFragmentActivity() {
@@ -34,6 +36,11 @@ class PlatformConnectActivity : SingleFragmentActivity() {
 
     override fun createFragment() = PlatformConnectFragment()
 
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+//        actionBar?.show()
+        setSupportActionBar(toolbar)
+    }
     // handling results has to happen here and not in fragment, since passing 'activity'
     // as context to spotify login function
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
@@ -100,5 +107,7 @@ class PlatformConnectActivity : SingleFragmentActivity() {
             // conflict with pre-existing data
             Log.d(LOG_TAG, "new row id = -1. conflict with pre-existing id")
         }
+
+        db.close()
     }
 }

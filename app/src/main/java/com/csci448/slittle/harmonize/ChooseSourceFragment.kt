@@ -80,7 +80,7 @@ class ChooseSourceFragment : Fragment() {
             playlistTextView.setOnClickListener {
                 // need to be IDs, not names
                 val allArtists = mutableSetOf<String>()
-                val tracks = SpotifyClient.getPlaylistTracks(playlist._id) as MutableList<Track>
+                val tracks = SpotifyClient.getPlaylistTracks(playlist._id ?: "")
                 for (track : Track in tracks) {
                     allArtists.addAll(track._artistIds)
                 }

@@ -6,8 +6,11 @@ import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import android.provider.BaseColumns
+import android.support.design.widget.NavigationView
 import android.util.Log
 import android.support.v4.app.Fragment
+import android.support.v4.view.GravityCompat
+import android.support.v7.app.ActionBarDrawerToggle
 import android.view.*
 import android.view.View.GONE
 import android.view.View.VISIBLE
@@ -16,8 +19,10 @@ import kotlinx.android.synthetic.main.fragment_connect.*
 import com.spotify.sdk.android.authentication.AuthenticationClient
 import com.spotify.sdk.android.authentication.AuthenticationRequest
 import com.spotify.sdk.android.authentication.AuthenticationResponse
+import kotlinx.android.synthetic.main.activity_main.*
+import kotlinx.android.synthetic.main.app_bar_main.*
 
-class PlatformConnectFragment : Fragment() {
+class PlatformConnectFragment : Fragment(), NavigationView.OnNavigationItemSelectedListener {
     companion object {
         private const val LOG_TAG = "PlatformConnectFragment"
     }
@@ -102,7 +107,8 @@ class PlatformConnectFragment : Fragment() {
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         Log.d(LOG_TAG, "onCreateView() called")
-        return inflater.inflate(R.layout.fragment_connect, container, false)
+//        return inflater.inflate(R.layout.fragment_connect, container, false)
+        return inflater.inflate(R.layout.fragment_connect_two, container, false)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -129,19 +135,38 @@ class PlatformConnectFragment : Fragment() {
 
     override fun onCreateOptionsMenu(menu: Menu?, inflater: MenuInflater?) {
         super.onCreateOptionsMenu(menu, inflater)
-        inflater?.inflate(R.menu.platform_connect_options, menu)
+//        inflater?.inflate(R.menu.platform_connect_options, menu)
+        inflater?.inflate(R.menu.main, menu)
     }
 
     override fun onOptionsItemSelected(item: MenuItem?): Boolean =
         // Handle presses on the action bar menu items
         when (item?.itemId) {
             R.id.logout_spotify_option -> {
-//                SpotifyClient.logout() as Boolean
                 logoutFromSpotify()
                 true
             }
             else -> super.onOptionsItemSelected(item)
         }
+
+    override fun onNavigationItemSelected(item: MenuItem): Boolean {
+        // Handle navigation view item clicks here.
+        when (item.itemId) {
+            R.id.nav_generate -> {
+//                val generatePlaylistIntent = GeneratePlaylistActivity.createIntent(baseContext)
+//                startActivity(generatePlaylistIntent)
+                val connectPlatformIntent = PlatformConnectActivity.createIntent(context)
+                startActivity(connectPlatformIntent)
+            }
+            R.id.nav_connect -> {
+                val connectPlatformIntent = PlatformConnectActivity.createIntent(context)
+                startActivity(connectPlatformIntent)
+            }
+        }
+
+        drawer_layout.closeDrawer(GravityCompat.START)
+        return true
+    }
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)

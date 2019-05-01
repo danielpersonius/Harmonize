@@ -2,6 +2,7 @@ package com.csci448.slittle.harmonize
 
 import android.app.Activity
 import android.app.AlertDialog
+import android.content.ContentValues
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
@@ -12,6 +13,12 @@ import android.widget.*
 
 import kotlinx.android.synthetic.main.fragment_view_playlist.*
 import kotlinx.android.synthetic.main.playlist_item.view.*
+import java.text.SimpleDateFormat
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
+import java.util.*
+import kotlin.collections.ArrayList
+import kotlin.collections.HashMap
 
 
 class ViewPlaylistFragment : Fragment() {
@@ -22,6 +29,71 @@ class ViewPlaylistFragment : Fragment() {
     var playlistTitle : String? = "Playlist name"
     var tracks : List<Track> = arrayListOf()
     var tunedParameters : HashMap<String, String> = hashMapOf()
+    private lateinit var dbHelper : SpotifyReaderDbHelper
+    private var insertId : Long? = null
+
+    private fun savePlaylist() : Long? {
+        Log.d(LOG_TAG, "savePlaylist() called")
+        // Gets the data repository in write mode
+        val db = dbHelper.writableDatabase
+
+        // current timestamp
+//        val current = LocalDateTime.now()
+//        val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSS")
+//        val formattedDateTime = current.format(formatter)
+        val sdf = SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS", Locale.getDefault())
+        val formattedDateTime = sdf.format(Date()) // format current date
+
+        // Create a new map of values, where column names are the keys
+        val values = ContentValues().apply {
+            //put(SpotifyReaderContract.PlaylistEntry.PLAYLIST_HREF, null)
+            //put(SpotifyReaderContract.PlaylistEntry.PLAYLIST_ID, null)
+            put(SpotifyReaderContract.PlaylistEntry.PLAYLIST_CREATED, formattedDateTime)
+            put(SpotifyReaderContract.PlaylistEntry.PLAYLIST_NAME, playlistTitle)
+            put(SpotifyReaderContract.PlaylistEntry.PLAYLIST_COLLABORATIVE, 0)
+            put(SpotifyReaderContract.PlaylistEntry.PLAYLIST_OWNER, SpotifyClient.USER_NAME)
+            put(SpotifyReaderContract.PlaylistEntry.PLAYLIST_PUBLIC, 0)
+            put(SpotifyReaderContract.PlaylistEntry.PLAYLIST_TYPE, "playlist")
+            //put(SpotifyReaderContract.PlaylistEntry.PLAYLIST_URI, null)
+        }
+
+        // Insert the new row, returning the primary key value of the new row
+        val newRowId = db?.insert(SpotifyReaderContract.PlaylistEntry.TABLE_NAME, null, values)
+
+        if (newRowId == -1L) {
+            // conflict with pre-existing data
+            Log.d(LOG_TAG, "new row id = -1. conflict with pre-existing id")
+        }
+
+        db.close()
+        return newRowId
+    }
+
+    private fun saveTrack(track : Track) : Long? {
+        Log.d(LOG_TAG, "saveTrack() called")
+        // Gets the data repository in write mode
+        val db = dbHelper.writableDatabase
+
+        // Create a new map of values, where column names are the keys
+        val values = ContentValues().apply {
+            put(SpotifyReaderContract.TrackEntry.TRACK_ID,          track._id)
+            put(SpotifyReaderContract.TrackEntry.PLAYLIST_ID,       insertId)
+            put(SpotifyReaderContract.TrackEntry.TRACK_NAME,        track._name)
+            put(SpotifyReaderContract.TrackEntry.TRACK_ARTISTS,     track._artistNames.toString())
+            put(SpotifyReaderContract.TrackEntry.TRACK_ARTISTS_IDS, track._artistIds.toString())
+            put(SpotifyReaderContract.TrackEntry.TRACK_ALBUM,       track._album)
+        }
+
+        // Insert the new row, returning the primary key value of the new row
+        val newRowId = db?.insert(SpotifyReaderContract.TrackEntry.TABLE_NAME, null, values)
+
+        if (newRowId == -1L) {
+            // conflict with pre-existing data
+            Log.d(LOG_TAG, "new row id = -1. conflict with pre-existing id")
+        }
+
+        return newRowId
+    }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
@@ -43,6 +115,9 @@ class ViewPlaylistFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         Log.d(LOG_TAG, "onViewCreated() called")
         super.onViewCreated(view, savedInstanceState)
+
+        dbHelper = SpotifyReaderDbHelper(context)
+        insertId = savePlaylist()
 
         // rotation
         if (savedInstanceState != null) {
@@ -97,6 +172,8 @@ class ViewPlaylistFragment : Fragment() {
             val artistNameTextView = trackView.findViewById(R.id.playlist_artist_name) as TextView
             val albumNameTextView  = trackView.findViewById(R.id.playlist_album_name) as TextView
 
+            saveTrack(track)
+
             songNameTextView.text   = track._name
             val artists = track._artistNames
             var artistsText = ""
@@ -116,7 +193,6 @@ class ViewPlaylistFragment : Fragment() {
                 Toast.makeText(context, "Play song", Toast.LENGTH_SHORT).show()
                 SpotifyClient.startPlayback(track._id, false)
             }
-            // metadata(e.g. song characteristics) on long press
             trackView.song_info_icon.setOnClickListener {
                 val audioFeatures = SpotifyClient.getTrackAudioFeatures(track._id) as MutableMap<String, String>
                 track._metadata = audioFeatures
@@ -148,6 +224,9 @@ class ViewPlaylistFragment : Fragment() {
                 }
                 exportIntent.putExtra("PLAYLIST_TRACK_IDS", ArrayList(trackIds))
                 exportIntent.putExtra("TUNED_PARAMETERS", tunedParameters)
+                if (insertId != -1L) {
+                    exportIntent.putExtra("PLAYLIST_INSERT_ID", insertId)
+                }
                 startActivity(exportIntent)
                 true
             }
@@ -181,6 +260,7 @@ class ViewPlaylistFragment : Fragment() {
 
     override fun onDestroy() {
         super.onDestroy()
+        dbHelper.close()
         Log.d(LOG_TAG, "onDestroy() called")
     }
 
