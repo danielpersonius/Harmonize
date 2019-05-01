@@ -127,19 +127,26 @@ class TuneParametersFragment : Fragment() {
                     else
                         artist_similarity_seekbar.progress
                 val suggestedTracks = SpotifyClient.generatePlaylist(playlistId.toString(),
-                                               seedArtists!!.toList(),
-                                               seedGenres,
-                                               seedTracks,
-                                               suggestedTrackLimit,
-                                               artistSimilarity,
-                                               danceability,
-                                               energy,
-                                               speechiness,
-                                               loudness,
-                                               valence,
-                                               featureParameterBuffer) as List<Track>
+                                                                                seedArtists!!.toList(),
+                                                                                seedGenres,
+                                                                                seedTracks,
+                                                                                suggestedTrackLimit,
+                                                                                artistSimilarity,
+                                                                                danceability,
+                                                                                energy,
+                                                                                speechiness,
+                                                                                loudness,
+                                                                                valence,
+                                                                                featureParameterBuffer) as List<Track>
                 val viewPlaylistIntent = ViewPlaylistActivity.createIntent(context, "$playlistName Suggested")
                 viewPlaylistIntent.putExtra("PLAYLIST_TRACKS", ArrayList(suggestedTracks))
+                // make values into strings so the spotify client can put them in the post request
+                viewPlaylistIntent.putExtra("TUNED_PARAMETERS", hashMapOf(
+                                                                          "danceability" to "$danceability",
+                                                                          "energy" to "$energy",
+                                                                          "speechiness" to "$speechiness",
+                                                                          "loudness" to "$loudness",
+                                                                          "valence" to "$valence"))
                 startActivity(viewPlaylistIntent)
             }
         }

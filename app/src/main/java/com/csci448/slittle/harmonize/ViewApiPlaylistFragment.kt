@@ -96,9 +96,9 @@ class ViewApiPlaylistFragment : Fragment() {
             val track = it
             val inflater        = context?.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
             val trackView             = inflater.inflate(R.layout.playlist_item,null)
-            val songNameTextView   = trackView.findViewById<TextView>(R.id.playlist_song_name)
-            val artistNameTextView = trackView.findViewById<TextView>(R.id.playlist_artist_name)
-            val albumNameTextView  = trackView.findViewById<TextView>(R.id.playlist_album_name)
+            val songNameTextView   = trackView.findViewById(R.id.playlist_song_name) as TextView
+            val artistNameTextView = trackView.findViewById(R.id.playlist_artist_name) as TextView
+            val albumNameTextView  = trackView.findViewById(R.id.playlist_album_name) as TextView
 
             // it is name of iterator
             songNameTextView.text   = track._name

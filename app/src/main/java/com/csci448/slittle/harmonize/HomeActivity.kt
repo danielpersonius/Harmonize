@@ -66,8 +66,8 @@ class HomeActivity : SingleFragmentActivity(), NavigationView.OnNavigationItemSe
             val inflater = parent?.context?.
                 getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
             val view = inflater.inflate(R.layout.playlist_grid_item,null)
-            val image = view.findViewById<ImageView>(R.id.playlist_grid_playlist_image)
-            val name  = view.findViewById<TextView>(R.id.playlist_grid_playlist_name)
+            val image = view.findViewById(R.id.playlist_grid_playlist_image) as ImageView
+            val name  = view.findViewById(R.id.playlist_grid_playlist_name) as TextView
 
             name.text = getItem(position)._name
 

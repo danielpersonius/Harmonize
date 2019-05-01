@@ -21,6 +21,7 @@ class ViewPlaylistFragment : Fragment() {
 
     var playlistTitle : String? = "Playlist name"
     var tracks : List<Track> = arrayListOf()
+    var tunedParameters : HashMap<String, String> = hashMapOf()
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
@@ -56,6 +57,7 @@ class ViewPlaylistFragment : Fragment() {
                 playlistTitle = extras.getString("PLAYLIST_NAME")
                 val playlistId = extras.getString("PLAYLIST_ID") ?: null
                 tracks = extras.getStringArrayList("PLAYLIST_TRACKS") as List<Track>
+                tunedParameters = extras.getSerializable("TUNED_PARAMETERS") as HashMap<String, String>
 //                if (playlistId != null) {
 //                    tracks = SpotifyClient.getPlaylistTracks(playlistId) as MutableList<Track>
 //                }
@@ -75,7 +77,8 @@ class ViewPlaylistFragment : Fragment() {
             builder.setView(titleEditTextBox)
             builder.setPositiveButton("Done") {_, _ ->
                 // todo persist name change
-                playlist_name_banner.text = titleEditTextBox.text.toString()
+                playlistTitle = titleEditTextBox.text.toString()
+                playlist_name_banner.text = playlistTitle
             }
 
             builder.setNegativeButton("Cancel") {_, _ ->
@@ -90,9 +93,9 @@ class ViewPlaylistFragment : Fragment() {
             val track = it
             val inflater        = context?.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
             val trackView             = inflater.inflate(R.layout.playlist_item,null)
-            val songNameTextView   = trackView.findViewById<TextView>(R.id.playlist_song_name)
-            val artistNameTextView = trackView.findViewById<TextView>(R.id.playlist_artist_name)
-            val albumNameTextView  = trackView.findViewById<TextView>(R.id.playlist_album_name)
+            val songNameTextView   = trackView.findViewById(R.id.playlist_song_name) as TextView
+            val artistNameTextView = trackView.findViewById(R.id.playlist_artist_name) as TextView
+            val albumNameTextView  = trackView.findViewById(R.id.playlist_album_name) as TextView
 
             songNameTextView.text   = track._name
             val artists = track._artistNames
@@ -111,6 +114,7 @@ class ViewPlaylistFragment : Fragment() {
             // play song on press
             trackView.setOnClickListener {
                 Toast.makeText(context, "Play song", Toast.LENGTH_SHORT).show()
+                SpotifyClient.startPlayback(track._id, false)
             }
             // metadata(e.g. song characteristics) on long press
             trackView.song_info_icon.setOnClickListener {
@@ -136,6 +140,14 @@ class ViewPlaylistFragment : Fragment() {
         when (item?.itemId) {
             R.id.playlist_menu_export_option -> {
                 val exportIntent = ExportActivity.createIntent(context)
+                exportIntent.putExtra("PLAYLIST_NAME", playlistTitle)
+                // get just the ids of the tracks
+                val trackIds = mutableListOf<String>()
+                for (track : Track in tracks) {
+                    trackIds.add(track._id)
+                }
+                exportIntent.putExtra("PLAYLIST_TRACK_IDS", ArrayList(trackIds))
+                exportIntent.putExtra("TUNED_PARAMETERS", tunedParameters)
                 startActivity(exportIntent)
                 true
             }

@@ -86,7 +86,7 @@ class TrackCharacteristicsFragment : Fragment() {
             }
         }
 
-        val banner = trackName + getString(R.string.characteristics_string)
+        val banner = trackName + " " + getString(R.string.characteristics_string)
         track_characteristics_label.text = banner
         danceability_value.text     = convertValueToPercentage(audioFeatures["danceability"])
         energy_value.text           = convertValueToPercentage(audioFeatures["energy"])

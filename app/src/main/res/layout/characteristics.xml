@@ -13,7 +13,6 @@
             android:id="@+id/track_characteristics_label"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="48dp"
             android:background="@color/colorPrimaryDark"
             android:gravity="center"
             android:textSize="44sp"
@@ -53,8 +52,7 @@
                         android:layout_height="match_parent"
                         android:textSize="30sp"
                         android:gravity="end"
-                        tools:hint="#"
-                        android:background="#fff"/>
+                        tools:hint="#"/>
             </LinearLayout>
             <LinearLayout
                     android:layout_width="match_parent"
@@ -76,7 +74,7 @@
                         android:layout_height="match_parent"
                         android:textSize="30sp"
                         android:gravity="end"
-                        android:background="#fff"/>
+                        tools:hint="#"/>
             </LinearLayout>
             <LinearLayout
                     android:layout_width="match_parent"
@@ -98,7 +96,7 @@
                         android:layout_height="match_parent"
                         android:textSize="30sp"
                         android:gravity="end"
-                        android:background="#fff"/>
+                        tools:hint="#"/>
             </LinearLayout>
             <LinearLayout
                     android:layout_width="match_parent"
@@ -120,7 +118,7 @@
                         android:layout_height="match_parent"
                         android:textSize="30sp"
                         android:gravity="end"
-                        android:background="#fff"/>
+                        tools:hint="#"/>
             </LinearLayout>
             <LinearLayout
                     android:layout_width="match_parent"
@@ -142,7 +140,7 @@
                         android:layout_height="match_parent"
                         android:textSize="30sp"
                         android:gravity="end"
-                        android:background="#fff"/>
+                        tools:hint="#"/>
             </LinearLayout>
             <LinearLayout
                     android:layout_width="match_parent"
@@ -164,7 +162,7 @@
                         android:layout_height="match_parent"
                         android:textSize="30sp"
                         android:gravity="end"
-                        android:background="#fff"/>
+                        tools:hint="#"/>
             </LinearLayout>
             <LinearLayout
                     android:layout_width="match_parent"
@@ -186,7 +184,7 @@
                         android:layout_height="match_parent"
                         android:textSize="30sp"
                         android:gravity="end"
-                        android:background="#fff"/>
+                        tools:hint="#"/>
             </LinearLayout>
             <LinearLayout
                     android:layout_width="match_parent"
@@ -208,7 +206,7 @@
                         android:layout_height="match_parent"
                         android:textSize="30sp"
                         android:gravity="end"
-                        android:background="#fff"/>
+                        tools:hint="#"/>
             </LinearLayout>
             <LinearLayout
                     android:layout_width="match_parent"
@@ -230,7 +228,7 @@
                         android:layout_height="match_parent"
                         android:textSize="30sp"
                         android:gravity="end"
-                        android:background="#fff"/>
+                        tools:hint="#"/>
             </LinearLayout>
             <LinearLayout
                     android:layout_width="match_parent"
@@ -252,7 +250,7 @@
                         android:layout_height="match_parent"
                         android:textSize="30sp"
                         android:gravity="end"
-                        android:background="#fff"/>
+                        tools:hint="#"/>
             </LinearLayout>
         </LinearLayout>
 

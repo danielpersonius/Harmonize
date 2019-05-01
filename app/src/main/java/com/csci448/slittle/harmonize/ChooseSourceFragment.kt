@@ -47,14 +47,15 @@ class ChooseSourceFragment : Fragment() {
 
     override fun onOptionsItemSelected(item: MenuItem?): Boolean =
         // Handle presses on the action bar menu items
-        when (item?.itemId) {
-            R.id.playlist_create_option -> {
-                val generateIntent = GeneratePlaylistActivity.createIntent(context)
-                startActivity(generateIntent)
-                true
-            }
-            else -> super.onOptionsItemSelected(item)
-        }
+        true
+//        when (item?.itemId) {
+//            R.id.playlist_create_option -> {
+//                val generateIntent = GeneratePlaylistActivity.createIntent(context)
+//                startActivity(generateIntent)
+//                true
+//            }
+//            else -> super.onOptionsItemSelected(item)
+//        }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         Log.d(LOG_TAG, "onCreateView() called")

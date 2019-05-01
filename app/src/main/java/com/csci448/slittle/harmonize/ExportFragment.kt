@@ -2,6 +2,7 @@ package com.csci448.slittle.harmonize
 import android.app.Activity.RESULT_OK
 import android.content.Context
 import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import android.util.Log
 import android.support.v4.app.Fragment
@@ -10,9 +11,20 @@ import android.widget.Toast
 import kotlinx.android.synthetic.main.export.*
 
 class ExportFragment : Fragment() {
-
     companion object {
         private const val LOG_TAG = "ExportFragment"
+    }
+
+    private lateinit var playlistTitle : String
+    private var trackIds = arrayListOf<String>()
+    private var tunedParameters = mutableMapOf<String, String>()
+
+
+    private fun openOtherApp(uri : String) {
+        val intent = Intent(Intent.ACTION_VIEW)
+        intent.data = Uri.parse(uri)
+        intent.putExtra(Intent.EXTRA_REFERRER, Uri.parse("android-app://" + context!!.packageName))
+        startActivity(intent)
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
@@ -41,17 +53,43 @@ class ExportFragment : Fragment() {
         Log.d(LOG_TAG, "onViewCreated() called")
         super.onViewCreated(view, savedInstanceState)
 
+        // rotation
+        if (savedInstanceState != null) {
+            playlistTitle = savedInstanceState.getString("PLAYLIST_NAME")
+            trackIds = savedInstanceState.getStringArrayList("PLAYLIST_TRACK_IDS")
+            tunedParameters = savedInstanceState.getSerializable("TUNED_PARAMETERS") as HashMap<String, String>
+        }
+
+        // extras would overwrite values from saved instance state
+        else {
+            val intent = activity?.intent
+            val extras = intent?.extras
+            if (extras != null) {
+                playlistTitle = if (extras.containsKey("PLAYLIST_NAME")) extras.getString("PLAYLIST_NAME") else "suggested playlist"
+                trackIds = extras.getStringArrayList("PLAYLIST_TRACK_IDS")
+                tunedParameters = extras.getSerializable("TUNED_PARAMETERS") as HashMap<String, String>
+            }
+        }
+
         export_spotify_button.setOnClickListener {
-            Toast.makeText(context, "Exported to Spotify!", Toast.LENGTH_SHORT).show()
+            Toast.makeText(context, "Exporting to Spotify...", Toast.LENGTH_SHORT).show()
+            val playlistId = SpotifyClient.exportPlaylist(playlistTitle,
+                                                                 trackIds.toList(),
+                                                                 tunedParameters) as String?
+
+            if (playlistId != null) {
+                val redirectURI = "spotify:user:${SpotifyClient.USER_ID}:playlist:$playlistId"
+                openOtherApp(redirectURI)
+            }
         }
         export_apple_button.setOnClickListener {
-            Toast.makeText(context, "Exported to Apple Music!", Toast.LENGTH_SHORT).show()
+            Toast.makeText(context, "no action", Toast.LENGTH_SHORT).show()
         }
         export_soundcloud_button.setOnClickListener {
-            Toast.makeText(context, "Exported to Soundcloud!", Toast.LENGTH_SHORT).show()
+            Toast.makeText(context, "no action", Toast.LENGTH_SHORT).show()
         }
         export_pandora_button.setOnClickListener {
-            Toast.makeText(context, "Exported to Pandora!", Toast.LENGTH_SHORT).show()
+            Toast.makeText(context, "no action", Toast.LENGTH_SHORT).show()
         }
     }
 
