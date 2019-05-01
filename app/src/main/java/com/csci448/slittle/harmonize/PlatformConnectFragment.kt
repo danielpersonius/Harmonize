@@ -20,7 +20,10 @@ import com.spotify.sdk.android.authentication.AuthenticationClient
 import com.spotify.sdk.android.authentication.AuthenticationRequest
 import com.spotify.sdk.android.authentication.AuthenticationResponse
 import kotlinx.android.synthetic.main.activity_main.*
+import kotlinx.android.synthetic.main.activity_main.nav_view
+import kotlinx.android.synthetic.main.app_bar_connect.*
 import kotlinx.android.synthetic.main.app_bar_main.*
+import kotlinx.android.synthetic.main.fragment_connect_two.*
 
 class PlatformConnectFragment : Fragment(), NavigationView.OnNavigationItemSelectedListener {
     companion object {
@@ -108,7 +111,9 @@ class PlatformConnectFragment : Fragment(), NavigationView.OnNavigationItemSelec
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         Log.d(LOG_TAG, "onCreateView() called")
 //        return inflater.inflate(R.layout.fragment_connect, container, false)
-        return inflater.inflate(R.layout.fragment_connect_two, container, false)
+//        return inflater.inflate(R.layout.fragment_connect_two, container, false)
+//        return inflater.inflate(R.layout.activity_main, container, false)
+        return inflater.inflate(R.layout.activity_connect, container, false)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -117,6 +122,14 @@ class PlatformConnectFragment : Fragment(), NavigationView.OnNavigationItemSelec
         connect_progress_circle.visibility = GONE
 
         dbHelper = SpotifyReaderDbHelper(context)
+
+        val toggle = ActionBarDrawerToggle(
+            activity, connect_drawer_layout, connect_toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close
+        )
+        connect_drawer_layout.addDrawerListener(toggle)
+        toggle.syncState()
+
+        nav_view.setNavigationItemSelectedListener(this)
 
         connect_spotify_button.setOnClickListener {
             connect_progress_circle.visibility = VISIBLE
@@ -149,6 +162,7 @@ class PlatformConnectFragment : Fragment(), NavigationView.OnNavigationItemSelec
             else -> super.onOptionsItemSelected(item)
         }
 
+
     override fun onNavigationItemSelected(item: MenuItem): Boolean {
         // Handle navigation view item clicks here.
         when (item.itemId) {
@@ -156,11 +170,11 @@ class PlatformConnectFragment : Fragment(), NavigationView.OnNavigationItemSelec
 //                val generatePlaylistIntent = GeneratePlaylistActivity.createIntent(baseContext)
 //                startActivity(generatePlaylistIntent)
                 val connectPlatformIntent = PlatformConnectActivity.createIntent(context)
-                startActivity(connectPlatformIntent)
+                //startActivity(connectPlatformIntent)
             }
             R.id.nav_connect -> {
                 val connectPlatformIntent = PlatformConnectActivity.createIntent(context)
-                startActivity(connectPlatformIntent)
+                //startActivity(connectPlatformIntent)
             }
         }
 
