@@ -123,6 +123,15 @@ class PlatformConnectFragment : Fragment(), NavigationView.OnNavigationItemSelec
             activity, connect_drawer_layout, connect_toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close
         )
         connect_toolbar.inflateMenu(R.menu.platform_connect_options)
+        connect_toolbar.setOnMenuItemClickListener {
+            when(it.itemId) {
+                R.id.logout_spotify_option -> {
+                    logoutFromSpotify()
+                }
+                else -> super.onOptionsItemSelected(it)
+            }
+            true
+        }
 
         connect_drawer_layout.addDrawerListener(toggle)
         toggle.syncState()

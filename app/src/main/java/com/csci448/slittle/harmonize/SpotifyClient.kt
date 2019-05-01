@@ -359,7 +359,6 @@ class SpotifyClient {
                     }
                 }
             }
-
         }
 
         fun getActivePlayback() : Boolean = runBlocking {

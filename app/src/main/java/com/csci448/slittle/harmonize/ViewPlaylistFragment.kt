@@ -6,22 +6,24 @@ import android.content.ContentValues
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import android.support.design.widget.NavigationView
 import android.support.v4.app.Fragment
+import android.support.v4.view.GravityCompat
+import android.support.v7.app.ActionBarDrawerToggle
 import android.util.Log
 import android.view.*
 import android.widget.*
-
+import kotlinx.android.synthetic.main.activity_view_playlist.*
+import kotlinx.android.synthetic.main.app_bar_view_playlist.*
 import kotlinx.android.synthetic.main.fragment_view_playlist.*
 import kotlinx.android.synthetic.main.playlist_item.view.*
 import java.text.SimpleDateFormat
-import java.time.LocalDateTime
-import java.time.format.DateTimeFormatter
 import java.util.*
 import kotlin.collections.ArrayList
 import kotlin.collections.HashMap
 
 
-class ViewPlaylistFragment : Fragment() {
+class ViewPlaylistFragment : Fragment(), NavigationView.OnNavigationItemSelectedListener {
     companion object {
         private const val LOG_TAG = "ViewPlaylistFragment"
     }
@@ -37,24 +39,17 @@ class ViewPlaylistFragment : Fragment() {
         // Gets the data repository in write mode
         val db = dbHelper.writableDatabase
 
-        // current timestamp
-//        val current = LocalDateTime.now()
-//        val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSS")
-//        val formattedDateTime = current.format(formatter)
         val sdf = SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS", Locale.getDefault())
         val formattedDateTime = sdf.format(Date()) // format current date
 
         // Create a new map of values, where column names are the keys
         val values = ContentValues().apply {
-            //put(SpotifyReaderContract.PlaylistEntry.PLAYLIST_HREF, null)
-            //put(SpotifyReaderContract.PlaylistEntry.PLAYLIST_ID, null)
             put(SpotifyReaderContract.PlaylistEntry.PLAYLIST_CREATED, formattedDateTime)
             put(SpotifyReaderContract.PlaylistEntry.PLAYLIST_NAME, playlistTitle)
             put(SpotifyReaderContract.PlaylistEntry.PLAYLIST_COLLABORATIVE, 0)
             put(SpotifyReaderContract.PlaylistEntry.PLAYLIST_OWNER, SpotifyClient.USER_NAME)
             put(SpotifyReaderContract.PlaylistEntry.PLAYLIST_PUBLIC, 0)
             put(SpotifyReaderContract.PlaylistEntry.PLAYLIST_TYPE, "playlist")
-            //put(SpotifyReaderContract.PlaylistEntry.PLAYLIST_URI, null)
         }
 
         // Insert the new row, returning the primary key value of the new row
@@ -109,7 +104,7 @@ class ViewPlaylistFragment : Fragment() {
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         Log.d(LOG_TAG, "onCreateView() called")
-        return inflater.inflate(R.layout.fragment_view_playlist, container, false)
+        return inflater.inflate(R.layout.activity_view_playlist, container, false)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -117,7 +112,38 @@ class ViewPlaylistFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         dbHelper = SpotifyReaderDbHelper(context)
-        insertId = savePlaylist()
+
+        val toggle = ActionBarDrawerToggle(
+            activity, view_playlist_drawer_layout, view_playlist_toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close
+        )
+        view_playlist_toolbar.inflateMenu(R.menu.view_playlist_options)
+        view_playlist_toolbar.setOnMenuItemClickListener {
+            Log.d(LOG_TAG, "toolbar export!")
+            when (it.itemId) {
+                R.id.playlist_menu_export_option -> {
+                    Log.d(LOG_TAG, "playlist export!")
+                    val exportIntent = ExportActivity.createIntent(context)
+                    exportIntent.putExtra("PLAYLIST_NAME", playlistTitle)
+                    // get just the ids of the tracks
+                    val trackIds = mutableListOf<String>()
+                    for (track: Track in tracks) {
+                        trackIds.add(track._id)
+                    }
+                    exportIntent.putExtra("PLAYLIST_TRACK_IDS", ArrayList(trackIds))
+                    exportIntent.putExtra("TUNED_PARAMETERS", tunedParameters)
+                    if (insertId != -1L) {
+                        exportIntent.putExtra("PLAYLIST_INSERT_ID", insertId)
+                    }
+                    startActivity(exportIntent)
+                }
+                else -> super.onOptionsItemSelected(it)
+            }
+            true
+        }
+        view_playlist_drawer_layout.addDrawerListener(toggle)
+        toggle.syncState()
+
+        view_playlist_nav_view.setNavigationItemSelectedListener(this)
 
         // rotation
         if (savedInstanceState != null) {
@@ -139,6 +165,7 @@ class ViewPlaylistFragment : Fragment() {
             }
         }
 
+        insertId = savePlaylist()
         playlist_name_banner.text = playlistTitle
 
         // change name pen icon press
@@ -208,18 +235,20 @@ class ViewPlaylistFragment : Fragment() {
 
     override fun onCreateOptionsMenu(menu: Menu?, inflater: MenuInflater?) {
         super.onCreateOptionsMenu(menu, inflater)
-        inflater?.inflate(R.menu.playlist_options, menu)
+        inflater?.inflate(R.menu.view_playlist_options, menu)
     }
 
-    override fun onOptionsItemSelected(item: MenuItem?): Boolean =
+    override fun onOptionsItemSelected(item: MenuItem?): Boolean {
+        Log.d(LOG_TAG, "onOptionsItemSelected() called")
         // Handle presses on the action bar menu items
         when (item?.itemId) {
             R.id.playlist_menu_export_option -> {
+                Log.d(LOG_TAG, "export!")
                 val exportIntent = ExportActivity.createIntent(context)
                 exportIntent.putExtra("PLAYLIST_NAME", playlistTitle)
                 // get just the ids of the tracks
                 val trackIds = mutableListOf<String>()
-                for (track : Track in tracks) {
+                for (track: Track in tracks) {
                     trackIds.add(track._id)
                 }
                 exportIntent.putExtra("PLAYLIST_TRACK_IDS", ArrayList(trackIds))
@@ -228,10 +257,22 @@ class ViewPlaylistFragment : Fragment() {
                     exportIntent.putExtra("PLAYLIST_INSERT_ID", insertId)
                 }
                 startActivity(exportIntent)
-                true
+                return true
             }
             else -> super.onOptionsItemSelected(item)
         }
+        return super.onOptionsItemSelected(item)
+    }
+
+    override fun onNavigationItemSelected(item: MenuItem): Boolean {
+        when (item.itemId) {
+            R.id.nav_generate -> {}
+            R.id.nav_connect -> {}
+        }
+
+        view_playlist_drawer_layout.closeDrawer(GravityCompat.START)
+        return true
+    }
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)

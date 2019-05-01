@@ -132,7 +132,7 @@ class ViewApiPlaylistFragment : Fragment() {
 
     override fun onCreateOptionsMenu(menu: Menu?, inflater: MenuInflater?) {
         super.onCreateOptionsMenu(menu, inflater)
-        inflater?.inflate(R.menu.playlist_options, menu)
+        inflater?.inflate(R.menu.view_playlist_options, menu)
     }
 
     override fun onOptionsItemSelected(item: MenuItem?): Boolean =

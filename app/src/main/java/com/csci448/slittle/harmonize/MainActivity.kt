@@ -117,9 +117,10 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 
             name.text = getItem(position)._name
             view.setOnClickListener {
-//                val viewPlaylistIntent = ViewPlaylistActivity.createIntent(baseContext, getItem(position)._name)
-//                startActivity(viewPlaylistIntent)
-                Toast.makeText(baseContext, "temporarily unavailable. please generate a new playlist.", Toast.LENGTH_SHORT).show()
+                val viewPlaylistIntent = ViewPlaylistActivity.createIntent(baseContext, getItem(position)._name)
+
+                startActivity(viewPlaylistIntent)
+//                Toast.makeText(baseContext, "temporarily unavailable. please generate a new playlist.", Toast.LENGTH_SHORT).show()
             }
             view.setOnLongClickListener {
                 val affectedRows = deleteGeneratedPlaylist(getItem(position))

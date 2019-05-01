@@ -73,6 +73,8 @@ class ExportFragment : Fragment() {
         Log.d(LOG_TAG, "onViewCreated() called")
         super.onViewCreated(view, savedInstanceState)
 
+        dbHelper = SpotifyReaderDbHelper(context)
+
         // rotation
         if (savedInstanceState != null) {
             playlistTitle = savedInstanceState.getString("PLAYLIST_NAME")
