@@ -4,21 +4,13 @@ import android.content.ContentValues
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
-import android.support.design.widget.NavigationView
-import android.support.v4.view.GravityCompat
-import android.support.v7.app.ActionBarDrawerToggle
 import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import android.widget.Toast
 import com.spotify.sdk.android.authentication.AuthenticationClient
 import com.spotify.sdk.android.authentication.AuthenticationResponse
-import kotlinx.android.synthetic.main.activity_main.*
-import kotlinx.android.synthetic.main.activity_main.nav_view
 import kotlinx.android.synthetic.main.app_bar_connect.*
-import kotlinx.android.synthetic.main.app_bar_main.*
-import kotlinx.android.synthetic.main.fragment_connect_two.*
-
 
 class PlatformConnectActivity : SingleFragmentActivity()  {
 
@@ -26,8 +18,7 @@ class PlatformConnectActivity : SingleFragmentActivity()  {
         private const val LOG_TAG = "PlatformConnectActivity"
 
         fun createIntent(baseContext: Context?): Intent {
-            val intent = Intent(baseContext, PlatformConnectActivity::class.java)
-            return intent
+            return Intent(baseContext, PlatformConnectActivity::class.java)
         }
 
         val CLIENT_ID = "96fb37843a5e4e92a1a8c4c5168e3371"
@@ -47,7 +38,8 @@ class PlatformConnectActivity : SingleFragmentActivity()  {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setSupportActionBar(connect_toolbar)
+//        menuInflater.inflate(connect_toolbar)
+//        setSupportActionBar(connect_toolbar)
 
 //        val toggle = ActionBarDrawerToggle(
 //            this, connect_drawer_layout, connect_toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close
@@ -103,21 +95,18 @@ class PlatformConnectActivity : SingleFragmentActivity()  {
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
+        Log.d(LOG_TAG, "activity onCreateOptionsMenu() called")
         // Inflate the menu; this adds items to the action bar if it is present.
-        menuInflater.inflate(R.menu.platform_connect_options, menu)
-        return true
+        menuInflater.inflate(R.menu.main, menu)
+        return super.onCreateOptionsMenu(menu)
     }
 
-    override fun onOptionsItemSelected(item: MenuItem) : Boolean {
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
         // Handle action bar item clicks here. The action bar will
         // automatically handle clicks on the Home/Up button, so long
         // as you specify a parent activity in AndroidManifest.xml.
         when (item.itemId) {
-            R.id.logout_spotify_option -> {
-//                logoutFromSpotify()
-                Toast.makeText(this, "logout", Toast.LENGTH_SHORT).show()
-                return true
-            }
+            R.id.action_settings -> return true
             else -> return super.onOptionsItemSelected(item)
         }
     }

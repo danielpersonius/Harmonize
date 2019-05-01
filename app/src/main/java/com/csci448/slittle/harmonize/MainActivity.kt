@@ -187,11 +187,11 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 //                val generatePlaylistIntent = GeneratePlaylistActivity.createIntent(baseContext)
 //                startActivity(generatePlaylistIntent)
                 val connectPlatformIntent = PlatformConnectActivity.createIntent(baseContext)
-                startActivity(connectPlatformIntent)
+//                startActivity(connectPlatformIntent)
             }
             R.id.nav_connect -> {
                 val connectPlatformIntent = PlatformConnectActivity.createIntent(baseContext)
-                startActivity(connectPlatformIntent)
+//                startActivity(connectPlatformIntent)
             }
         }
 
@@ -200,8 +200,8 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
     }
 
     override fun onDestroy() {
-        super.onDestroy()
         dbHelper.close()
+        super.onDestroy()
     }
 
     override fun onResume() {

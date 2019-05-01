@@ -19,11 +19,13 @@ import kotlinx.android.synthetic.main.fragment_connect.*
 import com.spotify.sdk.android.authentication.AuthenticationClient
 import com.spotify.sdk.android.authentication.AuthenticationRequest
 import com.spotify.sdk.android.authentication.AuthenticationResponse
+import kotlinx.android.synthetic.main.activity_connect.*
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.activity_main.nav_view
 import kotlinx.android.synthetic.main.app_bar_connect.*
 import kotlinx.android.synthetic.main.app_bar_main.*
 import kotlinx.android.synthetic.main.fragment_connect_two.*
+import kotlinx.android.synthetic.main.fragment_connect_two.connect_drawer_layout
 
 class PlatformConnectFragment : Fragment(), NavigationView.OnNavigationItemSelectedListener {
     companion object {
@@ -105,14 +107,9 @@ class PlatformConnectFragment : Fragment(), NavigationView.OnNavigationItemSelec
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         Log.d(LOG_TAG, "onCreate() called")
-        setHasOptionsMenu(true)
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        Log.d(LOG_TAG, "onCreateView() called")
-//        return inflater.inflate(R.layout.fragment_connect, container, false)
-//        return inflater.inflate(R.layout.fragment_connect_two, container, false)
-//        return inflater.inflate(R.layout.activity_main, container, false)
         return inflater.inflate(R.layout.activity_connect, container, false)
     }
 
@@ -120,16 +117,17 @@ class PlatformConnectFragment : Fragment(), NavigationView.OnNavigationItemSelec
         Log.d(LOG_TAG, "onViewCreated() called")
         super.onViewCreated(view, savedInstanceState)
         connect_progress_circle.visibility = GONE
-
         dbHelper = SpotifyReaderDbHelper(context)
 
         val toggle = ActionBarDrawerToggle(
             activity, connect_drawer_layout, connect_toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close
         )
+        connect_toolbar.inflateMenu(R.menu.platform_connect_options)
+
         connect_drawer_layout.addDrawerListener(toggle)
         toggle.syncState()
 
-        nav_view.setNavigationItemSelectedListener(this)
+        connect_nav_view.setNavigationItemSelectedListener(this)
 
         connect_spotify_button.setOnClickListener {
             connect_progress_circle.visibility = VISIBLE
@@ -146,23 +144,6 @@ class PlatformConnectFragment : Fragment(), NavigationView.OnNavigationItemSelec
         }
     }
 
-    override fun onCreateOptionsMenu(menu: Menu?, inflater: MenuInflater?) {
-        super.onCreateOptionsMenu(menu, inflater)
-//        inflater?.inflate(R.menu.platform_connect_options, menu)
-        inflater?.inflate(R.menu.main, menu)
-    }
-
-    override fun onOptionsItemSelected(item: MenuItem?): Boolean =
-        // Handle presses on the action bar menu items
-        when (item?.itemId) {
-            R.id.logout_spotify_option -> {
-                logoutFromSpotify()
-                true
-            }
-            else -> super.onOptionsItemSelected(item)
-        }
-
-
     override fun onNavigationItemSelected(item: MenuItem): Boolean {
         // Handle navigation view item clicks here.
         when (item.itemId) {
@@ -178,7 +159,7 @@ class PlatformConnectFragment : Fragment(), NavigationView.OnNavigationItemSelec
             }
         }
 
-        drawer_layout.closeDrawer(GravityCompat.START)
+        connect_drawer_layout.closeDrawer(GravityCompat.START)
         return true
     }
 
