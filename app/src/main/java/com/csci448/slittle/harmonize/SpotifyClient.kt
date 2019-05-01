@@ -2,7 +2,6 @@ package com.csci448.slittle.harmonize
 
 import android.app.Activity
 import android.util.Log
-import android.widget.Toast
 import com.spotify.sdk.android.authentication.AuthenticationClient
 import com.spotify.sdk.android.authentication.AuthenticationRequest
 import com.spotify.sdk.android.authentication.AuthenticationResponse
@@ -11,13 +10,10 @@ import khttp.post
 import kotlinx.coroutines.*
 import java.net.URLEncoder
 import org.json.JSONArray
-import org.json.JSONException
 import org.json.JSONObject
-import org.json.JSONStringer
 import kotlin.math.min
-import kotlin.js.*
-import android.content.pm.PackageManager
-
+import khttp.put
+import khttp.responses.Response
 
 
 class SpotifyClient {
@@ -38,7 +34,7 @@ class SpotifyClient {
                 AuthenticationResponse.Type.TOKEN,
                 PlatformConnectActivity.REDIRECT_URI)
             builder.setShowDialog(true)
-            builder.setScopes(arrayOf("user-read-private", "streaming", "user-library-modify", "playlist-modify-private", "playlist-modify-public", "user-library-read", "playlist-read-private"))
+            builder.setScopes(arrayOf("user-read-playback-state", "user-read-private", "streaming", "user-library-modify", "playlist-modify-private", "playlist-modify-public", "user-library-read", "playlist-read-private"))
             return builder.build()
         }
 
@@ -46,7 +42,7 @@ class SpotifyClient {
             val builder = AuthenticationRequest.Builder(CLIENT_ID,
                                                         AuthenticationResponse.Type.TOKEN,
                                                         REDIRECT_URI)
-            builder.setScopes(arrayOf("user-read-private", "streaming", "user-library-modify", "playlist-modify-private", "playlist-modify-public", "user-library-read", "playlist-read-private"))
+            builder.setScopes(arrayOf("user-read-playback-state", "user-read-private", "streaming", "user-library-modify", "playlist-modify-private", "playlist-modify-public", "user-library-read", "playlist-read-private"))
             builder.setShowDialog(true)
             val request = builder.build()
 
@@ -54,7 +50,7 @@ class SpotifyClient {
 //            AuthenticationClient.openLoginInBrowser(activity, request)
         }
 
-        fun logout() : Any? = runBlocking {
+        fun logout() : Boolean = runBlocking {
             Log.d(LOG_TAG, "logout() called")
             var logoutSuccess = false
             withContext(Dispatchers.IO) {
@@ -63,7 +59,7 @@ class SpotifyClient {
             logoutSuccess
         }
 
-        fun getUserPlaylists(accessToken : String, limit : Int, offset : Int) : Any? = runBlocking {
+        fun getUserPlaylists(accessToken : String, limit : Int, offset : Int) : MutableList<Playlist> = runBlocking {
             Log.d(LOG_TAG, "getUserPlaylists() called")
 
             withContext(Dispatchers.IO) {
@@ -98,7 +94,6 @@ class SpotifyClient {
                 when (response.statusCode) {
                     200 -> {
                         val result = JSONObject(response.text)
-//                        Log.d(LOG_TAG, result.toString())
                         val memberIsPremium = result.getString("product")
                         USER_NAME = result.getString("display_name")
                         USER_ID = result.getString("id")
@@ -145,7 +140,7 @@ class SpotifyClient {
             // todo implement me
         }
 
-        fun getTrackAudioFeatures(trackId : String) : Any? = runBlocking {
+        fun getTrackAudioFeatures(trackId : String) : MutableMap<String, String> = runBlocking {
             Log.d(LOG_TAG, "getTrackAudioFeatures() called")
 
             val audioFeatures = mutableMapOf<String, String>()
@@ -184,7 +179,7 @@ class SpotifyClient {
                              speechiness : Int,
                              loudness : Int,
                              valence : Int,
-                             buffer : Int) : Any? = runBlocking {
+                             buffer : Int) : MutableList<Track> = runBlocking {
             Log.d(LOG_TAG, "generatePlaylist($danceability, $energy, $speechiness, $loudness, $valence, $buffer) called")
             val suggestedTracks = mutableListOf<Track>()
 
@@ -255,7 +250,7 @@ class SpotifyClient {
         fun exportPlaylist(playlistName    : String,
                            trackIds        : List<String>,
                            tunedParameters : Map<String, String> = mapOf()
-                          ) : Any? = runBlocking {
+                          ) : String? = runBlocking {
             // beautify tuned parameters
             var tunedParametersString = "["
             for ((key, value) in tunedParameters) {
@@ -316,16 +311,103 @@ class SpotifyClient {
             playlistId
         }
 
-//        fun isSpotifyInstalled() { // move to an activity
-//            val pm = getActivity().getPackageManager()
-//            var isSpotifyInstalled: Boolean
-//            try {
-//                pm.getPackageInfo("com.spotify.music", 0)
-//                isSpotifyInstalled = true
-//            } catch (e: PackageManager.NameNotFoundException) {
-//                isSpotifyInstalled = false
-//            }
-//
-//        }
+        // todo a bit of the last track is heard when playing a new track. tried to fix with volume control, but not working yet
+        // todo change to App Remote SDK, instead of using the Web Api
+        fun startPlayback(uri : String,
+                          isPaused : Boolean) : Any? = runBlocking {
+            val deviceId = getUserDevices()
+            if (deviceId != null) {
+                if (transferPlayback(deviceId) == 204) {
+                    Log.d(LOG_TAG, "transfer 204")
+                    // Spotify handles transferPlayback request asynchronously, so wait till playback devices activates
+                    // works for now, but in some scenarios, may never be true
+                    while (!getActivePlayback()) {}
+                    withContext(Dispatchers.IO) {
+                        var playbackResponse : Response
+                        var data = ""
+
+                        if (!isPaused) {
+                            data = JSONObject(mapOf("uris" to listOf("spotify:track:$uri"))).toString()
+//                            val volumeResponse = put("https://api.spotify.com/v1/me/player/volume?volume_percent=50",
+//                                headers = mapOf("Authorization" to "Bearer $ACCESS_TOKEN"))
+//                            when(volumeResponse.statusCode) {
+//                                204 -> Log.d(LOG_TAG, "204 volume 50")
+//                                else -> Log.d(LOG_TAG, "volume response: ${volumeResponse.statusCode} ${volumeResponse.text}")
+//                            }
+                        }
+//                        else {
+//                            val volumeResponse = put("https://api.spotify.com/v1/me/player/volume?volume_percent=0",
+//                                headers = mapOf("Authorization" to "Bearer $ACCESS_TOKEN"))
+//                            when(volumeResponse.statusCode) {
+//                                204 -> Log.d(LOG_TAG, "204 volume 0")
+//                                else -> Log.d(LOG_TAG, "volume response: ${volumeResponse.statusCode} ${volumeResponse.text}")
+//                            }
+//                        }
+
+                        playbackResponse = put("https://api.spotify.com/v1/me/player/play",
+                            data = data,
+                            headers = mapOf("Authorization" to "Bearer $ACCESS_TOKEN"))
+
+                        when(playbackResponse.statusCode) {
+                            204 -> Log.d(LOG_TAG, "startPlayback 204 Success!")
+                            403 -> Log.d(LOG_TAG, "startPlayback 403 forbidden! Premium required")
+                            404 -> Log.d(LOG_TAG, "startPlayback 404 not found: ${playbackResponse.text}")
+                            else -> Log.d(LOG_TAG, "${playbackResponse.statusCode} Something else went wrong: ${playbackResponse.text}")
+                        }
+                    }
+                }
+            }
+
+        }
+
+        fun getActivePlayback() : Boolean = runBlocking {
+            withContext(Dispatchers.IO) {
+                val response = get("https://api.spotify.com/v1/me/player",
+                    headers = mapOf("Authorization" to "Bearer $ACCESS_TOKEN"))
+                when(response.statusCode) {
+                    200 -> {
+                        val device = JSONObject(response.text).getString("device")
+                        val deviceId = JSONObject(device).getString("id")
+                        val isActive = JSONObject(device).getBoolean("is_active")
+                        isActive
+                    }
+                    else -> {
+                        Log.d(LOG_TAG, "getActivePlayback: ${response.statusCode} ${response.text}")
+                        false
+                    }
+                }
+            }
+        }
+
+        // todo can't use with startPlayback, since don't know which device is this mobile phone
+        fun getUserDevices () : String? = runBlocking {
+            var deviceId : String? = null
+            withContext(Dispatchers.IO) {
+                val response = get("https://api.spotify.com/v1/me/player/devices",
+                                             headers = mapOf("Authorization" to "Bearer $ACCESS_TOKEN"))
+                when(response.statusCode) {
+                    200 -> {
+                        val devices = JSONArray(JSONObject(response.text).getString("devices"))
+                        Log.d(LOG_TAG, "devices: $devices")
+                        // may not work when user has multiple devices
+                        // i do, but only my phone shows up, so maybe it's ok
+                        deviceId = JSONObject(devices[0].toString()).getString("id")
+                    }
+                    else -> Log.d(LOG_TAG, "get devices: ${response.statusCode} ${response.text}")
+                }
+            }
+            deviceId
+        }
+
+        // returns the status code of the transfer request
+        fun transferPlayback(deviceId : String) : Int = runBlocking {
+            // PUT https://api.spotify.com/v1/me/player
+            withContext(Dispatchers.IO) {
+                val response = put("https://api.spotify.com/v1/me/player",
+                    data = JSONObject(mapOf("device_ids" to listOf(deviceId), "play" to true)).toString(),
+                    headers = mapOf("Authorization" to "Bearer $ACCESS_TOKEN"))
+                response.statusCode
+            }
+        }
     }
 }

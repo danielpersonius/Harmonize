@@ -60,15 +60,15 @@ class PlatformConnectFragment : Fragment() {
             }
         }
 
-        if (accessToken == null) {
+//        if (accessToken == null) {
             loginToSpotify()
-        }
+//        }
         // user already has an access token
-        else {
-            SpotifyClient.ACCESS_TOKEN = accessToken as String
-            val generateActivityIntent = GeneratePlaylistActivity.createIntent(context)
-            startActivity(generateActivityIntent)
-        }
+//        else {
+//            SpotifyClient.ACCESS_TOKEN = accessToken as String
+//            val generateActivityIntent = GeneratePlaylistActivity.createIntent(context)
+//            startActivity(generateActivityIntent)
+//        }
 
         cursor.close()
     }

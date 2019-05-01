@@ -114,6 +114,7 @@ class ViewPlaylistFragment : Fragment() {
             // play song on press
             trackView.setOnClickListener {
                 Toast.makeText(context, "Play song", Toast.LENGTH_SHORT).show()
+                SpotifyClient.startPlayback(track._id, false)
             }
             // metadata(e.g. song characteristics) on long press
             trackView.song_info_icon.setOnClickListener {
