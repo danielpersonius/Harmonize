@@ -5,6 +5,7 @@ import android.app.AlertDialog
 import android.content.ContentValues
 import android.content.Context
 import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import android.support.design.widget.NavigationView
 import android.support.v4.app.Fragment
@@ -30,14 +31,14 @@ class ViewPlaylistFragment : Fragment(), NavigationView.OnNavigationItemSelected
 
     var playlistTitle : String? = "Playlist name"
     var tracks : List<Track> = arrayListOf()
-    var tunedParameters : HashMap<String, String> = hashMapOf()
-    private lateinit var dbHelper : SpotifyReaderDbHelper
-    private var insertId : Long? = null
+    var tunedParameters : HashMap<String, String>? = hashMapOf()
+    private var insertId = 0L
+    private var playlistRowId : Long? = null
+    private var playlistIsNew = false
 
-    private fun savePlaylist() : Long? {
+    private fun savePlaylist() : Long {
         Log.d(LOG_TAG, "savePlaylist() called")
         // Gets the data repository in write mode
-        val db = dbHelper.writableDatabase
 
         val sdf = SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS", Locale.getDefault())
         val formattedDateTime = sdf.format(Date()) // format current date
@@ -53,21 +54,19 @@ class ViewPlaylistFragment : Fragment(), NavigationView.OnNavigationItemSelected
         }
 
         // Insert the new row, returning the primary key value of the new row
-        val newRowId = db?.insert(SpotifyReaderContract.PlaylistEntry.TABLE_NAME, null, values)
+        val newRowId = DbInstance.writableDb.insert(SpotifyReaderContract.PlaylistEntry.TABLE_NAME, null, values)
 
         if (newRowId == -1L) {
             // conflict with pre-existing data
             Log.d(LOG_TAG, "new row id = -1. conflict with pre-existing id")
         }
 
-        db.close()
         return newRowId
     }
 
     private fun saveTrack(track : Track) : Long? {
         Log.d(LOG_TAG, "saveTrack() called")
         // Gets the data repository in write mode
-        val db = dbHelper.writableDatabase
 
         // Create a new map of values, where column names are the keys
         val values = ContentValues().apply {
@@ -80,7 +79,7 @@ class ViewPlaylistFragment : Fragment(), NavigationView.OnNavigationItemSelected
         }
 
         // Insert the new row, returning the primary key value of the new row
-        val newRowId = db?.insert(SpotifyReaderContract.TrackEntry.TABLE_NAME, null, values)
+        val newRowId = DbInstance.writableDb.insert(SpotifyReaderContract.TrackEntry.TABLE_NAME, null, values)
 
         if (newRowId == -1L) {
             // conflict with pre-existing data
@@ -99,7 +98,6 @@ class ViewPlaylistFragment : Fragment(), NavigationView.OnNavigationItemSelected
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         Log.d(LOG_TAG, "onCreate() called")
-        setHasOptionsMenu(true)
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
@@ -110,40 +108,6 @@ class ViewPlaylistFragment : Fragment(), NavigationView.OnNavigationItemSelected
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         Log.d(LOG_TAG, "onViewCreated() called")
         super.onViewCreated(view, savedInstanceState)
-
-        dbHelper = SpotifyReaderDbHelper(context)
-
-        val toggle = ActionBarDrawerToggle(
-            activity, view_playlist_drawer_layout, view_playlist_toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close
-        )
-        view_playlist_toolbar.inflateMenu(R.menu.view_playlist_options)
-        view_playlist_toolbar.setOnMenuItemClickListener {
-            Log.d(LOG_TAG, "toolbar export!")
-            when (it.itemId) {
-                R.id.playlist_menu_export_option -> {
-                    Log.d(LOG_TAG, "playlist export!")
-                    val exportIntent = ExportActivity.createIntent(context)
-                    exportIntent.putExtra("PLAYLIST_NAME", playlistTitle)
-                    // get just the ids of the tracks
-                    val trackIds = mutableListOf<String>()
-                    for (track: Track in tracks) {
-                        trackIds.add(track._id)
-                    }
-                    exportIntent.putExtra("PLAYLIST_TRACK_IDS", ArrayList(trackIds))
-                    exportIntent.putExtra("TUNED_PARAMETERS", tunedParameters)
-                    if (insertId != -1L) {
-                        exportIntent.putExtra("PLAYLIST_INSERT_ID", insertId)
-                    }
-                    startActivity(exportIntent)
-                }
-                else -> super.onOptionsItemSelected(it)
-            }
-            true
-        }
-        view_playlist_drawer_layout.addDrawerListener(toggle)
-        toggle.syncState()
-
-        view_playlist_nav_view.setNavigationItemSelectedListener(this)
 
         // rotation
         if (savedInstanceState != null) {
@@ -156,16 +120,82 @@ class ViewPlaylistFragment : Fragment(), NavigationView.OnNavigationItemSelected
             val extras = intent?.extras
             if (extras != null) {
                 playlistTitle = extras.getString("PLAYLIST_NAME")
-                val playlistId = extras.getString("PLAYLIST_ID") ?: null
+                playlistIsNew = extras.getBoolean("NEW_PLAYLIST")
                 tracks = extras.getStringArrayList("PLAYLIST_TRACKS") as List<Track>
-                tunedParameters = extras.getSerializable("TUNED_PARAMETERS") as HashMap<String, String>
-//                if (playlistId != null) {
-//                    tracks = SpotifyClient.getPlaylistTracks(playlistId) as MutableList<Track>
-//                }
+                // playlist is not new, and so has an id in the database
+                if (extras.containsKey("PLAYLIST_ROW_ID")) {
+                    playlistRowId = extras.getLong("PLAYLIST_ROW_ID")
+                }
+                tunedParameters =
+                    if (extras.containsKey("TUNED_PARAMETERS"))
+                        extras.getSerializable("TUNED_PARAMETERS") as HashMap<String, String>
+                    else
+                        null
             }
         }
 
-        insertId = savePlaylist()
+        val toggle = ActionBarDrawerToggle(
+            activity, view_playlist_drawer_layout, view_playlist_toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close
+        )
+        view_playlist_toolbar.inflateMenu(R.menu.view_playlist_options)
+        view_playlist_toolbar.setOnMenuItemClickListener {
+//            Log.d(LOG_TAG, "toolbar export!")
+            when (it.itemId) {
+                R.id.playlist_menu_export_option -> {
+//                    Log.d(LOG_TAG, "playlist export!")
+                    val exportIntent = ExportActivity.createIntent(context)
+                    exportIntent.putExtra("PLAYLIST_NAME", playlistTitle)
+                    // get just the ids of the tracks
+                    val trackIds = mutableListOf<String>()
+                    for (track: Track in tracks) {
+                        trackIds.add(track._id)
+                    }
+                    exportIntent.putExtra("PLAYLIST_TRACK_IDS", ArrayList(trackIds))
+                    exportIntent.putExtra("TUNED_PARAMETERS", tunedParameters)
+                    if (playlistRowId != null) {
+                        Log.d(LOG_TAG, "playlist row id is not null: $playlistRowId")
+                        exportIntent.putExtra("PLAYLIST_ROW_ID", playlistRowId as Long)
+                    }
+                    startActivity(exportIntent)
+                }
+                else -> super.onOptionsItemSelected(it)
+            }
+            true
+        }
+        // add 'View on Spotify' option if already exported
+        // already exported if db row does not have null uri
+        if (playlistRowId != null) {
+            // remove export option
+            view_playlist_toolbar.menu.removeItem(R.id.playlist_menu_export_option)
+
+            val playlist = SpotifyClient.getPlaylistFromDb(playlistRowId as Long)
+            Log.d(LOG_TAG, "playlist: $playlist")
+            if (playlist?._id != null) {
+                val viewPlaylistMenuItem = view_playlist_toolbar.menu.add(
+                    Menu.NONE, // groupId
+                    1, // itemId
+                    2, // order
+                    "View in Spotify" // title
+                )
+                viewPlaylistMenuItem?.setOnMenuItemClickListener {
+                    val redirectURI = "spotify:user:${SpotifyClient.USER_ID}:playlist:${playlist._id}"
+                    val intent = Intent(Intent.ACTION_VIEW)
+                    intent.data = Uri.parse(redirectURI)
+                    intent.putExtra(Intent.EXTRA_REFERRER, Uri.parse("android-app://" + context!!.packageName))
+                    startActivity(intent)
+                    true
+                }
+            }
+        }
+
+        view_playlist_drawer_layout.addDrawerListener(toggle)
+        toggle.syncState()
+
+        view_playlist_nav_view.setNavigationItemSelectedListener(this)
+
+        if (playlistIsNew) {
+            insertId = savePlaylist()
+        }
         playlist_name_banner.text = playlistTitle
 
         // change name pen icon press
@@ -199,7 +229,10 @@ class ViewPlaylistFragment : Fragment(), NavigationView.OnNavigationItemSelected
             val artistNameTextView = trackView.findViewById(R.id.playlist_artist_name) as TextView
             val albumNameTextView  = trackView.findViewById(R.id.playlist_album_name) as TextView
 
-            saveTrack(track)
+//            Log.d(LOG_TAG, "track: $track")
+            if (playlistIsNew) {
+                saveTrack(track)
+            }
 
             songNameTextView.text   = track._name
             val artists = track._artistNames
@@ -221,7 +254,8 @@ class ViewPlaylistFragment : Fragment(), NavigationView.OnNavigationItemSelected
                 SpotifyClient.startPlayback(track._id, false)
             }
             trackView.song_info_icon.setOnClickListener {
-                val audioFeatures = SpotifyClient.getTrackAudioFeatures(track._id) as MutableMap<String, String>
+                val audioFeatures = SpotifyClient.getTrackAudioFeatures(track._id, activity as Activity)
+//                Log.d(LOG_TAG, "audio features: $audioFeatures")
                 track._metadata = audioFeatures
                 val intent = TrackCharacteristicsActivity.createIntent(context, track._name, track._metadata)
                 startActivity(intent)
@@ -233,41 +267,15 @@ class ViewPlaylistFragment : Fragment(), NavigationView.OnNavigationItemSelected
         }
     }
 
-    override fun onCreateOptionsMenu(menu: Menu?, inflater: MenuInflater?) {
-        super.onCreateOptionsMenu(menu, inflater)
-        inflater?.inflate(R.menu.view_playlist_options, menu)
-    }
-
-    override fun onOptionsItemSelected(item: MenuItem?): Boolean {
-        Log.d(LOG_TAG, "onOptionsItemSelected() called")
-        // Handle presses on the action bar menu items
-        when (item?.itemId) {
-            R.id.playlist_menu_export_option -> {
-                Log.d(LOG_TAG, "export!")
-                val exportIntent = ExportActivity.createIntent(context)
-                exportIntent.putExtra("PLAYLIST_NAME", playlistTitle)
-                // get just the ids of the tracks
-                val trackIds = mutableListOf<String>()
-                for (track: Track in tracks) {
-                    trackIds.add(track._id)
-                }
-                exportIntent.putExtra("PLAYLIST_TRACK_IDS", ArrayList(trackIds))
-                exportIntent.putExtra("TUNED_PARAMETERS", tunedParameters)
-                if (insertId != -1L) {
-                    exportIntent.putExtra("PLAYLIST_INSERT_ID", insertId)
-                }
-                startActivity(exportIntent)
-                return true
-            }
-            else -> super.onOptionsItemSelected(item)
-        }
-        return super.onOptionsItemSelected(item)
-    }
 
     override fun onNavigationItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
             R.id.nav_generate -> {}
             R.id.nav_connect -> {}
+            R.id.nav_home -> {
+                val mainActivityIntent = MainActivity.createIntent(context as Context)
+                startActivity(mainActivityIntent)
+            }
         }
 
         view_playlist_drawer_layout.closeDrawer(GravityCompat.START)
@@ -301,7 +309,6 @@ class ViewPlaylistFragment : Fragment(), NavigationView.OnNavigationItemSelected
 
     override fun onDestroy() {
         super.onDestroy()
-        dbHelper.close()
         Log.d(LOG_TAG, "onDestroy() called")
     }
 

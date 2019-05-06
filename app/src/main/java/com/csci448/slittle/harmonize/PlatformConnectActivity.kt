@@ -3,52 +3,36 @@ package com.csci448.slittle.harmonize
 import android.content.ContentValues
 import android.content.Context
 import android.content.Intent
-import android.os.Bundle
 import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import android.widget.Toast
 import com.spotify.sdk.android.authentication.AuthenticationClient
 import com.spotify.sdk.android.authentication.AuthenticationResponse
-import kotlinx.android.synthetic.main.app_bar_connect.*
 
 class PlatformConnectActivity : SingleFragmentActivity()  {
-
     companion object {
         private const val LOG_TAG = "PlatformConnectActivity"
-
-        fun createIntent(baseContext: Context?): Intent {
-            return Intent(baseContext, PlatformConnectActivity::class.java)
-        }
-
-        val CLIENT_ID = "96fb37843a5e4e92a1a8c4c5168e3371"
+        private var gotoPage : String = "home"
         // Request code will be used to verify if result comes from the login activity. Can be set to any integer.
-        val SPOTIFY_LOGIN_REQUEST_CODE = 1
-        // can be anything really
-        val REDIRECT_URI = "com.csci448.slittle.harmonize://callback"
-        val CLIENT_SECRET = "84ce3a2b19c74df7900d1d6d588a14d2"
-        lateinit var ACCESS_TOKEN: String
+        const val SPOTIFY_LOGIN_REQUEST_CODE = 1
+        /**
+         *
+         * @param goto - what page to go to after the user connects
+         */
+        fun createIntent(baseContext: Context?, goto : String): Intent {
+            val intent =  Intent(baseContext, PlatformConnectActivity::class.java)
+            intent.putExtra("GOTO", goto)
+            gotoPage = goto
+            return intent
+        }
     }
 
-    private lateinit var dbHelper : SpotifyReaderDbHelper
 
     override fun getLogTag() = LOG_TAG
 
     override fun createFragment() = PlatformConnectFragment()
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-//        menuInflater.inflate(connect_toolbar)
-//        setSupportActionBar(connect_toolbar)
-
-//        val toggle = ActionBarDrawerToggle(
-//            this, connect_drawer_layout, connect_toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close
-//        )
-//        connect_drawer_layout.addDrawerListener(toggle)
-//        toggle.syncState()
-//
-//        nav_view.setNavigationItemSelectedListener(this)
-    }
     // handling results has to happen here and not in fragment, since passing 'activity'
     // as context to spotify login function
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
@@ -56,26 +40,26 @@ class PlatformConnectActivity : SingleFragmentActivity()  {
         if (resultCode != RESULT_OK) { return }
         if (data == null) { return }
 
-        dbHelper = SpotifyReaderDbHelper(baseContext)
-
         // Spotify login activity
         if (requestCode == SPOTIFY_LOGIN_REQUEST_CODE) {
             val response = AuthenticationClient.getResponse(resultCode, data)
-            Log.d(LOG_TAG, response.type.toString())
 
             when (response.type) {
-                // Response was successful and contains auth token
-                AuthenticationResponse.Type.TOKEN -> {
-                    // Handle successful response
-                    ACCESS_TOKEN = response.accessToken
-                    SpotifyClient.ACCESS_TOKEN = response.accessToken
-                    // get user info like ID and Name
-                    SpotifyClient.getUserInformation()
-                    // this
-                    storeSpotifyUser(SpotifyClient.USER_ID, SpotifyClient.USER_NAME, SpotifyClient.ACCESS_TOKEN)
+                // Response was successful and contains auth code needed to get refresh token
+                AuthenticationResponse.Type.CODE -> {
+                    SpotifyClient.authorize(true, response.code)
+                    storeSpotifyUser(SpotifyClient.USER_ID, SpotifyClient.USER_NAME)
 
-                    val generateActivityIntent = GeneratePlaylistActivity.createIntent(this)
-                    startActivity(generateActivityIntent)
+                    when (gotoPage) {
+                        "generate" -> {
+                            val generateActivityIntent = GeneratePlaylistActivity.createIntent(this)
+                            startActivity(generateActivityIntent)
+                        }
+                        else -> {
+                            val mainActivityIntent = MainActivity.createIntent(this)
+                            startActivity(mainActivityIntent)
+                        }
+                    }
                 }
 
                 // Auth flow returned an error
@@ -112,27 +96,21 @@ class PlatformConnectActivity : SingleFragmentActivity()  {
     }
 
     private fun storeSpotifyUser(userId : String,
-                                 userName : String,
-                                 accessToken : String) {
+                                 userName : String) {
         Log.d(LOG_TAG, "storeSpotifyUser() called")
-        // Gets the data repository in write mode
-        val db = dbHelper.writableDatabase
         // Create a new map of values, where column names are the keys
         val values = ContentValues().apply {
             put(SpotifyReaderContract.UserEntry.USER_ID, userId)
             put(SpotifyReaderContract.UserEntry.USER_NAME, userName)
             put(SpotifyReaderContract.UserEntry.PLATFORM, "Spotify")
-            put(SpotifyReaderContract.UserEntry.ACCESS_TOKEN, accessToken)
         }
 
         // Insert the new row, returning the primary key value of the new row
-        val newRowId = db?.insert(SpotifyReaderContract.UserEntry.TABLE_NAME, null, values)
+        val newRowId = DbInstance.writableDb.insert(SpotifyReaderContract.UserEntry.TABLE_NAME, null, values)
 
         if (newRowId == -1L) {
             // conflict with pre-existing data
             Log.d(LOG_TAG, "new row id = -1. conflict with pre-existing id")
         }
-
-        db.close()
     }
 }

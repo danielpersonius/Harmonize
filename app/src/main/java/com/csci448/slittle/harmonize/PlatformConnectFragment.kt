@@ -1,4 +1,5 @@
 package com.csci448.slittle.harmonize
+import android.app.Activity
 import android.app.Activity.RESULT_OK
 import android.content.ContentValues
 import android.content.Context
@@ -15,6 +16,7 @@ import android.view.*
 import android.view.View.GONE
 import android.view.View.VISIBLE
 import android.widget.Toast
+import com.csci448.slittle.harmonize.PlatformConnectActivity.Companion.SPOTIFY_LOGIN_REQUEST_CODE
 import kotlinx.android.synthetic.main.fragment_connect.*
 import com.spotify.sdk.android.authentication.AuthenticationClient
 import com.spotify.sdk.android.authentication.AuthenticationRequest
@@ -32,43 +34,43 @@ class PlatformConnectFragment : Fragment(), NavigationView.OnNavigationItemSelec
         private const val LOG_TAG = "PlatformConnectFragment"
     }
 
-    private lateinit var dbHelper : SpotifyReaderDbHelper
+    private var goto : String? = "home"
 
     private fun connectToPlatform(platform : String) {
         Log.d(LOG_TAG, "connectToPlatform() called")
-        var userId      : String? = null
-        var userName    : String? = null
-        var accessToken : String? = null
+//        var userId      : String? = null
+//        var userName    : String? = null
+//        var accessToken : String? = null
 
-        val db = dbHelper.readableDatabase
-        // specify the columns to retrieve
-        val projection = arrayOf(
-            BaseColumns._ID,
-            SpotifyReaderContract.UserEntry.USER_ID,
-            SpotifyReaderContract.UserEntry.USER_NAME,
-            SpotifyReaderContract.UserEntry.PLATFORM,
-            SpotifyReaderContract.UserEntry.ACCESS_TOKEN)
-        val selection = "${SpotifyReaderContract.UserEntry.PLATFORM} = ?"
-        val selectionArgs = arrayOf(platform)
-
-        val cursor = db.query(
-            SpotifyReaderContract.UserEntry.TABLE_NAME,
-            projection,
-            selection,     // The columns for the WHERE clause
-            selectionArgs, // The values for the WHERE clause
-            null,
-            null,
-            null
-        )
-
-        with(cursor) {
-            while (moveToNext()) {
-                //val rowId = getLong(getColumnIndexOrThrow(BaseColumns._ID))
-                userId = getString(getColumnIndexOrThrow(SpotifyReaderContract.UserEntry.USER_ID))
-                userName = getString(getColumnIndexOrThrow(SpotifyReaderContract.UserEntry.USER_NAME))
-                accessToken = getString(getColumnIndexOrThrow(SpotifyReaderContract.UserEntry.ACCESS_TOKEN))
-            }
-        }
+//        val db = dbHelper.readableDatabase
+//        // specify the columns to retrieve
+//        val projection = arrayOf(
+//            BaseColumns._ID,
+//            SpotifyReaderContract.UserEntry.USER_ID,
+//            SpotifyReaderContract.UserEntry.USER_NAME,
+//            SpotifyReaderContract.UserEntry.PLATFORM,
+//            SpotifyReaderContract.UserEntry.ACCESS_TOKEN)
+//        val selection = "${SpotifyReaderContract.UserEntry.PLATFORM} = ?"
+//        val selectionArgs = arrayOf(platform)
+//
+//        val cursor = db.query(
+//            SpotifyReaderContract.UserEntry.TABLE_NAME,
+//            projection,
+//            selection,     // The columns for the WHERE clause
+//            selectionArgs, // The values for the WHERE clause
+//            null,
+//            null,
+//            null
+//        )
+//
+//        with(cursor) {
+//            while (moveToNext()) {
+//                //val rowId = getLong(getColumnIndexOrThrow(BaseColumns._ID))
+//                userId = getString(getColumnIndexOrThrow(SpotifyReaderContract.UserEntry.USER_ID))
+//                userName = getString(getColumnIndexOrThrow(SpotifyReaderContract.UserEntry.USER_NAME))
+//                accessToken = getString(getColumnIndexOrThrow(SpotifyReaderContract.UserEntry.ACCESS_TOKEN))
+//            }
+//        }
 
 //        if (accessToken == null) {
             loginToSpotify()
@@ -80,11 +82,12 @@ class PlatformConnectFragment : Fragment(), NavigationView.OnNavigationItemSelec
 //            startActivity(generateActivityIntent)
 //        }
 
-        cursor.close()
+//        cursor.close()
     }
 
     private fun loginToSpotify() {
-        AuthenticationClient.openLoginActivity(activity, PlatformConnectActivity.SPOTIFY_LOGIN_REQUEST_CODE, SpotifyClient.getAuthenticationRequest())
+        Log.d(LOG_TAG, "loginToSpotify() called")
+        AuthenticationClient.openLoginActivity(activity, SPOTIFY_LOGIN_REQUEST_CODE, SpotifyClient.getAuthenticationRequest())
     }
 
     private fun logoutFromSpotify() {
@@ -94,6 +97,7 @@ class PlatformConnectFragment : Fragment(), NavigationView.OnNavigationItemSelec
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        Log.d(LOG_TAG, "onActivityResult() called")
         super.onActivityResult(requestCode, resultCode, data)
         if (resultCode != RESULT_OK) { return }
         if (data == null) { return }
@@ -117,7 +121,20 @@ class PlatformConnectFragment : Fragment(), NavigationView.OnNavigationItemSelec
         Log.d(LOG_TAG, "onViewCreated() called")
         super.onViewCreated(view, savedInstanceState)
         connect_progress_circle.visibility = GONE
-        dbHelper = SpotifyReaderDbHelper(context)
+
+        // rotation
+        if (savedInstanceState != null) {
+            goto = savedInstanceState.getString("GOTO")
+        }
+
+        // extras would overwrite values from saved instance state
+        else {
+            val intent = activity?.intent
+            val extras = intent?.extras
+            if (extras != null) {
+                goto = extras.getString("GOTO")
+            }
+        }
 
         val toggle = ActionBarDrawerToggle(
             activity, connect_drawer_layout, connect_toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close
@@ -140,7 +157,8 @@ class PlatformConnectFragment : Fragment(), NavigationView.OnNavigationItemSelec
 
         connect_spotify_button.setOnClickListener {
             connect_progress_circle.visibility = VISIBLE
-            connectToPlatform("Spotify")
+//            connectToPlatform("Spotify")
+            loginToSpotify()
         }
         connect_apple_button.setOnClickListener {
             Toast.makeText(context, "Connecting Apple Music!", Toast.LENGTH_SHORT).show()
@@ -159,12 +177,16 @@ class PlatformConnectFragment : Fragment(), NavigationView.OnNavigationItemSelec
             R.id.nav_generate -> {
 //                val generatePlaylistIntent = GeneratePlaylistActivity.createIntent(baseContext)
 //                startActivity(generatePlaylistIntent)
-                val connectPlatformIntent = PlatformConnectActivity.createIntent(context)
+//                val connectPlatformIntent = PlatformConnectActivity.createIntent(context, )
                 //startActivity(connectPlatformIntent)
             }
             R.id.nav_connect -> {
-                val connectPlatformIntent = PlatformConnectActivity.createIntent(context)
+//                val connectPlatformIntent = PlatformConnectActivity.createIntent(context)
                 //startActivity(connectPlatformIntent)
+            }
+            R.id.nav_home -> {
+                val mainActivityIntent = MainActivity.createIntent(context as Context)
+                startActivity(mainActivityIntent)
             }
         }
 

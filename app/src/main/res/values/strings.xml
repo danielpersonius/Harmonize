@@ -47,6 +47,7 @@
     <string name="nav_header_title">Harmonize</string>
     <string name="nav_header_desc">Header description</string>
     <string name="nav_header_subtitle">subtitle</string>
+    <string name="nav_item_home_label">Home</string>
     <string name="nav_item_generate_label">Generate New Playlist</string>
     <string name="nav_item_connect_label">Connect Platforms</string>
     <string name="action_settings">Settings</string>

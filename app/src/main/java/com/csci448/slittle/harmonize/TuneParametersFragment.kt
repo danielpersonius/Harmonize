@@ -139,6 +139,7 @@ class TuneParametersFragment : Fragment() {
                                                                                 featureParameterBuffer) as List<Track>
                 val viewPlaylistIntent = ViewPlaylistActivity.createIntent(context, "$playlistName Suggested")
                 viewPlaylistIntent.putExtra("PLAYLIST_TRACKS", ArrayList(suggestedTracks))
+                viewPlaylistIntent.putExtra("NEW_PLAYLIST", true)
                 // make values into strings so the spotify client can put them in the post request
                 viewPlaylistIntent.putExtra("TUNED_PARAMETERS", hashMapOf(
                                                                           "danceability" to "$danceability",

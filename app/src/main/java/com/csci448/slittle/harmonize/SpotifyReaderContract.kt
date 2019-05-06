@@ -4,24 +4,25 @@ import android.provider.BaseColumns
 
 object SpotifyReaderContract {
     object UserEntry : BaseColumns {
-        const val TABLE_NAME   = "user_account"
-        const val USER_ID      = "user_id"
-        const val USER_NAME    = "user_name"
-        const val PLATFORM     = "platform"
-        const val ACCESS_TOKEN = "access_token"
+        const val TABLE_NAME    = "user_account"
+        const val USER_ID       = "user_id"
+        const val USER_NAME     = "user_name"
+        const val PLATFORM      = "platform"
+        const val REFRESH_TOKEN = "refresh_token"
+        const val HAS_PREMIUM   = "has_premium"
     }
 
     object PlaylistEntry : BaseColumns {
-        const val TABLE_NAME = "spotify_playlist"
-        const val PLAYLIST_CREATED = "playlist_created"
-        const val PLAYLIST_HREF = "playlist_href"
-        const val PLAYLIST_ID = "playlist_id"
-        const val PLAYLIST_NAME = "playlist_name"
+        const val TABLE_NAME             = "spotify_playlist"
+        const val PLAYLIST_CREATED       = "playlist_created"
+        const val PLAYLIST_HREF          = "playlist_href"
+        const val PLAYLIST_ID            = "playlist_id"
+        const val PLAYLIST_NAME          = "playlist_name"
         const val PLAYLIST_COLLABORATIVE = "playlist_collaborative"
-        const val PLAYLIST_OWNER = "playlist_owner"
-        const val PLAYLIST_PUBLIC = "playlist_public"
-        const val PLAYLIST_TYPE = "playlist_type"
-        const val PLAYLIST_URI = "playlist_uri"
+        const val PLAYLIST_OWNER         = "playlist_owner"
+        const val PLAYLIST_PUBLIC        = "playlist_public"
+        const val PLAYLIST_TYPE          = "playlist_type"
+        const val PLAYLIST_URI           = "playlist_uri"
     }
 
     // suggested tracks
@@ -40,10 +41,11 @@ object SpotifyReaderContract {
     const val SQL_CREATE_USER_ENTRIES =
         "CREATE TABLE ${UserEntry.TABLE_NAME} (" +
                      "${BaseColumns._ID} INTEGER PRIMARY KEY," +
-                     "${UserEntry.USER_ID} TEXT," +
+                     "${UserEntry.USER_ID} TEXT UNIQUE," +
                      "${UserEntry.USER_NAME} TEXT," +
                      "${UserEntry.PLATFORM} TEXT," +
-                     "${UserEntry.ACCESS_TOKEN} TEXT)"
+                     "${UserEntry.REFRESH_TOKEN} TEXT," +
+                     "${UserEntry.HAS_PREMIUM} INTEGER)"
 
     const val SQL_CREATE_PLAYLIST_ENTRIES =
         "CREATE TABLE ${PlaylistEntry.TABLE_NAME} (" +
