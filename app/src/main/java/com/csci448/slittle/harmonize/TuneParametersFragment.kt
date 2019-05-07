@@ -2,6 +2,7 @@ package com.csci448.slittle.harmonize
 
 import android.app.Activity
 import android.app.AlertDialog
+import android.app.Notification
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
@@ -166,6 +167,7 @@ class TuneParametersFragment : Fragment() {
                     .setSmallIcon(R.drawable.harmonize_launcher)
                     .setContentTitle("Suggested Playlist is ready!")
                     .setContentText("Your new playlist '$playlistName Suggested' has been made")
+                    .setDefaults(Notification.DEFAULT_ALL)
                     .setPriority(NotificationCompat.PRIORITY_MAX)
                     // Set the intent that will fire when the user taps the notification
                     .setContentIntent(pendingIntent)
@@ -176,17 +178,8 @@ class TuneParametersFragment : Fragment() {
                     notify(notificationId, builder.build())
                 }
 
-                val viewPlaylistIntent = ViewPlaylistActivity.createIntent(context, "$playlistName Suggested")
-                viewPlaylistIntent.putExtra("PLAYLIST_TRACKS", ArrayList(suggestedTracks))
-                viewPlaylistIntent.putExtra("NEW_PLAYLIST", true)
-                // make values into strings so the spotify client can put them in the post request
-                viewPlaylistIntent.putExtra("TUNED_PARAMETERS", hashMapOf(
-                                                                          "danceability" to "$danceability",
-                                                                          "energy" to "$energy",
-                                                                          "speechiness" to "$speechiness",
-                                                                          "loudness" to "$loudness",
-                                                                          "valence" to "$valence"))
-//                startActivity(viewPlaylistIntent)
+                val homeIntent = MainActivity.createIntent(context as Context)
+                startActivity(homeIntent)
             }
         }
 
