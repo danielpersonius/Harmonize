@@ -3,18 +3,20 @@ package com.csci448.slittle.harmonize
 import android.app.Activity
 import android.content.ContentValues
 import android.provider.BaseColumns
+import android.util.Base64
 import android.util.Log
 import com.spotify.sdk.android.authentication.AuthenticationRequest
 import com.spotify.sdk.android.authentication.AuthenticationResponse
 import khttp.get
 import khttp.post
-import kotlinx.coroutines.*
-import java.net.URLEncoder
+import khttp.put
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.withContext
 import org.json.JSONArray
 import org.json.JSONObject
+import java.net.URLEncoder
 import kotlin.math.min
-import khttp.put
-import android.util.Base64
 
 class SpotifyClient {
     companion object {
@@ -23,6 +25,7 @@ class SpotifyClient {
         lateinit var USER_ID : String
         lateinit var USER_NAME : String
         lateinit var REFRESH_TOKEN : String
+        private var LOGGED_IN = false
         var HAS_PREMIUM = false
         private const val CLIENT_ID = "96fb37843a5e4e92a1a8c4c5168e3371"
         // can be anything really
@@ -37,6 +40,14 @@ class SpotifyClient {
         }
         fun refreshTokenIsInitialized() : Boolean {
             return ::REFRESH_TOKEN.isInitialized
+        }
+
+        fun userIsLoggedIn() : Boolean {
+            return LOGGED_IN
+        }
+
+        fun setUserIsLoggedIn(userIsLoggedIn : Boolean) {
+            LOGGED_IN = userIsLoggedIn
         }
         /**
          * gets a new access token by either getting a new refresh token
@@ -71,10 +82,11 @@ class SpotifyClient {
                         if (getNewRefreshToken) {
                             REFRESH_TOKEN = result.getString("refresh_token")
                         } else {} // needed for some reason, even though it's empty
+
                         // no user found, so retrieve data and store it
                         if (!getUserFromDb()) {
                             getUserInformation()
-                            storeSpotifyUser(USER_ID, USER_NAME, REFRESH_TOKEN)
+                            storeSpotifyUser(USER_ID, USER_NAME, REFRESH_TOKEN, HAS_PREMIUM)
                         } else {}
                     }
                     else ->
@@ -94,8 +106,6 @@ class SpotifyClient {
         }
 
         fun getUserPlaylists(accessToken : String, limit : Int, offset : Int) : MutableList<Playlist> = runBlocking {
-            Log.d(LOG_TAG, "getUserPlaylists() called")
-
             withContext(Dispatchers.IO) {
                 val playlists = mutableListOf<Playlist>()
                 val response =
@@ -139,7 +149,6 @@ class SpotifyClient {
         }
 
         fun getPlaylistTracks(playlistId : String) : MutableList<Track> = runBlocking {
-            Log.d(LOG_TAG, "getPlaylistTracks() called")
             val items = URLEncoder.encode("items(track(album, artists, id, name, type))", "utf-8")
 
             withContext(Dispatchers.IO) {
@@ -178,7 +187,6 @@ class SpotifyClient {
             val audioFeatures = mutableMapOf<String, String>()
 
             if (!::ACCESS_TOKEN.isInitialized) {
-                Log.d(LOG_TAG, "reauthorize")
                 authorize(false)
             }
             withContext(Dispatchers.IO) {
@@ -215,7 +223,6 @@ class SpotifyClient {
                              loudness : Int,
                              valence : Int,
                              buffer : Int) : MutableList<Track> = runBlocking {
-            Log.d(LOG_TAG, "generatePlaylist($danceability, $energy, $speechiness, $loudness, $valence, $buffer) called")
             val suggestedTracks = mutableListOf<Track>()
 
             if (!::ACCESS_TOKEN.isInitialized) {
@@ -337,7 +344,7 @@ class SpotifyClient {
                                                                 headers = mapOf("Authorization" to "Bearer $ACCESS_TOKEN", "Content-Type" to "application/json"))
                                 when (addResponse.statusCode) {
                                     201 -> {
-//                                        val snapshotId = JSONObject(addResponse.text).getString("snapshot_id")
+                                        val snapshotId = JSONObject(addResponse.text).getString("snapshot_id")
                                     }
                                     else -> Log.d(LOG_TAG, "Something went wrong when adding tracks: ${addResponse.text}")
                                 }
@@ -355,13 +362,14 @@ class SpotifyClient {
 
         // todo - a bit of the last track is heard when playing a new track. tried to fix with volume control, but not working yet
         // todo - change to App Remote SDK, instead of using the Web Api
+        // todo - send message back to playlist view if not premium or some other error occured
         fun startPlayback(uri : String,
-                          isPaused : Boolean) : Any? = runBlocking {
+                          isPaused : Boolean) : Boolean? = runBlocking {
+            var playbackSuccess = false
             if (HAS_PREMIUM) {
                 val deviceId = getUserDevices()
                 if (deviceId != null) {
                     if (transferPlayback(deviceId) == 204) {
-                        Log.d(LOG_TAG, "transfer 204")
                         // Spotify handles transferPlayback request asynchronously, so wait till playback devices activates
                         // works for now, but in some scenarios, may never be true
                         while (!getActivePlayback()) {}
@@ -377,7 +385,7 @@ class SpotifyClient {
                                 headers = mapOf("Authorization" to "Bearer $ACCESS_TOKEN"))
 
                             when(playbackResponse.statusCode) {
-                                204  -> Log.d(LOG_TAG, "startPlayback 204 Success!")
+                                204  -> playbackSuccess = true
                                 403  -> Log.d(LOG_TAG, "startPlayback 403 forbidden! Premium required")
                                 404  -> Log.d(LOG_TAG, "startPlayback 404 not found: ${playbackResponse.text}")
                                 else -> Log.d(LOG_TAG, "${playbackResponse.statusCode} Something else went wrong: ${playbackResponse.text}")
@@ -386,6 +394,7 @@ class SpotifyClient {
                     }
                 }
             }
+            playbackSuccess
         }
 
         private fun getActivePlayback() : Boolean = runBlocking {
@@ -408,7 +417,7 @@ class SpotifyClient {
         }
 
         // todo can't use with startPlayback, since don't know which device is this mobile phone
-        private fun getUserDevices () : String? = runBlocking {
+        private fun getUserDevices() : String? = runBlocking {
             var deviceId : String? = null
             withContext(Dispatchers.IO) {
                 val response = get("https://api.spotify.com/v1/me/player/devices",
@@ -416,7 +425,6 @@ class SpotifyClient {
                 when(response.statusCode) {
                     200 -> {
                         val devices = JSONArray(JSONObject(response.text).getString("devices"))
-                        Log.d(LOG_TAG, "devices: $devices")
                         // may not work when user has multiple devices
                         // i do, but only my phone shows up, so maybe it's ok
                         deviceId = JSONObject(devices[0].toString()).getString("id")
@@ -439,8 +447,8 @@ class SpotifyClient {
 
         private fun storeSpotifyUser(userId : String,
                                      userName : String,
-                                     refreshToken: String) {
-            Log.d(LOG_TAG, "storeSpotifyUser() called")
+                                     refreshToken: String,
+                                     hasPremium : Boolean) {
             // Gets the data repository in write mode
             // Create a new map of values, where column names are the keys
             val values = ContentValues().apply {
@@ -448,20 +456,18 @@ class SpotifyClient {
                 put(SpotifyReaderContract.UserEntry.USER_NAME, userName)
                 put(SpotifyReaderContract.UserEntry.PLATFORM, "Spotify")
                 put(SpotifyReaderContract.UserEntry.REFRESH_TOKEN, refreshToken)
+                put(SpotifyReaderContract.UserEntry.HAS_PREMIUM, hasPremium)
             }
 
             // Insert the new row, returning the primary key value of the new row
             val newRowId = DbInstance.writableDb.insert(SpotifyReaderContract.UserEntry.TABLE_NAME, null, values)
-
-            if (newRowId == -1L) {
-                // conflict with pre-existing data
-                Log.d(LOG_TAG, "new row id = -1. conflict with pre-existing id")
-            }
         }
 
         // todo reduce or eliminate side effects
         private fun getUserFromDb() : Boolean {
             var userId : String? = null
+            var userName : String? = null
+            var hasPremium : Int? = null
             val projection = arrayOf(
                 SpotifyReaderContract.UserEntry.USER_ID,
                 SpotifyReaderContract.UserEntry.USER_NAME,
@@ -485,10 +491,8 @@ class SpotifyClient {
             with(cursor) {
                 while (moveToNext()) {
                     userId = getString(getColumnIndexOrThrow(SpotifyReaderContract.UserEntry.USER_ID))
-                    USER_NAME = getString(getColumnIndexOrThrow(SpotifyReaderContract.UserEntry.USER_NAME))
-                    if (getInt(getColumnIndexOrThrow(SpotifyReaderContract.UserEntry.HAS_PREMIUM)) == 1) {
-                        HAS_PREMIUM = true
-                    }
+                    userName = getString(getColumnIndexOrThrow(SpotifyReaderContract.UserEntry.USER_NAME))
+                    hasPremium = getInt(getColumnIndexOrThrow(SpotifyReaderContract.UserEntry.HAS_PREMIUM))
                     val refreshToken = getString(getColumnIndexOrThrow(SpotifyReaderContract.UserEntry.REFRESH_TOKEN))
                     if (refreshToken != null) {
                         REFRESH_TOKEN = refreshToken
@@ -500,6 +504,10 @@ class SpotifyClient {
                 return false
             }
             USER_ID = userId as String
+            USER_NAME = userName as String
+            if (hasPremium == 1) {
+                HAS_PREMIUM = true
+            }
             return true
         }
 
@@ -547,6 +555,95 @@ class SpotifyClient {
             }
 
             return playlist
+        }
+
+        fun getPlaylistsFromDb() : MutableList<Playlist> {
+            val playlists = mutableListOf<Playlist>()
+            val db = DbInstance.readableDb
+            // specify the columns to retrieve
+            val projection = arrayOf(
+                BaseColumns._ID,
+                SpotifyReaderContract.PlaylistEntry.PLAYLIST_CREATED,
+                SpotifyReaderContract.PlaylistEntry.PLAYLIST_HREF,
+                SpotifyReaderContract.PlaylistEntry.PLAYLIST_ID,
+                SpotifyReaderContract.PlaylistEntry.PLAYLIST_NAME,
+                SpotifyReaderContract.PlaylistEntry.PLAYLIST_COLLABORATIVE,
+                SpotifyReaderContract.PlaylistEntry.PLAYLIST_OWNER,
+                SpotifyReaderContract.PlaylistEntry.PLAYLIST_PUBLIC,
+                SpotifyReaderContract.PlaylistEntry.PLAYLIST_TYPE,
+                SpotifyReaderContract.PlaylistEntry.PLAYLIST_URI)
+
+            val sortOrder = "${SpotifyReaderContract.PlaylistEntry.PLAYLIST_CREATED} DESC"
+
+            val cursor = db.query(
+                SpotifyReaderContract.PlaylistEntry.TABLE_NAME,
+                projection,
+                null,
+                null,
+                null,
+                null,
+                sortOrder
+            )
+
+            with(cursor) {
+                while (moveToNext()) {
+                    val rowId       = getLong(getColumnIndexOrThrow(BaseColumns._ID))
+                    val href       = getString(getColumnIndexOrThrow(SpotifyReaderContract.PlaylistEntry.PLAYLIST_HREF))
+                    val id         = getString(getColumnIndexOrThrow(SpotifyReaderContract.PlaylistEntry.PLAYLIST_ID))
+                    val name       = getString(getColumnIndexOrThrow(SpotifyReaderContract.PlaylistEntry.PLAYLIST_NAME))
+                    val collaborative = getInt   (getColumnIndexOrThrow(SpotifyReaderContract.PlaylistEntry.PLAYLIST_COLLABORATIVE))
+                    val owner      = getString(getColumnIndexOrThrow(SpotifyReaderContract.PlaylistEntry.PLAYLIST_OWNER))
+                    val public        = getInt   (getColumnIndexOrThrow(SpotifyReaderContract.PlaylistEntry.PLAYLIST_PUBLIC))
+                    val type       = getString(getColumnIndexOrThrow(SpotifyReaderContract.PlaylistEntry.PLAYLIST_TYPE))
+                    val uri        = getString(getColumnIndexOrThrow(SpotifyReaderContract.PlaylistEntry.PLAYLIST_URI))
+                    playlists.add(
+                        Playlist(rowId, href, id, name, (collaborative == 1), owner, (public == 1), type, uri, null)
+                    )
+                }
+            }
+
+            return playlists
+        }
+
+        fun getPlaylistTracksFromDb(playlistRowId: Long) : List<Track> {
+            val tracks = mutableListOf<Track>()
+            // specify the columns to retrieve
+            val projection = arrayOf(
+                BaseColumns._ID,
+                SpotifyReaderContract.TrackEntry.TRACK_ID,
+                SpotifyReaderContract.TrackEntry.TRACK_NAME,
+                SpotifyReaderContract.TrackEntry.TRACK_ARTISTS,
+                SpotifyReaderContract.TrackEntry.TRACK_ARTISTS_IDS,
+                SpotifyReaderContract.TrackEntry.TRACK_ALBUM)
+
+            val selection = "${SpotifyReaderContract.TrackEntry.PLAYLIST_ID}=?"
+            val selectionArgs = arrayOf(playlistRowId.toString())
+
+            val cursor = DbInstance.readableDb.query(
+                SpotifyReaderContract.TrackEntry.TABLE_NAME,
+                projection,
+                selection,
+                selectionArgs,
+                null,
+                null,
+                null
+            )
+
+            with(cursor) {
+                while (moveToNext()) {
+                    val rowId       = getLong(getColumnIndexOrThrow(BaseColumns._ID))
+                    val id         = getString(getColumnIndexOrThrow(SpotifyReaderContract.TrackEntry.TRACK_ID))
+                    val name       = getString(getColumnIndexOrThrow(SpotifyReaderContract.TrackEntry.TRACK_NAME))
+                    val artistNames= getString(getColumnIndexOrThrow(SpotifyReaderContract.TrackEntry.TRACK_ARTISTS))
+                    val artistIds  = getString(getColumnIndexOrThrow(SpotifyReaderContract.TrackEntry.TRACK_ARTISTS_IDS))
+                    val album      = getString(getColumnIndexOrThrow(SpotifyReaderContract.TrackEntry.TRACK_ALBUM))
+
+                    tracks.add(
+                        Track(id, name, artistNames.split(","), artistIds.split(","), album)
+                    )
+                }
+            }
+            return tracks
         }
 
         fun removeAllGeneratedPlaylistsFromDb() {

@@ -3,70 +3,46 @@ import android.app.Activity.RESULT_OK
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
-import android.util.Log
+import android.support.design.widget.NavigationView
 import android.support.v4.app.Fragment
+import android.support.v4.view.GravityCompat
+import android.support.v7.app.ActionBarDrawerToggle
 import android.text.TextUtils
-import android.view.*
+import android.view.LayoutInflater
+import android.view.MenuItem
+import android.view.View
 import android.view.View.GONE
 import android.view.View.VISIBLE
+import android.view.ViewGroup
 import android.widget.TextView
+import kotlinx.android.synthetic.main.activity_choose_source.*
+import kotlinx.android.synthetic.main.app_bar_choose_source.*
 import kotlinx.android.synthetic.main.fragment_choose_source.*
 
-class ChooseSourceFragment : Fragment() {
-    companion object {
-        private const val LOG_TAG = "ChooseSourceFragment"
-        fun createFragment() : Fragment {
-            val arguments = Bundle()
-            val chooseSourceFragment = HomeFragment()
-            chooseSourceFragment.arguments = arguments
-            return chooseSourceFragment
-        }
-    }
-
+class ChooseSourceFragment : Fragment(), NavigationView.OnNavigationItemSelectedListener {
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
         if (resultCode != RESULT_OK) { return }
         if (data == null) { return }
     }
 
-    override fun onAttach(context: Context?) {
-        super.onAttach(context)
-        Log.d(LOG_TAG, "onAttach() called")
-    }
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        Log.d(LOG_TAG, "onCreate() called")
-        setHasOptionsMenu(true)
-    }
-
-    override fun onCreateOptionsMenu(menu: Menu?, inflater: MenuInflater?) {
-        super.onCreateOptionsMenu(menu, inflater)
-        inflater?.inflate(R.menu.home_options, menu)
-    }
-
-    override fun onOptionsItemSelected(item: MenuItem?): Boolean =
-        // Handle presses on the action bar menu items
-        true
-//        when (item?.itemId) {
-//            R.id.playlist_create_option -> {
-//                val generateIntent = GeneratePlaylistActivity.createIntent(context)
-//                startActivity(generateIntent)
-//                true
-//            }
-//            else -> super.onOptionsItemSelected(item)
-//        }
-
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        Log.d(LOG_TAG, "onCreateView() called")
-        return inflater.inflate(R.layout.fragment_choose_source, container, false)
+        return inflater.inflate(R.layout.activity_choose_source, container, false)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        Log.d(LOG_TAG, "onViewCreated() called")
         super.onViewCreated(view, savedInstanceState)
         // hide spinner progress bar
         choose_source_progress_circle.visibility = GONE
+
+        val toggle = ActionBarDrawerToggle(
+            activity, choose_source_drawer_layout, choose_source_toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close
+        )
+
+        choose_source_drawer_layout.addDrawerListener(toggle)
+        toggle.syncState()
+
+        choose_source_nav_view.setNavigationItemSelectedListener(this)
 
         // todo 50 is the max limit, so look into paginating
         val playlists = SpotifyClient.getUserPlaylists(SpotifyClient.ACCESS_TOKEN, 50, 0) as List<Playlist>
@@ -97,42 +73,21 @@ class ChooseSourceFragment : Fragment() {
         }
     }
 
-    override fun onActivityCreated(savedInstanceState: Bundle?) {
-        super.onActivityCreated(savedInstanceState)
-        Log.d(LOG_TAG, "onActivityCreated() called")
+    override fun onNavigationItemSelected(item: MenuItem): Boolean {
+        FragmentHelper.handleNavItems(item, this, context as Context)
+        choose_source_drawer_layout.closeDrawer(GravityCompat.START)
+        return true
     }
 
     override fun onStart() {
         super.onStart()
-        Log.d(LOG_TAG, "onStart() called")
         // hide spinner progress bar
         choose_source_progress_circle.visibility = GONE
     }
 
     override fun onResume() {
         super.onResume()
-        Log.d(LOG_TAG, "onResume() called")
         // hide spinner progress bar
         choose_source_progress_circle.visibility = GONE
-    }
-
-    override fun onPause() {
-        super.onPause()
-        Log.d(LOG_TAG, "onPause() called")
-    }
-
-    override fun onStop() {
-        super.onStop()
-        Log.d(LOG_TAG, "onStop() called")
-    }
-
-    override fun onDestroy() {
-        super.onDestroy()
-        Log.d(LOG_TAG, "onDestroy() called")
-    }
-
-    override fun onDetach() {
-        super.onDetach()
-        Log.d(LOG_TAG, "onDetach() called")
     }
 }

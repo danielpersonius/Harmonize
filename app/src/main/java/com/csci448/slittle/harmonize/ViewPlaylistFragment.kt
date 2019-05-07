@@ -2,37 +2,44 @@ package com.csci448.slittle.harmonize
 
 import android.app.Activity
 import android.app.AlertDialog
-import android.app.PendingIntent
 import android.content.ContentValues
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
+import android.provider.BaseColumns
 import android.support.design.widget.NavigationView
 import android.support.v4.app.Fragment
-import android.support.v4.app.NotificationCompat
-import android.support.v4.app.NotificationManagerCompat
 import android.support.v4.view.GravityCompat
 import android.support.v7.app.ActionBarDrawerToggle
-import android.util.Log
 import android.view.*
-import android.widget.*
+import android.widget.EditText
+import android.widget.TextView
+import android.widget.Toast
 import kotlinx.android.synthetic.main.activity_view_playlist.*
 import kotlinx.android.synthetic.main.app_bar_view_playlist.*
 import kotlinx.android.synthetic.main.fragment_view_playlist.*
 import kotlinx.android.synthetic.main.playlist_item.view.*
-import java.text.SimpleDateFormat
-import java.util.*
-import kotlin.collections.ArrayList
-import kotlin.collections.HashMap
-
 
 class ViewPlaylistFragment : Fragment(), NavigationView.OnNavigationItemSelectedListener {
-    var playlistTitle : String? = "Playlist name"
-    var tracks : List<Track> = arrayListOf()
+    private var playlist : Playlist? = null
+    private var playlistTitle : String? = "Playlist name"
+    var tracks : List<Track> = listOf()
     var tunedParameters : HashMap<String, String>? = hashMapOf()
     private var playlistRowId : Long? = null
-    private var playlistIsNew = false
+
+    private fun changePlaylistName(rowId : Long, newName : String) : Int {
+        val values = ContentValues().apply {
+            put(SpotifyReaderContract.PlaylistEntry.PLAYLIST_NAME, newName)
+        }
+
+        val selection = "${BaseColumns._ID}=?"
+        val selectionArgs = arrayOf(rowId.toString())
+        return DbInstance.writableDb.update(SpotifyReaderContract.PlaylistEntry.TABLE_NAME,
+            values,
+            selection,
+            selectionArgs)
+    }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
@@ -57,10 +64,6 @@ class ViewPlaylistFragment : Fragment(), NavigationView.OnNavigationItemSelected
             val intent = activity?.intent
             val extras = intent?.extras
             if (extras != null) {
-                playlistTitle = extras.getString("PLAYLIST_NAME")
-                playlistIsNew = extras.getBoolean("NEW_PLAYLIST")
-                tracks = extras.getStringArrayList("PLAYLIST_TRACKS") as List<Track>
-                // playlist is not new, and so has an id in the database
                 if (extras.containsKey("PLAYLIST_ROW_ID")) {
                     playlistRowId = extras.getLong("PLAYLIST_ROW_ID")
                 }
@@ -70,6 +73,13 @@ class ViewPlaylistFragment : Fragment(), NavigationView.OnNavigationItemSelected
                     else
                         null
             }
+        }
+
+        if (playlistRowId != null) {
+            playlist = SpotifyClient.getPlaylistFromDb(playlistRowId as Long)
+            playlistTitle = playlist?._name ?: playlistTitle
+            tracks = SpotifyClient.getPlaylistTracksFromDb(playlistRowId as Long)
+
         }
 
         val toggle = ActionBarDrawerToggle(
@@ -100,11 +110,11 @@ class ViewPlaylistFragment : Fragment(), NavigationView.OnNavigationItemSelected
         // add 'View on Spotify' option if already exported
         // already exported if db row does not have null uri
         if (playlistRowId != null) {
-            // remove export option
-            view_playlist_toolbar.menu.removeItem(R.id.playlist_menu_export_option)
-
             val playlist = SpotifyClient.getPlaylistFromDb(playlistRowId as Long)
             if (playlist?._id != null) {
+                // remove fragment_export option
+                view_playlist_toolbar.menu.removeItem(R.id.playlist_menu_export_option)
+
                 val viewPlaylistMenuItem = view_playlist_toolbar.menu.add(
                     Menu.NONE, // groupId
                     1, // itemId
@@ -130,8 +140,7 @@ class ViewPlaylistFragment : Fragment(), NavigationView.OnNavigationItemSelected
         playlist_name_banner.text = playlistTitle
 
         // change name pen icon press
-        editable_icon.setOnClickListener {
-            Toast.makeText(context, "Change name", Toast.LENGTH_SHORT).show()
+        playlist_name_banner.setOnClickListener {
             val titleEditTextBox = EditText(context)
             // dialog box for input
             val builder = AlertDialog.Builder(context)
@@ -139,9 +148,10 @@ class ViewPlaylistFragment : Fragment(), NavigationView.OnNavigationItemSelected
             builder.setTitle("Change playlist name")
             builder.setView(titleEditTextBox)
             builder.setPositiveButton("Done") {_, _ ->
-                // todo persist name change
                 playlistTitle = titleEditTextBox.text.toString()
                 playlist_name_banner.text = playlistTitle
+                // update in db
+                changePlaylistName(playlistRowId as Long, playlistTitle as String)
             }
 
             builder.setNegativeButton("Cancel") {_, _ ->
@@ -174,10 +184,19 @@ class ViewPlaylistFragment : Fragment(), NavigationView.OnNavigationItemSelected
             artistNameTextView.text = artistsText
             albumNameTextView.text  = track._album
 
-            // play song on press
+            // try to play song on press
             trackView.setOnClickListener {
-                Toast.makeText(context, "Play song", Toast.LENGTH_SHORT).show()
-                SpotifyClient.startPlayback(track._id, false)
+                if (SpotifyClient.userIsLoggedIn()) {
+                    if (SpotifyClient.startPlayback(track._id, false) as Boolean) {
+                        Toast.makeText(context, "Playing song!", Toast.LENGTH_SHORT).show()
+                    }
+                }
+                else {
+                    Toast.makeText(context, "need to log into Spotify app first", Toast.LENGTH_SHORT).show()
+                    val connectPlatformIntent = PlatformConnectActivity.createIntent(context, "view")
+                    connectPlatformIntent.putExtra("PLAYLIST_ROW_ID", playlistRowId)
+                    startActivity(connectPlatformIntent)
+                }
             }
             trackView.song_info_icon.setOnClickListener {
                 val audioFeatures = SpotifyClient.getTrackAudioFeatures(track._id, activity as Activity)
@@ -187,21 +206,12 @@ class ViewPlaylistFragment : Fragment(), NavigationView.OnNavigationItemSelected
             }
 
             // todo swipe left or right to delete song from list
-
             tracklist_linearlayout.addView(trackView)
         }
     }
 
     override fun onNavigationItemSelected(item: MenuItem): Boolean {
-        when (item.itemId) {
-            R.id.nav_generate -> {}
-            R.id.nav_connect -> {}
-            R.id.nav_home -> {
-                val mainActivityIntent = MainActivity.createIntent(context as Context)
-                startActivity(mainActivityIntent)
-            }
-        }
-
+        FragmentHelper.handleNavItems(item, this, context as Context)
         view_playlist_drawer_layout.closeDrawer(GravityCompat.START)
         return true
     }

@@ -1,5 +1,6 @@
 package com.csci448.slittle.harmonize
 
+import android.app.Notification
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.content.Context
@@ -11,6 +12,7 @@ import android.support.design.widget.NavigationView
 import android.support.v4.view.GravityCompat
 import android.support.v7.app.ActionBarDrawerToggle
 import android.support.v7.app.AppCompatActivity
+import android.util.Log
 import android.view.*
 import android.widget.BaseAdapter
 import android.widget.TextView
@@ -27,94 +29,8 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         }
     }
 
-    val playlists = mutableListOf<Playlist>()
+    var playlists = mutableListOf<Playlist>()
     private lateinit var adapter  : PlaylistAdapter
-
-    private fun getPlaylistTracks(playlistRowId: Long) : List<Track> {
-        val tracks = mutableListOf<Track>()
-        // specify the columns to retrieve
-        val projection = arrayOf(
-            BaseColumns._ID,
-            SpotifyReaderContract.TrackEntry.TRACK_ID,
-            SpotifyReaderContract.TrackEntry.TRACK_NAME,
-            SpotifyReaderContract.TrackEntry.TRACK_ARTISTS,
-            SpotifyReaderContract.TrackEntry.TRACK_ARTISTS_IDS,
-            SpotifyReaderContract.TrackEntry.TRACK_ALBUM)
-
-        val selection = "${SpotifyReaderContract.TrackEntry.PLAYLIST_ID}=?"
-        val selectionArgs = arrayOf(playlistRowId.toString())
-
-        val cursor = DbInstance.readableDb.query(
-            SpotifyReaderContract.TrackEntry.TABLE_NAME,
-            projection,
-            selection,
-            selectionArgs,
-            null,
-            null,
-            null
-        )
-
-        with(cursor) {
-            while (moveToNext()) {
-                val rowId       = getLong(getColumnIndexOrThrow(BaseColumns._ID))
-                val id         = getString(getColumnIndexOrThrow(SpotifyReaderContract.TrackEntry.TRACK_ID))
-                val name       = getString(getColumnIndexOrThrow(SpotifyReaderContract.TrackEntry.TRACK_NAME))
-                val artistNames= getString(getColumnIndexOrThrow(SpotifyReaderContract.TrackEntry.TRACK_ARTISTS))
-                val artistIds  = getString(getColumnIndexOrThrow(SpotifyReaderContract.TrackEntry.TRACK_ARTISTS_IDS))
-                val album      = getString(getColumnIndexOrThrow(SpotifyReaderContract.TrackEntry.TRACK_ALBUM))
-
-                tracks.add(
-                    Track(id, name, artistNames.split(","), artistIds.split(","), album)
-                )
-            }
-        }
-        return tracks
-    }
-
-    private fun getPlaylists() {
-        val db = DbInstance.readableDb
-        // specify the columns to retrieve
-        val projection = arrayOf(
-            BaseColumns._ID,
-            SpotifyReaderContract.PlaylistEntry.PLAYLIST_CREATED,
-            SpotifyReaderContract.PlaylistEntry.PLAYLIST_HREF,
-            SpotifyReaderContract.PlaylistEntry.PLAYLIST_ID,
-            SpotifyReaderContract.PlaylistEntry.PLAYLIST_NAME,
-            SpotifyReaderContract.PlaylistEntry.PLAYLIST_COLLABORATIVE,
-            SpotifyReaderContract.PlaylistEntry.PLAYLIST_OWNER,
-            SpotifyReaderContract.PlaylistEntry.PLAYLIST_PUBLIC,
-            SpotifyReaderContract.PlaylistEntry.PLAYLIST_TYPE,
-            SpotifyReaderContract.PlaylistEntry.PLAYLIST_URI)
-
-        val sortOrder = "${SpotifyReaderContract.PlaylistEntry.PLAYLIST_CREATED} DESC"
-
-        val cursor = db.query(
-            SpotifyReaderContract.PlaylistEntry.TABLE_NAME,
-            projection,
-            null,
-            null,
-            null,
-            null,
-            sortOrder
-        )
-
-        with(cursor) {
-            while (moveToNext()) {
-                val rowId       = getLong(getColumnIndexOrThrow(BaseColumns._ID))
-                val href       = getString(getColumnIndexOrThrow(SpotifyReaderContract.PlaylistEntry.PLAYLIST_HREF))
-                val id         = getString(getColumnIndexOrThrow(SpotifyReaderContract.PlaylistEntry.PLAYLIST_ID))
-                val name       = getString(getColumnIndexOrThrow(SpotifyReaderContract.PlaylistEntry.PLAYLIST_NAME))
-                val collaborative = getInt   (getColumnIndexOrThrow(SpotifyReaderContract.PlaylistEntry.PLAYLIST_COLLABORATIVE))
-                val owner      = getString(getColumnIndexOrThrow(SpotifyReaderContract.PlaylistEntry.PLAYLIST_OWNER))
-                val public        = getInt   (getColumnIndexOrThrow(SpotifyReaderContract.PlaylistEntry.PLAYLIST_PUBLIC))
-                val type       = getString(getColumnIndexOrThrow(SpotifyReaderContract.PlaylistEntry.PLAYLIST_TYPE))
-                val uri        = getString(getColumnIndexOrThrow(SpotifyReaderContract.PlaylistEntry.PLAYLIST_URI))
-                playlists.add(
-                    Playlist(rowId, href, id, name, (collaborative == 1), owner, (public == 1), type, uri, null)
-                )
-            }
-        }
-    }
 
     private fun deleteGeneratedPlaylist(playlist : Playlist) : Int {
         val db = DbInstance.writableDb
@@ -137,6 +53,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
             val importance = NotificationManager.IMPORTANCE_HIGH
             val channel = NotificationChannel(NOTIFICATION_CHANNEL_ID, name, importance).apply {
                 description = descriptionText
+                lockscreenVisibility = Notification.VISIBILITY_PUBLIC
             }
             // Register the channel with the system
             val notificationManager: NotificationManager =
@@ -167,16 +84,10 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 
             name.text = getItem(position)._name
             view.setOnClickListener {
-                // retrieve playlist and tracks from db
                 if (playlist._rowId != null) {
-                    // authorize or reauthorize to play tracks and export
-                    SpotifyClient.authorize(false)
-                    val tracks = getPlaylistTracks(playlist._rowId)
-                    val viewPlaylistIntent = ViewPlaylistActivity.createIntent(baseContext, getItem(position)._name)
-                    viewPlaylistIntent.putExtra("PLAYLIST_NAME", playlist._name)
+                    // authorize or reauthorize to play tracks and fragment_export
+                    val viewPlaylistIntent = ViewPlaylistActivity.createIntent(baseContext)
                     viewPlaylistIntent.putExtra("PLAYLIST_ROW_ID", playlist._rowId)
-                    viewPlaylistIntent.putExtra("NEW_PLAYLIST", false)
-                    viewPlaylistIntent.putExtra("PLAYLIST_TRACKS", ArrayList(tracks))
                     // todo change to db call
                     viewPlaylistIntent.putExtra("TUNED_PARAMETERS", hashMapOf<String, String>())
                     startActivity(viewPlaylistIntent)
@@ -205,9 +116,23 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         createNotificationChannel()
 
         fab.setOnClickListener {
-            // have to connect to spotify each time for now until we persist access token
-            val connectIntent = PlatformConnectActivity.createIntent(baseContext, "generate")
-            startActivity(connectIntent)
+            // todo - bad spaghetti
+            var needToConnect = false
+            // not a very good check - the refresh token will pretty much always be
+            // initialized so this only succeeds because || is greedy and the first check will
+            // almost always succeed
+            if (!SpotifyClient.userIsLoggedIn() || !SpotifyClient.refreshTokenIsInitialized()) {
+                needToConnect = true
+                val connectPlatformIntent = PlatformConnectActivity.createIntent(baseContext, "generate")
+                startActivity(connectPlatformIntent)
+            }
+            else if (!SpotifyClient.accessTokenIsInitialized()) {
+                SpotifyClient.authorize(false)
+            }
+            if (!needToConnect) {
+                val generatePlaylistIntent = GeneratePlaylistActivity.createIntent(baseContext)
+                startActivity(generatePlaylistIntent)
+            }
         }
 
         val toggle = ActionBarDrawerToggle(
@@ -218,7 +143,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 
         nav_view.setNavigationItemSelectedListener(this)
 
-        getPlaylists()
+        playlists = SpotifyClient.getPlaylistsFromDb()
         adapter = PlaylistAdapter()
         home_playlist_grid.adapter = adapter
     }
@@ -248,21 +173,20 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
     }
 
     override fun onNavigationItemSelected(item: MenuItem): Boolean {
-        // Handle navigation view item clicks here.
         when (item.itemId) {
             R.id.nav_generate -> {
-                if (!SpotifyClient.refreshTokenIsInitialized()) {
+                if (!SpotifyClient.refreshTokenIsInitialized() || !SpotifyClient.userIsLoggedIn()) {
                     val connectPlatformIntent = PlatformConnectActivity.createIntent(baseContext, "generate")
                     startActivity(connectPlatformIntent)
                 }
                 else if (!SpotifyClient.accessTokenIsInitialized()) {
                     SpotifyClient.authorize(false)
-                    val generatePlaylistIntent = GeneratePlaylistActivity.createIntent(baseContext)
-                    startActivity(generatePlaylistIntent)
                 }
+                val generatePlaylistIntent = GeneratePlaylistActivity.createIntent(baseContext)
+                startActivity(generatePlaylistIntent)
             }
             R.id.nav_connect -> {
-                val connectPlatformIntent = PlatformConnectActivity.createIntent(baseContext, "home")
+                val connectPlatformIntent = PlatformConnectActivity.createIntent(baseContext, "generate")
                 startActivity(connectPlatformIntent)
             }
             R.id.nav_home -> {

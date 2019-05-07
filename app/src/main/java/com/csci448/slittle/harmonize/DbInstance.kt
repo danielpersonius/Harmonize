@@ -3,7 +3,6 @@ package com.csci448.slittle.harmonize
 import android.content.Context
 import android.database.sqlite.SQLiteDatabase
 
-
 class DbInstance {
     companion object {
         var dbHelper: SpotifyReaderDbHelper? = null

@@ -7,7 +7,7 @@ import android.database.sqlite.SQLiteOpenHelper
 class SpotifyReaderDbHelper(context: Context?) : SQLiteOpenHelper(context, DATABASE_NAME, null, DATABASE_VERSION) {
     companion object {
         // If you change the database schema, you must increment the database version
-        const val DATABASE_VERSION = 12
+        const val DATABASE_VERSION = 13
         const val DATABASE_NAME = "harmonize.db"
     }
 

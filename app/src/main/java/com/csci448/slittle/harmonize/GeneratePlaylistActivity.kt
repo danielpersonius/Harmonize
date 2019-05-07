@@ -7,8 +7,7 @@ class GeneratePlaylistActivity : SingleFragmentActivity() {
     companion object {
         private const val LOG_TAG = "GeneratePlaylistActivity"
         fun createIntent(baseContext: Context?): Intent {
-            val intent = Intent(baseContext, GeneratePlaylistActivity::class.java)
-            return intent
+            return Intent(baseContext, GeneratePlaylistActivity::class.java)
         }
     }
 

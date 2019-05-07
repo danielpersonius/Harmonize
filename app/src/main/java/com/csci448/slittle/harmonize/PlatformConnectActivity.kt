@@ -4,8 +4,6 @@ import android.content.ContentValues
 import android.content.Context
 import android.content.Intent
 import android.util.Log
-import android.view.Menu
-import android.view.MenuItem
 import android.widget.Toast
 import com.spotify.sdk.android.authentication.AuthenticationClient
 import com.spotify.sdk.android.authentication.AuthenticationResponse
@@ -28,9 +26,7 @@ class PlatformConnectActivity : SingleFragmentActivity()  {
         }
     }
 
-
     override fun getLogTag() = LOG_TAG
-
     override fun createFragment() = PlatformConnectFragment()
 
     // handling results has to happen here and not in fragment, since passing 'activity'
@@ -48,12 +44,20 @@ class PlatformConnectActivity : SingleFragmentActivity()  {
                 // Response was successful and contains auth code needed to get refresh token
                 AuthenticationResponse.Type.CODE -> {
                     SpotifyClient.authorize(true, response.code)
+                    SpotifyClient.setUserIsLoggedIn(true)
                     storeSpotifyUser(SpotifyClient.USER_ID, SpotifyClient.USER_NAME)
 
                     when (gotoPage) {
                         "generate" -> {
                             val generateActivityIntent = GeneratePlaylistActivity.createIntent(this)
                             startActivity(generateActivityIntent)
+                        }
+                        "view" -> {
+                            val viewPlaylistIntent = ViewPlaylistActivity.createIntent(this)
+                            viewPlaylistIntent.putExtra("PLAYLIST_ROW_ID", PlatformConnectFragment.playlistRowId)
+                            // todo eliminate this - eventually these parameters will be retrieved on the view playlist page
+                            viewPlaylistIntent.putExtra("TUNED_PARAMETERS", hashMapOf<String, String>())
+                            startActivity(viewPlaylistIntent)
                         }
                         else -> {
                             val mainActivityIntent = MainActivity.createIntent(this)
@@ -78,26 +82,8 @@ class PlatformConnectActivity : SingleFragmentActivity()  {
         }
     }
 
-    override fun onCreateOptionsMenu(menu: Menu): Boolean {
-        Log.d(LOG_TAG, "activity onCreateOptionsMenu() called")
-        // Inflate the menu; this adds items to the action bar if it is present.
-        menuInflater.inflate(R.menu.main, menu)
-        return super.onCreateOptionsMenu(menu)
-    }
-
-    override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        when (item.itemId) {
-            R.id.action_settings -> return true
-            else -> return super.onOptionsItemSelected(item)
-        }
-    }
-
     private fun storeSpotifyUser(userId : String,
                                  userName : String) {
-        Log.d(LOG_TAG, "storeSpotifyUser() called")
         // Create a new map of values, where column names are the keys
         val values = ContentValues().apply {
             put(SpotifyReaderContract.UserEntry.USER_ID, userId)
@@ -106,11 +92,6 @@ class PlatformConnectActivity : SingleFragmentActivity()  {
         }
 
         // Insert the new row, returning the primary key value of the new row
-        val newRowId = DbInstance.writableDb.insert(SpotifyReaderContract.UserEntry.TABLE_NAME, null, values)
-
-        if (newRowId == -1L) {
-            // conflict with pre-existing data
-            Log.d(LOG_TAG, "new row id = -1. conflict with pre-existing id")
-        }
+        DbInstance.writableDb.insert(SpotifyReaderContract.UserEntry.TABLE_NAME, null, values)
     }
 }

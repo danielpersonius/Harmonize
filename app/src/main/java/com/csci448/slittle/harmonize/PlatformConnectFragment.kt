@@ -22,7 +22,14 @@ import kotlinx.android.synthetic.main.app_bar_connect.*
 import kotlinx.android.synthetic.main.fragment_connect.*
 
 class PlatformConnectFragment : Fragment(), NavigationView.OnNavigationItemSelectedListener {
-    private var goto : String? = "home"
+    companion object {
+        private var goto : String? = "home"
+        // if the user is not logged into the Spotify app when they try to play a song
+        // on the playlist view, they are redirected here. this is the id of the
+        // playlist they are viewing so onActivityResult in PlatformConnectActivity
+        // knows where to send the user back to
+        var playlistRowId = 0L
+    }
 
     private fun loginToSpotify() {
         AuthenticationClient.openLoginActivity(activity, SPOTIFY_LOGIN_REQUEST_CODE, SpotifyClient.getAuthenticationRequest())
@@ -51,6 +58,7 @@ class PlatformConnectFragment : Fragment(), NavigationView.OnNavigationItemSelec
         // rotation
         if (savedInstanceState != null) {
             goto = savedInstanceState.getString("GOTO")
+            playlistRowId = savedInstanceState.getLong("PLAYLIST_ROW_ID")
         }
 
         // extras would overwrite values from saved instance state
@@ -59,6 +67,9 @@ class PlatformConnectFragment : Fragment(), NavigationView.OnNavigationItemSelec
             val extras = intent?.extras
             if (extras != null) {
                 goto = extras.getString("GOTO")
+                if (extras.containsKey("PLAYLIST_ROW_ID")) {
+                    playlistRowId = extras.getLong("PLAYLIST_ROW_ID")
+                }
             }
         }
 
@@ -97,24 +108,7 @@ class PlatformConnectFragment : Fragment(), NavigationView.OnNavigationItemSelec
     }
 
     override fun onNavigationItemSelected(item: MenuItem): Boolean {
-        // Handle navigation view item clicks here.
-        when (item.itemId) {
-            R.id.nav_generate -> {
-//                val generatePlaylistIntent = GeneratePlaylistActivity.createIntent(baseContext)
-//                startActivity(generatePlaylistIntent)
-//                val connectPlatformIntent = PlatformConnectActivity.createIntent(context, )
-                //startActivity(connectPlatformIntent)
-            }
-            R.id.nav_connect -> {
-//                val connectPlatformIntent = PlatformConnectActivity.createIntent(context)
-                //startActivity(connectPlatformIntent)
-            }
-            R.id.nav_home -> {
-                val mainActivityIntent = MainActivity.createIntent(context as Context)
-                startActivity(mainActivityIntent)
-            }
-        }
-
+        FragmentHelper.handleNavItems(item, this, context as Context)
         connect_drawer_layout.closeDrawer(GravityCompat.START)
         return true
     }

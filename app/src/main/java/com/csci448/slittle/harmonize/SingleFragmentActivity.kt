@@ -17,7 +17,6 @@ abstract class SingleFragmentActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        Log.d(getLogTag(), "onCreate() called")
         setContentView( getLayoutResId() )
 
         var fragment : Fragment? = supportFragmentManager.findFragmentById(R.id.fragment_container)
@@ -27,30 +26,5 @@ abstract class SingleFragmentActivity : AppCompatActivity() {
                 .add(R.id.fragment_container, fragment)
                 .commit()
         }
-    }
-
-    override fun onStart() {
-        super.onStart()
-        Log.d(getLogTag(), "onStart() called")
-    }
-
-    override fun onResume() {
-        super.onResume()
-        Log.d(getLogTag(), "onResume() called")
-    }
-
-    override fun onPause() {
-        Log.d(getLogTag(), "onPause() called")
-        super.onPause()
-    }
-
-    override fun onStop() {
-        Log.d(getLogTag(), "onStop() called")
-        super.onStop()
-    }
-
-    override fun onDestroy() {
-        Log.d(getLogTag(), "onDestroy() called")
-        super.onDestroy()
     }
 }

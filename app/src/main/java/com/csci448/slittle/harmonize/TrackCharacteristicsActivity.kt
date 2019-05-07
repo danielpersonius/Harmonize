@@ -19,9 +19,6 @@ class TrackCharacteristicsActivity : SingleFragmentActivity() {
         }
     }
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-    }
     override fun getLogTag() = LOG_TAG
 
     override fun createFragment() = TrackCharacteristicsFragment()

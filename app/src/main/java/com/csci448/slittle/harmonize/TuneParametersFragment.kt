@@ -25,7 +25,6 @@ import kotlinx.android.synthetic.main.app_bar_tune_parameters.*
 import kotlinx.android.synthetic.main.fragment_tune_parameters.*
 import java.text.SimpleDateFormat
 import java.util.*
-import kotlin.collections.ArrayList
 
 class TuneParametersFragment : Fragment(), NavigationView.OnNavigationItemSelectedListener {
     companion object {
@@ -46,8 +45,6 @@ class TuneParametersFragment : Fragment(), NavigationView.OnNavigationItemSelect
     private val suggestedTrackLimit    = 100
 
     private fun savePlaylist(playlistTitle : String) : Long {
-        // Gets the data repository in write mode
-
         val sdf = SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS", Locale.getDefault())
         val formattedDateTime = sdf.format(Date()) // format current date
 
@@ -130,7 +127,7 @@ class TuneParametersFragment : Fragment(), NavigationView.OnNavigationItemSelect
         tune_parameters_nav_view.setNavigationItemSelectedListener(this)
 
 //        // disable artist similarity for now
-//        artist_similarity_seekbar.isEnabled = false
+        artist_similarity_seekbar.isEnabled = false
 
         // rotation
         if (savedInstanceState != null) {
@@ -139,7 +136,6 @@ class TuneParametersFragment : Fragment(), NavigationView.OnNavigationItemSelect
         else {
             val intent = activity?.intent
             val extras = intent?.extras
-            Log.d(LOG_TAG, extras.toString())
             if (extras != null) {
                 playlistName = extras.getString("PLAYLIST_NAME") ?: ""
                 playlistId   = extras.getString("PLAYLIST_ID") ?: null
@@ -155,39 +151,39 @@ class TuneParametersFragment : Fragment(), NavigationView.OnNavigationItemSelect
 
         generate_playlist_button.setOnClickListener {
             if (playlistId != null) {
+                tune_parameters_progress_circle.visibility = View.VISIBLE
+
                 // user didn't supply a value, so set to default and exclude from search
                 val artistSimilarity =
                     if (artist_similarity_seekbar.progress == 0)
                         -1
                     else
-                        artist_similarity_seekbar.progress/2 //Dividing value in half due to Spotify's algorithm not returning results for very high percentages
+                        artist_similarity_seekbar.progress///2 //Dividing value in half due to Spotify's algorithm not returning results for very high percentages
                 val danceability =
                     if (danceability_parameter_seekbar.progress == 0)
                         -1
                     else
-                        danceability_parameter_seekbar.progress/2
+                        danceability_parameter_seekbar.progress///2
                 val energy =
                     if (energy_parameter_seekbar.progress == 0)
                         -1
                     else
-                        energy_parameter_seekbar.progress/2
+                        energy_parameter_seekbar.progress///2
                 val speechiness =
                     if (speechiness_parameter_seekbar.progress == 0)
                         -1
                     else
-                        speechiness_parameter_seekbar.progress/2
+                        speechiness_parameter_seekbar.progress///2
                 val loudness =
                     if (loudness_parameter_seekbar.progress == 0)
                         -1
                     else
-                        loudness_parameter_seekbar.progress/2
+                        loudness_parameter_seekbar.progress///2
                 val valence =
                     if (valence_parameter_seekbar.progress == 0)
                         -1
                     else
-                        artist_similarity_seekbar.progress/2
-
-                tune_parameters_progress_circle.visibility = View.VISIBLE
+                        artist_similarity_seekbar.progress///2
 
                 val suggestedTracks = SpotifyClient.generatePlaylist(playlistId.toString(),
                                                                                 seedArtists!!.toList(),
@@ -203,15 +199,20 @@ class TuneParametersFragment : Fragment(), NavigationView.OnNavigationItemSelect
                                                                                 featureParameterBuffer) as List<Track>
 
                 val newPlaylistName = "'$playlistName' Suggested"
+                val insertId = savePlaylist(newPlaylistName)
+                if (insertId != -1L) {
+                    for (track : Track in suggestedTracks) {
+                        saveTrack(track, insertId)
+                    }
+                }
+
                 // create notification
                 val notificationId = 1
                 // Create an explicit intent for an Activity in your app
                 val intent = Intent(context, ViewPlaylistActivity::class.java).apply {
                     flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
                 }
-                intent.putExtra("PLAYLIST_TRACKS", ArrayList(suggestedTracks))
-                intent.putExtra("PLAYLIST_NAME", newPlaylistName)
-                intent.putExtra("NEW_PLAYLIST", true)
+                intent.putExtra("PLAYLIST_ROW_ID", insertId)
                 // make values into strings so the spotify client can put them in the post request
                 intent.putExtra("TUNED_PARAMETERS", hashMapOf(
                                                              "danceability" to "$danceability",
@@ -228,31 +229,26 @@ class TuneParametersFragment : Fragment(), NavigationView.OnNavigationItemSelect
                     .setContentTitle("Suggested Playlist is ready!")
                     .setContentText("Your new playlist $newPlaylistName has been made")
                     .setDefaults(Notification.DEFAULT_ALL)
-                    .setPriority(NotificationCompat.PRIORITY_HIGH)
-                    // Set the intent that will fire when the user taps the notification
+                    .setPriority(NotificationCompat.PRIORITY_MAX)
                     .setContentIntent(pendingIntent)
                     .setAutoCancel(true)
 
-                // test delay
-//                GlobalScope.launch(context = Dispatchers.Main) {
-//                    Thread.sleep(5000)
-//                }
-
                 with(NotificationManagerCompat.from(context as Context)) {
-                    // notificationId is a unique int for each notification that you must define
+                    // id is a unique int for each notification that you must define
                     notify(notificationId, builder.build())
                 }
 
-                // db insert
-                val insertId = savePlaylist(newPlaylistName)
-                if (insertId != -1L) {
-                    for (track : Track in suggestedTracks) {
-                        saveTrack(track, insertId)
-                    }
-                }
-
-                val homeIntent = MainActivity.createIntent(context as Context)
-                startActivity(homeIntent)
+                val viewPlaylistIntent = ViewPlaylistActivity.createIntent(context as Context)
+                viewPlaylistIntent.putExtra("PLAYLIST_ROW_ID", insertId)
+                viewPlaylistIntent.putExtra("TUNED_PARAMETERS", hashMapOf(
+                                                                         "danceability" to "$danceability",
+                                                                         "energy"       to "$energy",
+                                                                         "speechiness"  to "$speechiness",
+                                                                         "loudness"     to "$loudness",
+                                                                         "valence"      to "$valence"
+                                                                     )
+                )
+                startActivity(viewPlaylistIntent)
             }
         }
 
@@ -350,24 +346,7 @@ class TuneParametersFragment : Fragment(), NavigationView.OnNavigationItemSelect
     }
 
     override fun onNavigationItemSelected(item: MenuItem): Boolean {
-        // Handle navigation view item clicks here.
-        when (item.itemId) {
-            R.id.nav_generate -> {
-//                val generatePlaylistIntent = GeneratePlaylistActivity.createIntent(baseContext)
-//                startActivity(generatePlaylistIntent)
-//                val connectPlatformIntent = PlatformConnectActivity.createIntent(context, )
-                //startActivity(connectPlatformIntent)
-            }
-            R.id.nav_connect -> {
-//                val connectPlatformIntent = PlatformConnectActivity.createIntent(context)
-                //startActivity(connectPlatformIntent)
-            }
-            R.id.nav_home -> {
-                val mainActivityIntent = MainActivity.createIntent(context as Context)
-                startActivity(mainActivityIntent)
-            }
-        }
-
+        FragmentHelper.handleNavItems(item, this, context as Context)
         tune_parameters_drawer_layout.closeDrawer(GravityCompat.START)
         return true
     }
