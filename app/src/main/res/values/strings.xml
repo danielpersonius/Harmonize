@@ -53,6 +53,8 @@
     <string name="action_settings">Settings</string>
     <string name="characteristics_string">Characteristics</string>
     <string name="spotify_logout">Logout from Spotify</string>
+    <string name="notification_channel_name">notifications</string>
+    <string name="notification_channel_description">all notifications</string>
 </resources>
 
 

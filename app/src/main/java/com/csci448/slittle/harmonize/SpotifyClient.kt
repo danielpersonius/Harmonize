@@ -548,5 +548,16 @@ class SpotifyClient {
 
             return playlist
         }
+
+        fun removeAllGeneratedPlaylistsFromDb() {
+            DbInstance.writableDb.delete(
+                SpotifyReaderContract.TrackEntry.TABLE_NAME,
+                null,
+                null)
+            DbInstance.writableDb.delete(
+                SpotifyReaderContract.PlaylistEntry.TABLE_NAME,
+                null,
+                null)
+        }
     }
 }

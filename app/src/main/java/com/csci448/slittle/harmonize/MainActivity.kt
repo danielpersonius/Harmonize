@@ -1,7 +1,10 @@
 package com.csci448.slittle.harmonize
 
+import android.app.NotificationChannel
+import android.app.NotificationManager
 import android.content.Context
 import android.content.Intent
+import android.os.Build
 import android.os.Bundle
 import android.provider.BaseColumns
 import android.support.design.widget.NavigationView
@@ -20,9 +23,9 @@ import kotlinx.android.synthetic.main.fragment_home.*
 class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelectedListener {
     companion object {
         private const val LOG_TAG = "HomeActivity"
+        const val NOTIFICATION_CHANNEL_ID = "1"
         fun createIntent(baseContext: Context): Intent {
-            val intent = Intent(baseContext, MainActivity::class.java)
-            return intent
+            return Intent(baseContext, MainActivity::class.java)
         }
     }
 
@@ -129,6 +132,23 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         return affectedRows
     }
 
+    private fun createNotificationChannel() {
+        // Create the NotificationChannel, but only on API 26+ because
+        // the NotificationChannel class is new and not in the support library
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            val name = getString(R.string.notification_channel_name)
+            val descriptionText = getString(R.string.notification_channel_description)
+            val importance = NotificationManager.IMPORTANCE_MAX
+            val channel = NotificationChannel(NOTIFICATION_CHANNEL_ID, name, importance).apply {
+                description = descriptionText
+            }
+            // Register the channel with the system
+            val notificationManager: NotificationManager =
+                getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+            notificationManager.createNotificationChannel(channel)
+        }
+    }
+
     inner class PlaylistAdapter : BaseAdapter() {
         override fun getCount(): Int {
             return playlists.size
@@ -186,6 +206,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         setSupportActionBar(toolbar)
 
         DbInstance.createDbInstance(applicationContext)
+        createNotificationChannel()
 
         fab.setOnClickListener {
             // have to connect to spotify each time for now until we persist access token

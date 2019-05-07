@@ -2,6 +2,7 @@ package com.csci448.slittle.harmonize
 
 import android.app.Activity
 import android.app.AlertDialog
+import android.app.PendingIntent
 import android.content.ContentValues
 import android.content.Context
 import android.content.Intent
@@ -9,6 +10,8 @@ import android.net.Uri
 import android.os.Bundle
 import android.support.design.widget.NavigationView
 import android.support.v4.app.Fragment
+import android.support.v4.app.NotificationCompat
+import android.support.v4.app.NotificationManagerCompat
 import android.support.v4.view.GravityCompat
 import android.support.v7.app.ActionBarDrawerToggle
 import android.util.Log
@@ -108,6 +111,7 @@ class ViewPlaylistFragment : Fragment(), NavigationView.OnNavigationItemSelected
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         Log.d(LOG_TAG, "onViewCreated() called")
         super.onViewCreated(view, savedInstanceState)
+
 
         // rotation
         if (savedInstanceState != null) {
