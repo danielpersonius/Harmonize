@@ -28,69 +28,11 @@ import kotlin.collections.HashMap
 
 
 class ViewPlaylistFragment : Fragment(), NavigationView.OnNavigationItemSelectedListener {
-    companion object {
-        private const val LOG_TAG = "ViewPlaylistFragment"
-    }
-
     var playlistTitle : String? = "Playlist name"
     var tracks : List<Track> = arrayListOf()
     var tunedParameters : HashMap<String, String>? = hashMapOf()
-    private var insertId = 0L
     private var playlistRowId : Long? = null
     private var playlistIsNew = false
-
-    private fun savePlaylist() : Long {
-        Log.d(LOG_TAG, "savePlaylist() called")
-        // Gets the data repository in write mode
-
-        val sdf = SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS", Locale.getDefault())
-        val formattedDateTime = sdf.format(Date()) // format current date
-
-        // Create a new map of values, where column names are the keys
-        val values = ContentValues().apply {
-            put(SpotifyReaderContract.PlaylistEntry.PLAYLIST_CREATED, formattedDateTime)
-            put(SpotifyReaderContract.PlaylistEntry.PLAYLIST_NAME, playlistTitle)
-            put(SpotifyReaderContract.PlaylistEntry.PLAYLIST_COLLABORATIVE, 0)
-            put(SpotifyReaderContract.PlaylistEntry.PLAYLIST_OWNER, SpotifyClient.USER_NAME)
-            put(SpotifyReaderContract.PlaylistEntry.PLAYLIST_PUBLIC, 0)
-            put(SpotifyReaderContract.PlaylistEntry.PLAYLIST_TYPE, "playlist")
-        }
-
-        // Insert the new row, returning the primary key value of the new row
-        val newRowId = DbInstance.writableDb.insert(SpotifyReaderContract.PlaylistEntry.TABLE_NAME, null, values)
-
-        if (newRowId == -1L) {
-            // conflict with pre-existing data
-            Log.d(LOG_TAG, "new row id = -1. conflict with pre-existing id")
-        }
-
-        return newRowId
-    }
-
-    private fun saveTrack(track : Track) : Long? {
-        Log.d(LOG_TAG, "saveTrack() called")
-        // Gets the data repository in write mode
-
-        // Create a new map of values, where column names are the keys
-        val values = ContentValues().apply {
-            put(SpotifyReaderContract.TrackEntry.TRACK_ID,          track._id)
-            put(SpotifyReaderContract.TrackEntry.PLAYLIST_ID,       insertId)
-            put(SpotifyReaderContract.TrackEntry.TRACK_NAME,        track._name)
-            put(SpotifyReaderContract.TrackEntry.TRACK_ARTISTS,     track._artistNames.toString())
-            put(SpotifyReaderContract.TrackEntry.TRACK_ARTISTS_IDS, track._artistIds.toString())
-            put(SpotifyReaderContract.TrackEntry.TRACK_ALBUM,       track._album)
-        }
-
-        // Insert the new row, returning the primary key value of the new row
-        val newRowId = DbInstance.writableDb.insert(SpotifyReaderContract.TrackEntry.TABLE_NAME, null, values)
-
-        if (newRowId == -1L) {
-            // conflict with pre-existing data
-            Log.d(LOG_TAG, "new row id = -1. conflict with pre-existing id")
-        }
-
-        return newRowId
-    }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
@@ -98,20 +40,12 @@ class ViewPlaylistFragment : Fragment(), NavigationView.OnNavigationItemSelected
         if (data == null) { return }
     }
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        Log.d(LOG_TAG, "onCreate() called")
-    }
-
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        Log.d(LOG_TAG, "onCreateView() called")
         return inflater.inflate(R.layout.activity_view_playlist, container, false)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        Log.d(LOG_TAG, "onViewCreated() called")
         super.onViewCreated(view, savedInstanceState)
-
 
         // rotation
         if (savedInstanceState != null) {
@@ -143,10 +77,8 @@ class ViewPlaylistFragment : Fragment(), NavigationView.OnNavigationItemSelected
         )
         view_playlist_toolbar.inflateMenu(R.menu.view_playlist_options)
         view_playlist_toolbar.setOnMenuItemClickListener {
-//            Log.d(LOG_TAG, "toolbar export!")
             when (it.itemId) {
                 R.id.playlist_menu_export_option -> {
-//                    Log.d(LOG_TAG, "playlist export!")
                     val exportIntent = ExportActivity.createIntent(context)
                     exportIntent.putExtra("PLAYLIST_NAME", playlistTitle)
                     // get just the ids of the tracks
@@ -157,7 +89,6 @@ class ViewPlaylistFragment : Fragment(), NavigationView.OnNavigationItemSelected
                     exportIntent.putExtra("PLAYLIST_TRACK_IDS", ArrayList(trackIds))
                     exportIntent.putExtra("TUNED_PARAMETERS", tunedParameters)
                     if (playlistRowId != null) {
-                        Log.d(LOG_TAG, "playlist row id is not null: $playlistRowId")
                         exportIntent.putExtra("PLAYLIST_ROW_ID", playlistRowId as Long)
                     }
                     startActivity(exportIntent)
@@ -173,7 +104,6 @@ class ViewPlaylistFragment : Fragment(), NavigationView.OnNavigationItemSelected
             view_playlist_toolbar.menu.removeItem(R.id.playlist_menu_export_option)
 
             val playlist = SpotifyClient.getPlaylistFromDb(playlistRowId as Long)
-            Log.d(LOG_TAG, "playlist: $playlist")
             if (playlist?._id != null) {
                 val viewPlaylistMenuItem = view_playlist_toolbar.menu.add(
                     Menu.NONE, // groupId
@@ -197,9 +127,6 @@ class ViewPlaylistFragment : Fragment(), NavigationView.OnNavigationItemSelected
 
         view_playlist_nav_view.setNavigationItemSelectedListener(this)
 
-        if (playlistIsNew) {
-            insertId = savePlaylist()
-        }
         playlist_name_banner.text = playlistTitle
 
         // change name pen icon press
@@ -233,11 +160,6 @@ class ViewPlaylistFragment : Fragment(), NavigationView.OnNavigationItemSelected
             val artistNameTextView = trackView.findViewById(R.id.playlist_artist_name) as TextView
             val albumNameTextView  = trackView.findViewById(R.id.playlist_album_name) as TextView
 
-//            Log.d(LOG_TAG, "track: $track")
-            if (playlistIsNew) {
-                saveTrack(track)
-            }
-
             songNameTextView.text   = track._name
             val artists = track._artistNames
             var artistsText = ""
@@ -259,7 +181,6 @@ class ViewPlaylistFragment : Fragment(), NavigationView.OnNavigationItemSelected
             }
             trackView.song_info_icon.setOnClickListener {
                 val audioFeatures = SpotifyClient.getTrackAudioFeatures(track._id, activity as Activity)
-//                Log.d(LOG_TAG, "audio features: $audioFeatures")
                 track._metadata = audioFeatures
                 val intent = TrackCharacteristicsActivity.createIntent(context, track._name, track._metadata)
                 startActivity(intent)
@@ -270,7 +191,6 @@ class ViewPlaylistFragment : Fragment(), NavigationView.OnNavigationItemSelected
             tracklist_linearlayout.addView(trackView)
         }
     }
-
 
     override fun onNavigationItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
@@ -284,45 +204,5 @@ class ViewPlaylistFragment : Fragment(), NavigationView.OnNavigationItemSelected
 
         view_playlist_drawer_layout.closeDrawer(GravityCompat.START)
         return true
-    }
-
-    override fun onActivityCreated(savedInstanceState: Bundle?) {
-        super.onActivityCreated(savedInstanceState)
-        Log.d(LOG_TAG, "onActivityCreated() called")
-    }
-
-    override fun onStart() {
-        super.onStart()
-        Log.d(LOG_TAG, "onStart() called")
-    }
-
-    override fun onResume() {
-        super.onResume()
-        Log.d(LOG_TAG, "onResume() called")
-    }
-
-    override fun onPause() {
-        super.onPause()
-        Log.d(LOG_TAG, "onPause() called")
-    }
-
-    override fun onStop() {
-        super.onStop()
-        Log.d(LOG_TAG, "onStop() called")
-    }
-
-    override fun onDestroy() {
-        super.onDestroy()
-        Log.d(LOG_TAG, "onDestroy() called")
-    }
-
-    override fun onAttach(context: Context?) {
-        super.onAttach(context)
-        Log.d(LOG_TAG, "onAttach() called")
-    }
-
-    override fun onDetach() {
-        super.onDetach()
-        Log.d(LOG_TAG, "onDetach() called")
     }
 }

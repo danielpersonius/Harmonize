@@ -4,23 +4,31 @@ import android.app.Activity
 import android.app.AlertDialog
 import android.app.Notification
 import android.app.PendingIntent
+import android.content.ContentValues
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import android.support.design.widget.NavigationView
 import android.support.v4.app.Fragment
 import android.support.v4.app.NotificationCompat
 import android.support.v4.app.NotificationManagerCompat
-import android.util.Log
+import android.support.v4.view.GravityCompat
+import android.support.v7.app.ActionBarDrawerToggle
 import android.view.LayoutInflater
+import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
 import android.widget.SeekBar
 import android.widget.TextView
+import kotlinx.android.synthetic.main.activity_tune_parameters.*
+import kotlinx.android.synthetic.main.app_bar_tune_parameters.*
 import kotlinx.android.synthetic.main.fragment_tune_parameters.*
+import java.text.SimpleDateFormat
+import java.util.*
+import kotlin.collections.ArrayList
 
-class TuneParametersFragment : Fragment() {
+class TuneParametersFragment : Fragment(), NavigationView.OnNavigationItemSelectedListener {
     companion object {
-        private const val LOG_TAG = "TuneParametersFragment"
         fun createFragment() : Fragment {
             val arguments = Bundle()
             val tuneParametersFragment = TuneParametersFragment()
@@ -36,6 +44,43 @@ class TuneParametersFragment : Fragment() {
     private var seedTracks   = mutableListOf<String>()
     private val featureParameterBuffer = 50
     private val suggestedTrackLimit    = 100
+
+    private fun savePlaylist(playlistTitle : String) : Long {
+        // Gets the data repository in write mode
+
+        val sdf = SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS", Locale.getDefault())
+        val formattedDateTime = sdf.format(Date()) // format current date
+
+        // Create a new map of values, where column names are the keys
+        val values = ContentValues().apply {
+            put(SpotifyReaderContract.PlaylistEntry.PLAYLIST_CREATED, formattedDateTime)
+            put(SpotifyReaderContract.PlaylistEntry.PLAYLIST_NAME, playlistTitle)
+            put(SpotifyReaderContract.PlaylistEntry.PLAYLIST_COLLABORATIVE, 0)
+            put(SpotifyReaderContract.PlaylistEntry.PLAYLIST_OWNER, SpotifyClient.USER_NAME)
+            put(SpotifyReaderContract.PlaylistEntry.PLAYLIST_PUBLIC, 0)
+            put(SpotifyReaderContract.PlaylistEntry.PLAYLIST_TYPE, "playlist")
+        }
+
+        // Insert the new row, returning the primary key value of the new row
+        return DbInstance.writableDb.insert(SpotifyReaderContract.PlaylistEntry.TABLE_NAME, null, values)
+    }
+
+    private fun saveTrack(track : Track, playlistInsertId : Long) : Long? {
+        // Gets the data repository in write mode
+
+        // Create a new map of values, where column names are the keys
+        val values = ContentValues().apply {
+            put(SpotifyReaderContract.TrackEntry.TRACK_ID,          track._id)
+            put(SpotifyReaderContract.TrackEntry.PLAYLIST_ID,       playlistInsertId)
+            put(SpotifyReaderContract.TrackEntry.TRACK_NAME,        track._name)
+            put(SpotifyReaderContract.TrackEntry.TRACK_ARTISTS,     track._artistNames.toString())
+            put(SpotifyReaderContract.TrackEntry.TRACK_ARTISTS_IDS, track._artistIds.toString())
+            put(SpotifyReaderContract.TrackEntry.TRACK_ALBUM,       track._album)
+        }
+
+        // Insert the new row, returning the primary key value of the new row
+        return DbInstance.writableDb.insert(SpotifyReaderContract.TrackEntry.TABLE_NAME, null, values)
+    }
 
     private fun showDescription(parameterName : String, description : String) {
         val descriptionTextView = TextView(context)
@@ -57,25 +102,32 @@ class TuneParametersFragment : Fragment() {
         if (data == null) { return }
     }
 
-    override fun onAttach(context: Context?) {
-        super.onAttach(context)
-        Log.d(LOG_TAG, "onAttach() called")
-    }
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        Log.d(LOG_TAG, "onCreate() called")
-        setHasOptionsMenu(true)
-    }
-
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        Log.d(LOG_TAG, "onCreateView() called")
-        return inflater.inflate(R.layout.fragment_tune_parameters, container, false)
+        return inflater.inflate(R.layout.activity_tune_parameters, container, false)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        Log.d(LOG_TAG, "onViewCreated() called")
         super.onViewCreated(view, savedInstanceState)
+        tune_parameters_progress_circle.visibility = View.GONE
+
+        val toggle = ActionBarDrawerToggle(
+            activity, tune_parameters_drawer_layout, tune_parameters_toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close
+        )
+        tune_parameters_toolbar.inflateMenu(R.menu.platform_connect_options)
+        tune_parameters_toolbar.setOnMenuItemClickListener {
+            when(it.itemId) {
+                R.id.logout_spotify_option -> {
+
+                }
+                else -> super.onOptionsItemSelected(it)
+            }
+            true
+        }
+
+        tune_parameters_drawer_layout.addDrawerListener(toggle)
+        toggle.syncState()
+
+        tune_parameters_nav_view.setNavigationItemSelectedListener(this)
 
         // disable artist similarity for now
         artist_similarity_seekbar.isEnabled = false
@@ -89,10 +141,14 @@ class TuneParametersFragment : Fragment() {
             val extras = intent?.extras
             if (extras != null) {
                 playlistName = extras.getString("PLAYLIST_NAME") ?: ""
-                playlistId = extras.getString("PLAYLIST_ID") ?: null
-                seedArtists = extras.getStringArrayList("PLAYLIST_ARTISTS")
-//                seedGenres = extras.getStringArrayList("PLAYLIST_GENRES") as MutableList<String>
-                seedTracks = extras.getStringArrayList("PLAYLIST_TRACKS") as MutableList<String>
+                playlistId   = extras.getString("PLAYLIST_ID") ?: null
+                seedArtists  = extras.getStringArrayList("PLAYLIST_ARTISTS")
+                seedGenres   =
+                    if (extras.containsKey("PLAYLIST_GENRES"))
+                        extras.getStringArrayList("PLAYLIST_GENRES") as MutableList<String>
+                    else
+                        mutableListOf()
+                seedTracks  = extras.getStringArrayList("PLAYLIST_TRACKS") as MutableList<String>
             }
         }
 
@@ -130,6 +186,8 @@ class TuneParametersFragment : Fragment() {
                     else
                         artist_similarity_seekbar.progress
 
+                tune_parameters_progress_circle.visibility = View.VISIBLE
+
                 val suggestedTracks = SpotifyClient.generatePlaylist(playlistId.toString(),
                                                                                 seedArtists!!.toList(),
                                                                                 seedGenres,
@@ -143,6 +201,7 @@ class TuneParametersFragment : Fragment() {
                                                                                 valence,
                                                                                 featureParameterBuffer) as List<Track>
 
+                val newPlaylistName = "'$playlistName' Suggested"
                 // create notification
                 val notificationId = 1
                 // Create an explicit intent for an Activity in your app
@@ -150,7 +209,7 @@ class TuneParametersFragment : Fragment() {
                     flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
                 }
                 intent.putExtra("PLAYLIST_TRACKS", ArrayList(suggestedTracks))
-                intent.putExtra("PLAYLIST_NAME", "$playlistName Suggested")
+                intent.putExtra("PLAYLIST_NAME", newPlaylistName)
                 intent.putExtra("NEW_PLAYLIST", true)
                 // make values into strings so the spotify client can put them in the post request
                 intent.putExtra("TUNED_PARAMETERS", hashMapOf(
@@ -166,16 +225,29 @@ class TuneParametersFragment : Fragment() {
                 val builder = NotificationCompat.Builder(context as Context, MainActivity.NOTIFICATION_CHANNEL_ID)
                     .setSmallIcon(R.drawable.harmonize_launcher)
                     .setContentTitle("Suggested Playlist is ready!")
-                    .setContentText("Your new playlist '$playlistName Suggested' has been made")
+                    .setContentText("Your new playlist $newPlaylistName has been made")
                     .setDefaults(Notification.DEFAULT_ALL)
-                    .setPriority(NotificationCompat.PRIORITY_MAX)
+                    .setPriority(NotificationCompat.PRIORITY_HIGH)
                     // Set the intent that will fire when the user taps the notification
                     .setContentIntent(pendingIntent)
                     .setAutoCancel(true)
 
+                // test delay
+//                GlobalScope.launch(context = Dispatchers.Main) {
+//                    Thread.sleep(5000)
+//                }
+
                 with(NotificationManagerCompat.from(context as Context)) {
                     // notificationId is a unique int for each notification that you must define
                     notify(notificationId, builder.build())
+                }
+
+                // db insert
+                val insertId = savePlaylist(newPlaylistName)
+                if (insertId != -1L) {
+                    for (track : Track in suggestedTracks) {
+                        saveTrack(track, insertId)
+                    }
                 }
 
                 val homeIntent = MainActivity.createIntent(context as Context)
@@ -276,38 +348,36 @@ class TuneParametersFragment : Fragment() {
         })
     }
 
-    override fun onActivityCreated(savedInstanceState: Bundle?) {
-        super.onActivityCreated(savedInstanceState)
-        Log.d(LOG_TAG, "onActivityCreated() called")
+    override fun onNavigationItemSelected(item: MenuItem): Boolean {
+        // Handle navigation view item clicks here.
+        when (item.itemId) {
+            R.id.nav_generate -> {
+//                val generatePlaylistIntent = GeneratePlaylistActivity.createIntent(baseContext)
+//                startActivity(generatePlaylistIntent)
+//                val connectPlatformIntent = PlatformConnectActivity.createIntent(context, )
+                //startActivity(connectPlatformIntent)
+            }
+            R.id.nav_connect -> {
+//                val connectPlatformIntent = PlatformConnectActivity.createIntent(context)
+                //startActivity(connectPlatformIntent)
+            }
+            R.id.nav_home -> {
+                val mainActivityIntent = MainActivity.createIntent(context as Context)
+                startActivity(mainActivityIntent)
+            }
+        }
+
+        tune_parameters_drawer_layout.closeDrawer(GravityCompat.START)
+        return true
     }
 
     override fun onStart() {
         super.onStart()
-        Log.d(LOG_TAG, "onStart() called")
+        tune_parameters_progress_circle.visibility = View.GONE
     }
 
     override fun onResume() {
         super.onResume()
-        Log.d(LOG_TAG, "onResume() called")
-    }
-
-    override fun onPause() {
-        super.onPause()
-        Log.d(LOG_TAG, "onPause() called")
-    }
-
-    override fun onStop() {
-        super.onStop()
-        Log.d(LOG_TAG, "onStop() called")
-    }
-
-    override fun onDestroy() {
-        super.onDestroy()
-        Log.d(LOG_TAG, "onDestroy() called")
-    }
-
-    override fun onDetach() {
-        super.onDetach()
-        Log.d(LOG_TAG, "onDetach() called")
+        tune_parameters_progress_circle.visibility = View.GONE
     }
 }

@@ -1,92 +1,30 @@
 package com.csci448.slittle.harmonize
-import android.app.Activity
 import android.app.Activity.RESULT_OK
-import android.content.ContentValues
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
-import android.provider.BaseColumns
 import android.support.design.widget.NavigationView
-import android.util.Log
 import android.support.v4.app.Fragment
 import android.support.v4.view.GravityCompat
 import android.support.v7.app.ActionBarDrawerToggle
-import android.view.*
+import android.view.LayoutInflater
+import android.view.MenuItem
+import android.view.View
 import android.view.View.GONE
 import android.view.View.VISIBLE
+import android.view.ViewGroup
 import android.widget.Toast
 import com.csci448.slittle.harmonize.PlatformConnectActivity.Companion.SPOTIFY_LOGIN_REQUEST_CODE
-import kotlinx.android.synthetic.main.fragment_connect.*
 import com.spotify.sdk.android.authentication.AuthenticationClient
-import com.spotify.sdk.android.authentication.AuthenticationRequest
-import com.spotify.sdk.android.authentication.AuthenticationResponse
 import kotlinx.android.synthetic.main.activity_connect.*
-import kotlinx.android.synthetic.main.activity_main.*
-import kotlinx.android.synthetic.main.activity_main.nav_view
 import kotlinx.android.synthetic.main.app_bar_connect.*
-import kotlinx.android.synthetic.main.app_bar_main.*
-import kotlinx.android.synthetic.main.fragment_connect_two.*
-import kotlinx.android.synthetic.main.fragment_connect_two.connect_drawer_layout
+import kotlinx.android.synthetic.main.fragment_connect.*
 
 class PlatformConnectFragment : Fragment(), NavigationView.OnNavigationItemSelectedListener {
-    companion object {
-        private const val LOG_TAG = "PlatformConnectFragment"
-    }
-
     private var goto : String? = "home"
 
-    private fun connectToPlatform(platform : String) {
-        Log.d(LOG_TAG, "connectToPlatform() called")
-//        var userId      : String? = null
-//        var userName    : String? = null
-//        var accessToken : String? = null
-
-//        val db = dbHelper.readableDatabase
-//        // specify the columns to retrieve
-//        val projection = arrayOf(
-//            BaseColumns._ID,
-//            SpotifyReaderContract.UserEntry.USER_ID,
-//            SpotifyReaderContract.UserEntry.USER_NAME,
-//            SpotifyReaderContract.UserEntry.PLATFORM,
-//            SpotifyReaderContract.UserEntry.ACCESS_TOKEN)
-//        val selection = "${SpotifyReaderContract.UserEntry.PLATFORM} = ?"
-//        val selectionArgs = arrayOf(platform)
-//
-//        val cursor = db.query(
-//            SpotifyReaderContract.UserEntry.TABLE_NAME,
-//            projection,
-//            selection,     // The columns for the WHERE clause
-//            selectionArgs, // The values for the WHERE clause
-//            null,
-//            null,
-//            null
-//        )
-//
-//        with(cursor) {
-//            while (moveToNext()) {
-//                //val rowId = getLong(getColumnIndexOrThrow(BaseColumns._ID))
-//                userId = getString(getColumnIndexOrThrow(SpotifyReaderContract.UserEntry.USER_ID))
-//                userName = getString(getColumnIndexOrThrow(SpotifyReaderContract.UserEntry.USER_NAME))
-//                accessToken = getString(getColumnIndexOrThrow(SpotifyReaderContract.UserEntry.ACCESS_TOKEN))
-//            }
-//        }
-
-//        if (accessToken == null) {
-            loginToSpotify()
-//        }
-        // user already has an access token
-//        else {
-//            SpotifyClient.ACCESS_TOKEN = accessToken as String
-//            val generateActivityIntent = GeneratePlaylistActivity.createIntent(context)
-//            startActivity(generateActivityIntent)
-//        }
-
-//        cursor.close()
-    }
-
     private fun loginToSpotify() {
-        Log.d(LOG_TAG, "loginToSpotify() called")
         AuthenticationClient.openLoginActivity(activity, SPOTIFY_LOGIN_REQUEST_CODE, SpotifyClient.getAuthenticationRequest())
     }
 
@@ -97,20 +35,9 @@ class PlatformConnectFragment : Fragment(), NavigationView.OnNavigationItemSelec
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        Log.d(LOG_TAG, "onActivityResult() called")
         super.onActivityResult(requestCode, resultCode, data)
         if (resultCode != RESULT_OK) { return }
         if (data == null) { return }
-    }
-
-    override fun onAttach(context: Context?) {
-        super.onAttach(context)
-        Log.d(LOG_TAG, "onAttach() called")
-    }
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        Log.d(LOG_TAG, "onCreate() called")
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
@@ -118,7 +45,6 @@ class PlatformConnectFragment : Fragment(), NavigationView.OnNavigationItemSelec
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        Log.d(LOG_TAG, "onViewCreated() called")
         super.onViewCreated(view, savedInstanceState)
         connect_progress_circle.visibility = GONE
 
@@ -157,7 +83,6 @@ class PlatformConnectFragment : Fragment(), NavigationView.OnNavigationItemSelec
 
         connect_spotify_button.setOnClickListener {
             connect_progress_circle.visibility = VISIBLE
-//            connectToPlatform("Spotify")
             loginToSpotify()
         }
         connect_apple_button.setOnClickListener {
@@ -194,40 +119,13 @@ class PlatformConnectFragment : Fragment(), NavigationView.OnNavigationItemSelec
         return true
     }
 
-    override fun onActivityCreated(savedInstanceState: Bundle?) {
-        super.onActivityCreated(savedInstanceState)
-        Log.d(LOG_TAG, "onActivityCreated() called")
-    }
-
     override fun onStart() {
         super.onStart()
-        Log.d(LOG_TAG, "onStart() called")
         connect_progress_circle.visibility = GONE
     }
 
     override fun onResume() {
         super.onResume()
-        Log.d(LOG_TAG, "onResume() called")
         connect_progress_circle.visibility = GONE
-    }
-
-    override fun onPause() {
-        super.onPause()
-        Log.d(LOG_TAG, "onPause() called")
-    }
-
-    override fun onStop() {
-        super.onStop()
-        Log.d(LOG_TAG, "onStop() called")
-    }
-
-    override fun onDestroy() {
-        super.onDestroy()
-        Log.d(LOG_TAG, "onDestroy() called")
-    }
-
-    override fun onDetach() {
-        super.onDetach()
-        Log.d(LOG_TAG, "onDetach() called")
     }
 }

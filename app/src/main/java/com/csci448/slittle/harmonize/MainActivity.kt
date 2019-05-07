@@ -11,7 +11,6 @@ import android.support.design.widget.NavigationView
 import android.support.v4.view.GravityCompat
 import android.support.v7.app.ActionBarDrawerToggle
 import android.support.v7.app.AppCompatActivity
-import android.util.Log
 import android.view.*
 import android.widget.BaseAdapter
 import android.widget.TextView
@@ -22,7 +21,6 @@ import kotlinx.android.synthetic.main.fragment_home.*
 
 class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelectedListener {
     companion object {
-        private const val LOG_TAG = "HomeActivity"
         const val NOTIFICATION_CHANNEL_ID = "1"
         fun createIntent(baseContext: Context): Intent {
             return Intent(baseContext, MainActivity::class.java)
@@ -119,14 +117,12 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
     }
 
     private fun deleteGeneratedPlaylist(playlist : Playlist) : Int {
-        Log.d(LOG_TAG, "deleteGeneratedPlaylist() called")
         val db = DbInstance.writableDb
         val selection = "${BaseColumns._ID}=?"
         val selectionArgs = arrayOf(playlist._rowId.toString())
         val affectedRows = db.delete(SpotifyReaderContract.PlaylistEntry.TABLE_NAME,
                                         selection,
                                         selectionArgs)
-        Log.d(LOG_TAG, "affected rows: $affectedRows")
         playlists.remove(playlist)
         adapter.notifyDataSetChanged()
         return affectedRows
@@ -138,7 +134,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val name = getString(R.string.notification_channel_name)
             val descriptionText = getString(R.string.notification_channel_description)
-            val importance = NotificationManager.IMPORTANCE_MAX
+            val importance = NotificationManager.IMPORTANCE_HIGH
             val channel = NotificationChannel(NOTIFICATION_CHANNEL_ID, name, importance).apply {
                 description = descriptionText
             }
@@ -280,13 +276,11 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
     }
 
     override fun onResume() {
-        Log.d(LOG_TAG, "onResume() called")
         adapter.notifyDataSetChanged()
         super.onResume()
     }
 
     override fun onStart() {
-        Log.d(LOG_TAG, "onStart() called")
         adapter.notifyDataSetChanged()
         super.onStart()
     }

@@ -96,7 +96,7 @@ class ExportFragment : Fragment() {
                 playlistRowId = extras.getLong("PLAYLIST_ROW_ID")
                 trackIds = extras.getStringArrayList("PLAYLIST_TRACK_IDS") as ArrayList<String>
                 tunedParameters =
-                        if (extras.containsKey("TUNED_PARAMETERS")) {
+                        if (extras.containsKey("TUNED_PARAMETERS") && extras.getSerializable("TUNED_PARAMETERS") != null) {
                             extras.getSerializable("TUNED_PARAMETERS") as HashMap<String, String>
                         }
                         else {
