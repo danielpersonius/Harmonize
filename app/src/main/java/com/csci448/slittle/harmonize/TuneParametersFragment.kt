@@ -77,8 +77,8 @@ class TuneParametersFragment : Fragment() {
         Log.d(LOG_TAG, "onViewCreated() called")
         super.onViewCreated(view, savedInstanceState)
 
-        // disable artist similarity for now
-        artist_similarity_seekbar.isEnabled = false
+//        // disable artist similarity for now
+//        artist_similarity_seekbar.isEnabled = false
 
         // rotation
         if (savedInstanceState != null) {
@@ -104,32 +104,32 @@ class TuneParametersFragment : Fragment() {
                     if (artist_similarity_seekbar.progress == 0)
                         -1
                     else
-                        artist_similarity_seekbar.progress
+                        artist_similarity_seekbar.progress/2 //Dividing value in half due to Spotify's algorithm not returning results for very high percentages
                 val danceability =
                     if (danceability_parameter_seekbar.progress == 0)
                         -1
                     else
-                        danceability_parameter_seekbar.progress
+                        danceability_parameter_seekbar.progress/2
                 val energy =
                     if (energy_parameter_seekbar.progress == 0)
                         -1
                     else
-                        energy_parameter_seekbar.progress
+                        energy_parameter_seekbar.progress/2
                 val speechiness =
                     if (speechiness_parameter_seekbar.progress == 0)
                         -1
                     else
-                        speechiness_parameter_seekbar.progress
+                        speechiness_parameter_seekbar.progress/2
                 val loudness =
                     if (loudness_parameter_seekbar.progress == 0)
                         -1
                     else
-                        loudness_parameter_seekbar.progress
+                        loudness_parameter_seekbar.progress/2
                 val valence =
                     if (valence_parameter_seekbar.progress == 0)
                         -1
                     else
-                        artist_similarity_seekbar.progress
+                        artist_similarity_seekbar.progress/2
 
                 val suggestedTracks = SpotifyClient.generatePlaylist(playlistId.toString(),
                                                                                 seedArtists!!.toList(),

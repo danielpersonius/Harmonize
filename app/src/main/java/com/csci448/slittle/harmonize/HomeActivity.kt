@@ -133,12 +133,12 @@ class HomeActivity : SingleFragmentActivity(), NavigationView.OnNavigationItemSe
         // Handle navigation view item clicks here.
         when (item.itemId) {
             R.id.nav_generate -> {
-//                val generatePlaylistIntent = GeneratePlaylistActivity.createIntent(baseContext)
-//                startActivity(generatePlaylistIntent)
+                val generatePlaylistIntent = GeneratePlaylistActivity.createIntent(baseContext)
+                startActivity(generatePlaylistIntent)
             }
             R.id.nav_connect -> {
-//                val connectPlatformIntent = PlatformConnectActivity.createIntent(baseContext)
-//                startActivity(connectPlatformIntent)
+                val connectPlatformIntent = GeneratePlaylistActivity.createIntent(baseContext)
+                startActivity(connectPlatformIntent)
             }
         }
 
