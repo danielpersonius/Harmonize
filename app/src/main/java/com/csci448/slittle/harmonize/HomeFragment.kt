@@ -25,8 +25,8 @@ class HomeFragment : Fragment() {
     }
 
     var playlists = mutableListOf(
-        Playlist("href", "1",  "playlist #1",  false, "owner", false, "playlist", "uri", listOf(Track("id","some song", listOf("some artist"), listOf("idk"), "some album"))),// mapOf("BPM" to "1000")))),
-        Playlist("href", "1",  "playlist #1",  false, "owner", false, "playlist", "uri", listOf(Track("id","some song", listOf("some artist"), listOf("idk"), "some album")))// mapOf("BPM" to "1000"))))
+        Playlist(null, "href", "1",  "playlist #1",  false, "owner", false, "playlist", "uri", listOf(Track("id","some song", listOf("some artist"), listOf("idk"), "some album"))),// mapOf("BPM" to "1000")))),
+        Playlist(null, "href", "1",  "playlist #1",  false, "owner", false, "playlist", "uri", listOf(Track("id","some song", listOf("some artist"), listOf("idk"), "some album")))// mapOf("BPM" to "1000"))))
         )
     private var adapter: PlaylistAdapter? = null
 //    private lateinit var drawerLayout: DrawerLayout
@@ -80,21 +80,6 @@ class HomeFragment : Fragment() {
 
     }
 
-    override fun onCreateOptionsMenu(menu: Menu?, inflater: MenuInflater?) {
-        super.onCreateOptionsMenu(menu, inflater)
-        inflater?.inflate(R.menu.home_options, menu)
-    }
-
-    override fun onOptionsItemSelected(item: MenuItem?): Boolean =
-    // Handle presses on the action bar menu items
-        when (item?.itemId) {
-            R.id.playlist_create_option -> {
-                val generateIntent = GeneratePlaylistActivity.createIntent(context)
-                startActivity(generateIntent)
-                true
-            }
-            else -> super.onOptionsItemSelected(item)
-        }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         Log.d(LOG_TAG, "onCreateView() called")

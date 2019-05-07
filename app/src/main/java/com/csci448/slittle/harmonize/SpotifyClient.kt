@@ -1,8 +1,9 @@
 package com.csci448.slittle.harmonize
 
 import android.app.Activity
+import android.content.ContentValues
+import android.provider.BaseColumns
 import android.util.Log
-import com.spotify.sdk.android.authentication.AuthenticationClient
 import com.spotify.sdk.android.authentication.AuthenticationRequest
 import com.spotify.sdk.android.authentication.AuthenticationResponse
 import khttp.get
@@ -13,8 +14,7 @@ import org.json.JSONArray
 import org.json.JSONObject
 import kotlin.math.min
 import khttp.put
-import khttp.responses.Response
-
+import android.util.Base64
 
 class SpotifyClient {
     companion object {
@@ -22,41 +22,75 @@ class SpotifyClient {
         lateinit var ACCESS_TOKEN : String
         lateinit var USER_ID : String
         lateinit var USER_NAME : String
+        lateinit var REFRESH_TOKEN : String
+        var HAS_PREMIUM = false
         private const val CLIENT_ID = "96fb37843a5e4e92a1a8c4c5168e3371"
-        // Request code will be used to verify if result comes from the login activity. Can be set to any integer.
-        private const val SPOTIFY_LOGIN_REQUEST_CODE = 1
         // can be anything really
         private const val REDIRECT_URI = "com.csci448.slittle.harmonize://callback"
         private const val CLIENT_SECRET = "84ce3a2b19c74df7900d1d6d588a14d2"
 
+        /**
+         * since ::isInitialized can't be used outside of this class
+         */
+        fun accessTokenIsInitialized() : Boolean {
+            return ::ACCESS_TOKEN.isInitialized
+        }
+        fun refreshTokenIsInitialized() : Boolean {
+            return ::REFRESH_TOKEN.isInitialized
+        }
+        /**
+         * gets a new access token by either getting a new refresh token
+         * or using existing refresh token
+         *
+         * @param getNewRefreshToken - true if have auth code and need refresh token, false if have refresh token
+         * @param authCode - the auth code needed to get new refresh token, if needed
+         */
+        fun authorize(getNewRefreshToken : Boolean, authCode : String? = null) : Any? = runBlocking {
+            val requestData : String
+            if (getNewRefreshToken) {
+                requestData = "grant_type=authorization_code&code=$authCode&redirect_uri=$REDIRECT_URI"
+            }
+            else {
+                if (!::REFRESH_TOKEN.isInitialized) {
+                    getUserFromDb()
+                }
+                requestData = "grant_type=refresh_token&refresh_token=$REFRESH_TOKEN"
+            }
+            withContext(Dispatchers.IO) {
+                val response = post("https://accounts.spotify.com/api/token",
+                    data = requestData,
+                    headers = mapOf(
+                        "Content-Type"  to "application/x-www-form-urlencoded",
+                        "Authorization" to "Basic ${Base64.encodeToString("$CLIENT_ID:$CLIENT_SECRET".toByteArray(), Base64.NO_WRAP).trim()}".trim()
+                    )
+                )
+                when(response.statusCode) {
+                    200 -> {
+                        val result = JSONObject(response.text)
+                        ACCESS_TOKEN = result.getString("access_token")
+                        if (getNewRefreshToken) {
+                            REFRESH_TOKEN = result.getString("refresh_token")
+                        } else {} // needed for some reason, even though it's empty
+                        // no user found, so retrieve data and store it
+                        if (!getUserFromDb()) {
+                            getUserInformation()
+                            storeSpotifyUser(USER_ID, USER_NAME, REFRESH_TOKEN)
+                        } else {}
+                    }
+                    else ->
+                        Log.d(LOG_TAG, "${response.statusCode} ${response.text}")
+                }
+            }
+
+        }
+
         fun getAuthenticationRequest() : AuthenticationRequest {
-            val builder = AuthenticationRequest.Builder(PlatformConnectActivity.CLIENT_ID,
-                AuthenticationResponse.Type.TOKEN,
-                PlatformConnectActivity.REDIRECT_URI)
+            val builder = AuthenticationRequest.Builder(CLIENT_ID,
+                AuthenticationResponse.Type.CODE,
+                REDIRECT_URI)
             builder.setShowDialog(true)
             builder.setScopes(arrayOf("user-read-playback-state", "user-read-private", "streaming", "user-library-modify", "playlist-modify-private", "playlist-modify-public", "user-library-read", "playlist-read-private"))
             return builder.build()
-        }
-
-        fun login(activity : Activity) {
-            val builder = AuthenticationRequest.Builder(CLIENT_ID,
-                                                        AuthenticationResponse.Type.TOKEN,
-                                                        REDIRECT_URI)
-            builder.setScopes(arrayOf("user-read-playback-state", "user-read-private", "streaming", "user-library-modify", "playlist-modify-private", "playlist-modify-public", "user-library-read", "playlist-read-private"))
-            builder.setShowDialog(true)
-            val request = builder.build()
-
-            AuthenticationClient.openLoginActivity(activity, SPOTIFY_LOGIN_REQUEST_CODE, request)
-//            AuthenticationClient.openLoginInBrowser(activity, request)
-        }
-
-        fun logout() : Boolean = runBlocking {
-            Log.d(LOG_TAG, "logout() called")
-            var logoutSuccess = false
-            withContext(Dispatchers.IO) {
-                val response = get("https://accounts.spotify.com")
-            }
-            logoutSuccess
         }
 
         fun getUserPlaylists(accessToken : String, limit : Int, offset : Int) : MutableList<Playlist> = runBlocking {
@@ -79,27 +113,26 @@ class SpotifyClient {
                     val type = playlistData.getString("type")
                     val uri = playlistData.getString("uri")
                     playlists.add(
-                        Playlist(href, id, name, collaborative, owner, public, type, uri, null)
+                        Playlist(null, href, id, name, collaborative, owner, public, type, uri, null)
                     )
                 }
                 playlists
             }
         }
 
-        // todo raise error/dialog if user not premium
-        fun getUserInformation() : Any? = runBlocking {
+        private fun getUserInformation() : Any? = runBlocking {
             withContext(Dispatchers.IO) {
                 val response =
                     get("https://api.spotify.com/v1/me", headers=mapOf("Authorization" to "Bearer $ACCESS_TOKEN"))
                 when (response.statusCode) {
                     200 -> {
                         val result = JSONObject(response.text)
-                        val memberIsPremium = result.getString("product")
+                        HAS_PREMIUM = result.getString("product") == "premium"
                         USER_NAME = result.getString("display_name")
                         USER_ID = result.getString("id")
                     }
                     else -> {
-                        Log.d(LOG_TAG, "Something went wrong: ${response.statusCode}")
+                        Log.d(LOG_TAG, "Something went wrong: ${response.statusCode} ${response.text}")
                     }
                 }
             }
@@ -140,26 +173,28 @@ class SpotifyClient {
             // todo implement me
         }
 
-        fun getTrackAudioFeatures(trackId : String) : MutableMap<String, String> = runBlocking {
+        fun getTrackAudioFeatures(trackId : String, activity: Activity) : MutableMap<String, String> = runBlocking {
             Log.d(LOG_TAG, "getTrackAudioFeatures() called")
-
             val audioFeatures = mutableMapOf<String, String>()
-            if (::ACCESS_TOKEN.isInitialized) {
-                withContext(Dispatchers.IO) {
-                    val response =
-                        get("https://api.spotify.com/v1/audio-features/$trackId", headers=mapOf("Authorization" to "Bearer $ACCESS_TOKEN"))
-                    val result = JSONObject(response.text)
-                    audioFeatures["danceability"]     = result.getString("danceability")
-                    audioFeatures["energy"]           = result.getString("energy")
-                    audioFeatures["loudness"]         = result.getString("loudness")
-                    audioFeatures["speechiness"]      = result.getString("speechiness")
-                    audioFeatures["acousticness"]     = result.getString("acousticness")
-                    audioFeatures["instrumentalness"] = result.getString("instrumentalness")
-                    audioFeatures["liveness"]         = result.getString("liveness")
-                    audioFeatures["valence"]          = result.getString("valence")
-                    audioFeatures["tempo"]            = result.getString("tempo")
-                    audioFeatures["time_signature"]   = result.getString("time_signature")
-                }
+
+            if (!::ACCESS_TOKEN.isInitialized) {
+                Log.d(LOG_TAG, "reauthorize")
+                authorize(false)
+            }
+            withContext(Dispatchers.IO) {
+                val response =
+                    get("https://api.spotify.com/v1/audio-features/$trackId", headers=mapOf("Authorization" to "Bearer $ACCESS_TOKEN"))
+                val result = JSONObject(response.text)
+                audioFeatures["danceability"]     = result.getString("danceability")
+                audioFeatures["energy"]           = result.getString("energy")
+                audioFeatures["loudness"]         = result.getString("loudness")
+                audioFeatures["speechiness"]      = result.getString("speechiness")
+                audioFeatures["acousticness"]     = result.getString("acousticness")
+                audioFeatures["instrumentalness"] = result.getString("instrumentalness")
+                audioFeatures["liveness"]         = result.getString("liveness")
+                audioFeatures["valence"]          = result.getString("valence")
+                audioFeatures["tempo"]            = result.getString("tempo")
+                audioFeatures["time_signature"]   = result.getString("time_signature")
             }
             audioFeatures
         }
@@ -183,63 +218,64 @@ class SpotifyClient {
             Log.d(LOG_TAG, "generatePlaylist($danceability, $energy, $speechiness, $loudness, $valence, $buffer) called")
             val suggestedTracks = mutableListOf<Track>()
 
-            if (::ACCESS_TOKEN.isInitialized) {
-                withContext(Dispatchers.IO) {
-                    var requestString = "https://api.spotify.com/v1/recommendations?limit=$limit"
+            if (!::ACCESS_TOKEN.isInitialized) {
+                authorize(false)
+            }
+            withContext(Dispatchers.IO) {
+                var requestString = "https://api.spotify.com/v1/recommendations?limit=$limit"
 
-                    var seedArtistsString = ""
-                    // todo - limited to 5 seed values, but will find a workaround
-                    for (i in 0 until min(5,seedArtists.size)) {
-                        seedArtistsString += seedArtists[i]
-                        if (i < seedArtists.size-1) {
-                            // url encoded space
-                            seedArtistsString += "%2C"
-                        }
+                var seedArtistsString = ""
+                // todo - limited to 5 seed values, but will find a workaround
+                for (i in 0 until min(5,seedArtists.size)) {
+                    seedArtistsString += seedArtists[i]
+                    if (i < seedArtists.size-1) {
+                        // url encoded space
+                        seedArtistsString += "%2C"
                     }
-                    requestString += "&seed_artists=$seedArtistsString"
+                }
+                requestString += "&seed_artists=$seedArtistsString"
 
-                    // same for genres and tracks
+                // same for genres and tracks
 
-                    if (danceability > -1) {
-                    requestString += "&min_danceability=${danceability-buffer}&max_danceability=${danceability+buffer}"
-                    }
-                    if (energy > -1) {
-                        requestString += "&min_energy=${energy-buffer}&max_energy=${energy+buffer}"
-                    }
-                    if (speechiness > -1) {
-                        requestString += "&min_speechiness=${danceability-buffer}&max_speechiness=${speechiness+buffer}"
-                    }
-                    if (loudness > -1) {
-                        requestString += "&min_loudness=${loudness-buffer}&max_loudness=${loudness+buffer}"
-                    }
-                    if (valence > -1) {
-                        requestString += "&min_valence=${valence-buffer}&max_valence=${valence+buffer}"
-                    }
+                if (danceability > -1) {
+                requestString += "&min_danceability=${danceability-buffer}&max_danceability=${danceability+buffer}"
+                }
+                if (energy > -1) {
+                    requestString += "&min_energy=${energy-buffer}&max_energy=${energy+buffer}"
+                }
+                if (speechiness > -1) {
+                    requestString += "&min_speechiness=${danceability-buffer}&max_speechiness=${speechiness+buffer}"
+                }
+                if (loudness > -1) {
+                    requestString += "&min_loudness=${loudness-buffer}&max_loudness=${loudness+buffer}"
+                }
+                if (valence > -1) {
+                    requestString += "&min_valence=${valence-buffer}&max_valence=${valence+buffer}"
+                }
 
-                    val response = get(requestString, headers=mapOf("Authorization" to "Bearer $ACCESS_TOKEN"))
-                    when(response.statusCode) {
-                        200 -> {
-                            val result = JSONObject(response.text)
-                            val tracks = JSONArray(result.getString("tracks"))
-                            for(i in 0 until tracks.length()) {
-                                val track = JSONObject(tracks[i].toString())
-                                val trackId = track.getString("id")
-                                val trackName = track.getString("name")
-                                val albumName = JSONObject(track.getString("album")).getString("name")
-                                val artists = JSONArray(track.getString("artists"))
-                                val artistNames = mutableListOf<String>()
-                                val artistIds = mutableListOf<String>()
-                                for(j in 0 until artists.length()) {
-                                    val artist = JSONObject(artists[j].toString())
-                                    artistNames.add(artist.getString("name"))
-                                    artistIds.add(artist.getString("id"))
-                                }
-                                suggestedTracks.add(Track(trackId, trackName, artistNames, artistIds, albumName))
+                val response = get(requestString, headers=mapOf("Authorization" to "Bearer $ACCESS_TOKEN"))
+                when(response.statusCode) {
+                    200 -> {
+                        val result = JSONObject(response.text)
+                        val tracks = JSONArray(result.getString("tracks"))
+                        for(i in 0 until tracks.length()) {
+                            val track = JSONObject(tracks[i].toString())
+                            val trackId = track.getString("id")
+                            val trackName = track.getString("name")
+                            val albumName = JSONObject(track.getString("album")).getString("name")
+                            val artists = JSONArray(track.getString("artists"))
+                            val artistNames = mutableListOf<String>()
+                            val artistIds = mutableListOf<String>()
+                            for(j in 0 until artists.length()) {
+                                val artist = JSONObject(artists[j].toString())
+                                artistNames.add(artist.getString("name"))
+                                artistIds.add(artist.getString("id"))
                             }
+                            suggestedTracks.add(Track(trackId, trackName, artistNames, artistIds, albumName))
                         }
-                        400 -> Log.d(LOG_TAG, "bad request")
-                        else -> Log.d(LOG_TAG, response.statusCode.toString())
                     }
+                    400 -> Log.d(LOG_TAG, "bad request")
+                    else -> Log.d(LOG_TAG, response.statusCode.toString())
                 }
             }
             suggestedTracks
@@ -250,21 +286,26 @@ class SpotifyClient {
         fun exportPlaylist(playlistName    : String,
                            trackIds        : List<String>,
                            tunedParameters : Map<String, String> = mapOf()
-                          ) : String? = runBlocking {
+                          ) : Pair<String?, String?>? = runBlocking {
             // beautify tuned parameters
             var tunedParametersString = "["
-            for ((key, value) in tunedParameters) {
-                if (value == "-1") {
-                    tunedParametersString += "$key = None, "
+            // for now, tuned parameters may be null
+            if (tunedParameters.isNotEmpty()) {
+                for ((key, value) in tunedParameters) {
+                    if (value == "-1") {
+                        tunedParametersString += "$key = None, "
+                    }
+                    else {
+                        tunedParametersString += "$key = $value, "
+                    }
                 }
-                else {
-                    tunedParametersString += "$key = $value, "
-                }
+                // remove last comma and add square bracket
+                tunedParametersString = tunedParametersString.substring(0, tunedParametersString.lastIndexOf(','))
             }
-            // remove last comma and add square bracket
-            tunedParametersString = tunedParametersString.substring(0, tunedParametersString.lastIndexOf(',')) + "]"
+            tunedParametersString += "]"
 
             var playlistId : String? = null
+            var playlistHref : String? = null
             if (::ACCESS_TOKEN.isInitialized) {
                 if (trackIds.isNotEmpty()) {
                     withContext(Dispatchers.IO) {
@@ -282,8 +323,9 @@ class SpotifyClient {
                                                            headers = mapOf("Authorization" to "Bearer $ACCESS_TOKEN", "Content-Type" to "application/json"))
                         when (createResponse.statusCode) {
                             201 -> {
-                                // get new playlist name and id
-                                playlistId = JSONObject(createResponse.text).getString("id")
+                                // get new playlist id and href
+                                playlistId   = JSONObject(createResponse.text).getString("id")
+                                playlistHref = JSONObject(createResponse.text).getString("href")
                                 // add tracks
                                 val uris = mutableListOf<String>()
                                 for (i in 0 until trackIds.size) {
@@ -308,59 +350,45 @@ class SpotifyClient {
                     }
                 }
             }
-            playlistId
+            Pair(playlistId, playlistHref)
         }
 
-        // todo a bit of the last track is heard when playing a new track. tried to fix with volume control, but not working yet
-        // todo change to App Remote SDK, instead of using the Web Api
+        // todo - a bit of the last track is heard when playing a new track. tried to fix with volume control, but not working yet
+        // todo - change to App Remote SDK, instead of using the Web Api
         fun startPlayback(uri : String,
                           isPaused : Boolean) : Any? = runBlocking {
-            val deviceId = getUserDevices()
-            if (deviceId != null) {
-                if (transferPlayback(deviceId) == 204) {
-                    Log.d(LOG_TAG, "transfer 204")
-                    // Spotify handles transferPlayback request asynchronously, so wait till playback devices activates
-                    // works for now, but in some scenarios, may never be true
-                    while (!getActivePlayback()) {}
-                    withContext(Dispatchers.IO) {
-                        var playbackResponse : Response
-                        var data = ""
+            if (HAS_PREMIUM) {
+                val deviceId = getUserDevices()
+                if (deviceId != null) {
+                    if (transferPlayback(deviceId) == 204) {
+                        Log.d(LOG_TAG, "transfer 204")
+                        // Spotify handles transferPlayback request asynchronously, so wait till playback devices activates
+                        // works for now, but in some scenarios, may never be true
+                        while (!getActivePlayback()) {}
+                        withContext(Dispatchers.IO) {
+                            var data = ""
 
-                        if (!isPaused) {
-                            data = JSONObject(mapOf("uris" to listOf("spotify:track:$uri"))).toString()
-//                            val volumeResponse = put("https://api.spotify.com/v1/me/player/volume?volume_percent=50",
-//                                headers = mapOf("Authorization" to "Bearer $ACCESS_TOKEN"))
-//                            when(volumeResponse.statusCode) {
-//                                204 -> Log.d(LOG_TAG, "204 volume 50")
-//                                else -> Log.d(LOG_TAG, "volume response: ${volumeResponse.statusCode} ${volumeResponse.text}")
-//                            }
-                        }
-//                        else {
-//                            val volumeResponse = put("https://api.spotify.com/v1/me/player/volume?volume_percent=0",
-//                                headers = mapOf("Authorization" to "Bearer $ACCESS_TOKEN"))
-//                            when(volumeResponse.statusCode) {
-//                                204 -> Log.d(LOG_TAG, "204 volume 0")
-//                                else -> Log.d(LOG_TAG, "volume response: ${volumeResponse.statusCode} ${volumeResponse.text}")
-//                            }
-//                        }
+                            if (!isPaused) {
+                                data = JSONObject(mapOf("uris" to listOf("spotify:track:$uri"))).toString()
+                            }
 
-                        playbackResponse = put("https://api.spotify.com/v1/me/player/play",
-                            data = data,
-                            headers = mapOf("Authorization" to "Bearer $ACCESS_TOKEN"))
+                            val playbackResponse = put("https://api.spotify.com/v1/me/player/play",
+                                data = data,
+                                headers = mapOf("Authorization" to "Bearer $ACCESS_TOKEN"))
 
-                        when(playbackResponse.statusCode) {
-                            204 -> Log.d(LOG_TAG, "startPlayback 204 Success!")
-                            403 -> Log.d(LOG_TAG, "startPlayback 403 forbidden! Premium required")
-                            404 -> Log.d(LOG_TAG, "startPlayback 404 not found: ${playbackResponse.text}")
-                            else -> Log.d(LOG_TAG, "${playbackResponse.statusCode} Something else went wrong: ${playbackResponse.text}")
+                            when(playbackResponse.statusCode) {
+                                204  -> Log.d(LOG_TAG, "startPlayback 204 Success!")
+                                403  -> Log.d(LOG_TAG, "startPlayback 403 forbidden! Premium required")
+                                404  -> Log.d(LOG_TAG, "startPlayback 404 not found: ${playbackResponse.text}")
+                                else -> Log.d(LOG_TAG, "${playbackResponse.statusCode} Something else went wrong: ${playbackResponse.text}")
+                            }
                         }
                     }
                 }
             }
-
         }
 
-        fun getActivePlayback() : Boolean = runBlocking {
+        private fun getActivePlayback() : Boolean = runBlocking {
             withContext(Dispatchers.IO) {
                 val response = get("https://api.spotify.com/v1/me/player",
                     headers = mapOf("Authorization" to "Bearer $ACCESS_TOKEN"))
@@ -380,7 +408,7 @@ class SpotifyClient {
         }
 
         // todo can't use with startPlayback, since don't know which device is this mobile phone
-        fun getUserDevices () : String? = runBlocking {
+        private fun getUserDevices () : String? = runBlocking {
             var deviceId : String? = null
             withContext(Dispatchers.IO) {
                 val response = get("https://api.spotify.com/v1/me/player/devices",
@@ -400,14 +428,136 @@ class SpotifyClient {
         }
 
         // returns the status code of the transfer request
-        fun transferPlayback(deviceId : String) : Int = runBlocking {
-            // PUT https://api.spotify.com/v1/me/player
+        private fun transferPlayback(deviceId : String) : Int = runBlocking {
             withContext(Dispatchers.IO) {
                 val response = put("https://api.spotify.com/v1/me/player",
                     data = JSONObject(mapOf("device_ids" to listOf(deviceId), "play" to true)).toString(),
                     headers = mapOf("Authorization" to "Bearer $ACCESS_TOKEN"))
                 response.statusCode
             }
+        }
+
+        private fun storeSpotifyUser(userId : String,
+                                     userName : String,
+                                     refreshToken: String) {
+            Log.d(LOG_TAG, "storeSpotifyUser() called")
+            // Gets the data repository in write mode
+            // Create a new map of values, where column names are the keys
+            val values = ContentValues().apply {
+                put(SpotifyReaderContract.UserEntry.USER_ID, userId)
+                put(SpotifyReaderContract.UserEntry.USER_NAME, userName)
+                put(SpotifyReaderContract.UserEntry.PLATFORM, "Spotify")
+                put(SpotifyReaderContract.UserEntry.REFRESH_TOKEN, refreshToken)
+            }
+
+            // Insert the new row, returning the primary key value of the new row
+            val newRowId = DbInstance.writableDb.insert(SpotifyReaderContract.UserEntry.TABLE_NAME, null, values)
+
+            if (newRowId == -1L) {
+                // conflict with pre-existing data
+                Log.d(LOG_TAG, "new row id = -1. conflict with pre-existing id")
+            }
+        }
+
+        // todo reduce or eliminate side effects
+        private fun getUserFromDb() : Boolean {
+            var userId : String? = null
+            val projection = arrayOf(
+                SpotifyReaderContract.UserEntry.USER_ID,
+                SpotifyReaderContract.UserEntry.USER_NAME,
+                SpotifyReaderContract.UserEntry.REFRESH_TOKEN,
+                SpotifyReaderContract.UserEntry.HAS_PREMIUM
+            )
+
+            val selection = "${SpotifyReaderContract.UserEntry.PLATFORM}=?"
+            val selectionArgs = arrayOf("Spotify")
+
+            val cursor = DbInstance.readableDb.query(
+                SpotifyReaderContract.UserEntry.TABLE_NAME,
+                projection,
+                selection,
+                selectionArgs,
+                null,
+                null,
+                null
+            )
+
+            with(cursor) {
+                while (moveToNext()) {
+                    userId = getString(getColumnIndexOrThrow(SpotifyReaderContract.UserEntry.USER_ID))
+                    USER_NAME = getString(getColumnIndexOrThrow(SpotifyReaderContract.UserEntry.USER_NAME))
+                    if (getInt(getColumnIndexOrThrow(SpotifyReaderContract.UserEntry.HAS_PREMIUM)) == 1) {
+                        HAS_PREMIUM = true
+                    }
+                    val refreshToken = getString(getColumnIndexOrThrow(SpotifyReaderContract.UserEntry.REFRESH_TOKEN))
+                    if (refreshToken != null) {
+                        REFRESH_TOKEN = refreshToken
+                    }
+                }
+            }
+            // no user found
+            if (userId == null) {
+                return false
+            }
+            USER_ID = userId as String
+            return true
+        }
+
+        fun getPlaylistFromDb(playlistId : Long) : Playlist? {
+            var playlist : Playlist? = null
+            // specify the columns to retrieve
+            val projection = arrayOf(
+                BaseColumns._ID,
+                SpotifyReaderContract.PlaylistEntry.PLAYLIST_CREATED,
+                SpotifyReaderContract.PlaylistEntry.PLAYLIST_HREF,
+                SpotifyReaderContract.PlaylistEntry.PLAYLIST_ID,
+                SpotifyReaderContract.PlaylistEntry.PLAYLIST_NAME,
+                SpotifyReaderContract.PlaylistEntry.PLAYLIST_COLLABORATIVE,
+                SpotifyReaderContract.PlaylistEntry.PLAYLIST_OWNER,
+                SpotifyReaderContract.PlaylistEntry.PLAYLIST_PUBLIC,
+                SpotifyReaderContract.PlaylistEntry.PLAYLIST_TYPE,
+                SpotifyReaderContract.PlaylistEntry.PLAYLIST_URI)
+
+            val selection = "${BaseColumns._ID}=?"
+            val selectionArgs = arrayOf(playlistId.toString())
+
+            val cursor = DbInstance.readableDb.query(
+                SpotifyReaderContract.PlaylistEntry.TABLE_NAME,
+                projection,
+                selection,
+                selectionArgs,
+                null,
+                null,
+                null
+            )
+
+            with(cursor) {
+                while (moveToNext()) {
+                    val rowId       = getLong(getColumnIndexOrThrow(BaseColumns._ID))
+                    val href       = getString(getColumnIndexOrThrow(SpotifyReaderContract.PlaylistEntry.PLAYLIST_HREF))
+                    val id         = getString(getColumnIndexOrThrow(SpotifyReaderContract.PlaylistEntry.PLAYLIST_ID))
+                    val name       = getString(getColumnIndexOrThrow(SpotifyReaderContract.PlaylistEntry.PLAYLIST_NAME))
+                    val collaborative = getInt   (getColumnIndexOrThrow(SpotifyReaderContract.PlaylistEntry.PLAYLIST_COLLABORATIVE))
+                    val owner      = getString(getColumnIndexOrThrow(SpotifyReaderContract.PlaylistEntry.PLAYLIST_OWNER))
+                    val public        = getInt   (getColumnIndexOrThrow(SpotifyReaderContract.PlaylistEntry.PLAYLIST_PUBLIC))
+                    val type       = getString(getColumnIndexOrThrow(SpotifyReaderContract.PlaylistEntry.PLAYLIST_TYPE))
+                    val uri        = getString(getColumnIndexOrThrow(SpotifyReaderContract.PlaylistEntry.PLAYLIST_URI))
+                    playlist = Playlist(rowId, href, id, name, (collaborative == 1), owner, (public == 1), type, uri, null)
+                }
+            }
+
+            return playlist
+        }
+
+        fun removeAllGeneratedPlaylistsFromDb() {
+            DbInstance.writableDb.delete(
+                SpotifyReaderContract.TrackEntry.TABLE_NAME,
+                null,
+                null)
+            DbInstance.writableDb.delete(
+                SpotifyReaderContract.PlaylistEntry.TABLE_NAME,
+                null,
+                null)
         }
     }
 }

@@ -2,10 +2,14 @@ package com.csci448.slittle.harmonize
 
 import android.app.Activity
 import android.app.AlertDialog
+import android.app.Notification
+import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.support.v4.app.Fragment
+import android.support.v4.app.NotificationCompat
+import android.support.v4.app.NotificationManagerCompat
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
@@ -126,6 +130,7 @@ class TuneParametersFragment : Fragment() {
                         -1
                     else
                         artist_similarity_seekbar.progress
+
                 val suggestedTracks = SpotifyClient.generatePlaylist(playlistId.toString(),
                                                                                 seedArtists!!.toList(),
                                                                                 seedGenres,
@@ -138,16 +143,44 @@ class TuneParametersFragment : Fragment() {
                                                                                 loudness,
                                                                                 valence,
                                                                                 featureParameterBuffer) as List<Track>
-                val viewPlaylistIntent = ViewPlaylistActivity.createIntent(context, "$playlistName Suggested")
-                viewPlaylistIntent.putExtra("PLAYLIST_TRACKS", ArrayList(suggestedTracks))
+
+                // create notification
+                val notificationId = 1
+                // Create an explicit intent for an Activity in your app
+                val intent = Intent(context, ViewPlaylistActivity::class.java).apply {
+                    flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+                }
+                intent.putExtra("PLAYLIST_TRACKS", ArrayList(suggestedTracks))
+                intent.putExtra("PLAYLIST_NAME", "$playlistName Suggested")
+                intent.putExtra("NEW_PLAYLIST", true)
                 // make values into strings so the spotify client can put them in the post request
-                viewPlaylistIntent.putExtra("TUNED_PARAMETERS", hashMapOf(
-                                                                          "danceability" to "$danceability",
-                                                                          "energy" to "$energy",
-                                                                          "speechiness" to "$speechiness",
-                                                                          "loudness" to "$loudness",
-                                                                          "valence" to "$valence"))
-                startActivity(viewPlaylistIntent)
+                intent.putExtra("TUNED_PARAMETERS", hashMapOf(
+                                                             "danceability" to "$danceability",
+                                                             "energy"       to "$energy",
+                                                             "speechiness"  to "$speechiness",
+                                                             "loudness"     to "$loudness",
+                                                             "valence"      to "$valence"
+                                                         )
+                                )
+                val pendingIntent: PendingIntent = PendingIntent.getActivity(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT)
+
+                val builder = NotificationCompat.Builder(context as Context, MainActivity.NOTIFICATION_CHANNEL_ID)
+                    .setSmallIcon(R.drawable.harmonize_launcher)
+                    .setContentTitle("Suggested Playlist is ready!")
+                    .setContentText("Your new playlist '$playlistName Suggested' has been made")
+                    .setDefaults(Notification.DEFAULT_ALL)
+                    .setPriority(NotificationCompat.PRIORITY_MAX)
+                    // Set the intent that will fire when the user taps the notification
+                    .setContentIntent(pendingIntent)
+                    .setAutoCancel(true)
+
+                with(NotificationManagerCompat.from(context as Context)) {
+                    // notificationId is a unique int for each notification that you must define
+                    notify(notificationId, builder.build())
+                }
+
+                val homeIntent = MainActivity.createIntent(context as Context)
+                startActivity(homeIntent)
             }
         }
 
