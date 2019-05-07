@@ -129,8 +129,8 @@ class TuneParametersFragment : Fragment(), NavigationView.OnNavigationItemSelect
 
         tune_parameters_nav_view.setNavigationItemSelectedListener(this)
 
-        // disable artist similarity for now
-        artist_similarity_seekbar.isEnabled = false
+//        // disable artist similarity for now
+//        artist_similarity_seekbar.isEnabled = false
 
         // rotation
         if (savedInstanceState != null) {
@@ -139,6 +139,7 @@ class TuneParametersFragment : Fragment(), NavigationView.OnNavigationItemSelect
         else {
             val intent = activity?.intent
             val extras = intent?.extras
+            Log.d(LOG_TAG, extras.toString())
             if (extras != null) {
                 playlistName = extras.getString("PLAYLIST_NAME") ?: ""
                 playlistId   = extras.getString("PLAYLIST_ID") ?: null
@@ -159,32 +160,32 @@ class TuneParametersFragment : Fragment(), NavigationView.OnNavigationItemSelect
                     if (artist_similarity_seekbar.progress == 0)
                         -1
                     else
-                        artist_similarity_seekbar.progress
+                        artist_similarity_seekbar.progress/2 //Dividing value in half due to Spotify's algorithm not returning results for very high percentages
                 val danceability =
                     if (danceability_parameter_seekbar.progress == 0)
                         -1
                     else
-                        danceability_parameter_seekbar.progress
+                        danceability_parameter_seekbar.progress/2
                 val energy =
                     if (energy_parameter_seekbar.progress == 0)
                         -1
                     else
-                        energy_parameter_seekbar.progress
+                        energy_parameter_seekbar.progress/2
                 val speechiness =
                     if (speechiness_parameter_seekbar.progress == 0)
                         -1
                     else
-                        speechiness_parameter_seekbar.progress
+                        speechiness_parameter_seekbar.progress/2
                 val loudness =
                     if (loudness_parameter_seekbar.progress == 0)
                         -1
                     else
-                        loudness_parameter_seekbar.progress
+                        loudness_parameter_seekbar.progress/2
                 val valence =
                     if (valence_parameter_seekbar.progress == 0)
                         -1
                     else
-                        artist_similarity_seekbar.progress
+                        artist_similarity_seekbar.progress/2
 
                 tune_parameters_progress_circle.visibility = View.VISIBLE
 

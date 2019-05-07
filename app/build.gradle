@@ -9,6 +9,8 @@ android {
         release {
             keyAlias 'releaseKey'
             storeFile file('/Users/daniel/.android/release.keystore')
+            storePassword kotlin_version
+            keyPassword kotlin_version
         }
     }
     compileSdkVersion 28
