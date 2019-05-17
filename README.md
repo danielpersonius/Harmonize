@@ -1,6 +1,8 @@
 # Harmonize
 Final project for CSCI448. A customizable music recommendation system.
 
+[![Build Status](https://travis-ci.com/danielpersonius/Harmonize.svg?branch=master)](https://travis-ci.com/danielpersonius/Harmonize)
+
 ## TODO
 - nosql db for storing client access token
 - secure spotify client id, redirect uri using Android Keystore
