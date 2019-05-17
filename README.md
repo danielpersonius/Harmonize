@@ -1,7 +1,5 @@
-# Harmonize
+# Harmonize [![Build Status](https://travis-ci.com/danielpersonius/Harmonize.svg?branch=master)](https://travis-ci.com/danielpersonius/Harmonize)
 Final project for CSCI448. A customizable music recommendation system.
-
-[![Build Status](https://travis-ci.com/danielpersonius/Harmonize.svg?branch=master)](https://travis-ci.com/danielpersonius/Harmonize)
 
 ## TODO
 - nosql db for storing client access token
